@@ -1,4 +1,3 @@
-const User = require("../models/user");
 const { createUserService } = require("../services/authService");
 
 const authController = {
