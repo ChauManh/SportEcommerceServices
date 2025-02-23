@@ -1,14 +1,14 @@
 // const authMiddleware = require('../middleware/auth');
-// const authRoter = require("./auth");
+const authRouter = require("./auth");
 // const userRouter = require("./user");
 // const adminRouter = require("./admin");
 
 function router(app) {
-  //   app.use("/auth", authRoter);
+  app.use("/auth", authRouter);
   //   app.use("/user", authMiddleware, userRouter);
   //   app.use("/admin", adminRouter);
   app.get("/", (req, res) => {
-    res.send("Hello Sport Ecommerce Service 123");
+    res.send("Hello WTM Sport Ecommerce Service");
   });
 }
 
