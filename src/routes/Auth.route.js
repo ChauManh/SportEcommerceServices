@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AuthController = require("../controllers/authController");
+const AuthController = require("../controllers/Auth.controller");
 // const auth = require("../middleware/auth"); // Middleware xác thực
 
 router.post("/sign_in", AuthController.createUser);

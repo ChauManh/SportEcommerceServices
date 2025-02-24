@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const CartController = require("../controllers/cartController");
+const CartController = require("../controllers/Cart.controller");
 // const auth = require("../middleware/auth"); // Middleware xác thực
 
 router.post("/", CartController.addProductToCart);

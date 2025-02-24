@@ -1,6 +1,6 @@
 // const authMiddleware = require('../middleware/auth');
-const authRouter = require("./auth");
-const cartRouter = require("./cart");
+const authRouter = require("./Auth.route");
+const cartRouter = require("./Cart.route");
 // const userRouter = require("./user");
 // const adminRouter = require("./admin");
 

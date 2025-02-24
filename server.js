@@ -3,7 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path");
 const db = require("./src/config/db");
-const route = require("./src/routes/index");
+const route = require("./src/routes/index.route");
 require("dotenv").config();
 
 db.connect();
