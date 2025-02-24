@@ -9,7 +9,11 @@ const orderSchema = new mongoose.Schema(
         required: false,
       },
     ],
-    user_id: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true,},
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     delivery_fee: { type: Number, required: true, default: 0 },
     shipping_address: {
       full_name: { type: String, required: true },
@@ -39,8 +43,8 @@ const orderSchema = new mongoose.Schema(
       enum: [
         "Chờ xác nhận",
         "Đang chuẩn bị hàng",
-        "Đang giao", 
-        "Hoàn thành", 
+        "Đang giao",
+        "Hoàn thành",
         "Hoàn hàng",
         "Hủy hàng",
       ],
@@ -52,13 +56,13 @@ const orderSchema = new mongoose.Schema(
       required: true,
       default: "cod",
     },
-    order_delivery_date: {type: Date,},
-    estimated_delivery_date: {type: Date,},
-    order_total_price: {type: Number, required: true,},
-    order_total_final: {type: Number, required: true,},
-    order_total_discount: {type: Number, required: true,},
+    order_delivery_date: { type: Date },
+    estimated_delivery_date: { type: Date },
+    order_total_price: { type: Number, required: true },
+    order_total_final: { type: Number, required: true },
+    order_total_discount: { type: Number, required: true },
     order_note: { type: String },
-    is_feedback: { type: Boolean}
+    is_feedback: { type: Boolean },
   },
   {
     timestamps: true,
