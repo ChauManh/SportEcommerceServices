@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CartController = require("../controllers/Cart.controller");
-// const auth = require("../middleware/auth"); // Middleware xác thực
+const { VerifyToken } = require("../middlewares/AuthMiddleWare"); // Middleware xác thực
 
 router.post("/", CartController.addProductToCart);
 router.get("/:userId", CartController.getCart);

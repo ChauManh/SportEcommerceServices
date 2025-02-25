@@ -7,7 +7,8 @@ const favouriteController = {
   // Thêm sản phẩm vào giỏ hàng
   async updateFavourite(req, res) {
     try {
-      const { userId, productId } = req.body;
+      const { userId } = req.user;
+      const { productId } = req.body;
       const data = await updateProductToFavourService({
         user_id: userId,
         product_id: productId,
@@ -27,7 +28,7 @@ const favouriteController = {
   },
 
   async getFavourite(req, res) {
-    const { userId } = req.params;
+    const { userId } = req.user;
 
     try {
       const data = await getFavouriteService(userId);
@@ -45,24 +46,24 @@ const favouriteController = {
     }
   },
 
-  async clearFavourite(req, res) {
-    const { userId } = req.params;
+  // async clearFavourite(req, res) {
+  //   const { userId } = req.params;
 
-    try {
-      const data = await clearCartService(userId);
+  //   try {
+  //     const data = await clearCartService(userId);
 
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(404).json({ message: data.EM });
-      }
-    } catch (error) {
-      console.error("Error in clearCart:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
-  },
+  //     if (data.EC === 0) {
+  //       return res.status(200).json(data);
+  //     } else {
+  //       return res.status(404).json({ message: data.EM });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in clearCart:", error);
+  //     return res
+  //       .status(500)
+  //       .json({ message: "Internal server error", error: error.message });
+  //   }
+  // },
 };
 
 module.exports = favouriteController;

@@ -52,7 +52,56 @@ const AuthController = require("../controllers/Auth.controller");
  *         description: Lỗi máy chủ
  */
 router.post("/sign_in", AuthController.createUser);
-// router.post('/login', AuthController.handleLogin);
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Đăng nhập vào hệ thống
+ *     description: API cho phép người dùng đăng nhập bằng user_name hoặc email và password.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - user_name
+ *               - password
+ *             properties:
+ *               user_name:
+ *                 type: string
+ *                 description: Tên người dùng hoặc email
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Mật khẩu của tài khoản
+ *                 example: "mypassword123"
+ *     responses:
+ *       200:
+ *         description: Đăng nhập thành công, trả về token xác thực
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Logged in successfully"
+ *                 accessToken:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+ *       400:
+ *         description: Sai thông tin đăng nhập (username hoặc password không đúng)
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.post("/login", AuthController.loginUser);
 // router.get('/user', auth, AuthController.getUser);  // Đảm bảo người dùng đã đăng nhập
 // router.get('/account', auth, AuthController.getAccount);  // Lấy thông tin tài khoản người dùng
 // router.post('/google', AuthController.handleGoogleAuth);

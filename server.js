@@ -23,7 +23,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // api docu
 
 // Routes
 route(app);
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
