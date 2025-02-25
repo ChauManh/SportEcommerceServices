@@ -6,20 +6,11 @@ const bcrypt = require("bcrypt");
 
 // const saltRounds = 10;
 
-const createUserService = async ({
-  user_name,
-  full_name,
-  email,
-  phone,
-  password,
-  birth,
-  gender,
-  addresses,
-}) => {
+const createUserService = async ({ user_name, email, password }) => {
   try {
     // Check exists
     const existingUser = await User.findOne({
-      $or: [{ user_name }, { email }, { phone }],
+      $or: [{ user_name }, { email }],
     });
     if (existingUser) {
       return {
@@ -31,13 +22,8 @@ const createUserService = async ({
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       user_name,
-      full_name,
       email,
-      phone,
       password: hashedPassword,
-      birth,
-      gender,
-      addresses,
     });
 
     await newUser.save();

@@ -4,6 +4,9 @@ const morgan = require("morgan");
 const path = require("path");
 const db = require("./src/config/db");
 const route = require("./src/routes/index.route");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocs = require("./src/config/swagger");
+
 require("dotenv").config();
 
 db.connect();
@@ -16,6 +19,7 @@ app.use(express.static(path.join(__dirname, "public"))); // Static files
 app.use(express.urlencoded({ extended: true })); // Xử lý form
 app.use(express.json()); // Xử lý dữ liệu JSON trong request body.
 app.use(cors());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // api documentation
 
 // Routes
 route(app);
@@ -23,4 +27,5 @@ route(app);
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Swagger docs at http://localhost:${PORT}/api-docs`);
 });

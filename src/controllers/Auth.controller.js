@@ -2,27 +2,13 @@ const { createUserService } = require("../services/Auth.service");
 
 const authController = {
   async createUser(req, res) {
-    const {
-      user_name,
-      full_name,
-      email,
-      phone,
-      password,
-      birth,
-      gender,
-      addresses,
-    } = req.body;
+    const { user_name, email, password } = req.body;
 
     try {
       const data = await createUserService({
         user_name,
-        full_name,
         email,
-        phone,
         password,
-        birth,
-        gender,
-        addresses,
       });
       if (data) {
         return res.status(201).json(data);

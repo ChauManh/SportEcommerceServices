@@ -15,12 +15,12 @@ const addressSchema = new mongoose.Schema(
 
 const userSchema = new mongoose.Schema(
   {
-    user_name: { type: String, required: true },
+    user_name: { type: String, unique: true, required: true },
     full_name: { type: String },
     password: { type: String, required: true },
     avt_img: { type: String },
     email: { type: String, unique: true, required: true },
-    phone: { type: String, unique: true },
+    phone: { type: String },
     addresses: [addressSchema], // Nhúng trực tiếp mảng địa chỉ vào User
     birth: { type: Date },
     gender: {
