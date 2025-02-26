@@ -7,6 +7,7 @@ const route = require("./src/routes/index.route");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./src/config/swagger");
 
+
 require("dotenv").config();
 
 db.connect();

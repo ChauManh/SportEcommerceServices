@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema(
   {
     product_title: { type: String, required: true },
     product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-    product_brand: { type: String, required: true }, // mới thêm, oke không???
+    product_brand: { type: String, required: true }, 
     product_description: { type: String, required: true },
     product_display: { type: Boolean, required: true, default: true },
     product_famous: { type: Boolean, required: true, default: false },
