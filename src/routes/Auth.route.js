@@ -102,8 +102,6 @@ router.post("/sign_in", AuthController.createUser);
  *         description: Lỗi máy chủ
  */
 router.post("/login", AuthController.loginUser);
-// router.get('/user', auth, AuthController.getUser);  // Đảm bảo người dùng đã đăng nhập
-// router.get('/account', auth, AuthController.getAccount);  // Lấy thông tin tài khoản người dùng
 // router.post('/google', AuthController.handleGoogleAuth);
 // router.post('/forgot-password', AuthController.forgotPassword);
 // router.post('/verify-otp', AuthController.verifyOtp);

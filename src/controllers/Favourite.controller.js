@@ -1,6 +1,7 @@
 const {
   updateProductToFavourService,
   getFavouriteService,
+  clearFavouritesService,
 } = require("../services/Favourite.service");
 
 const favouriteController = {
@@ -46,24 +47,24 @@ const favouriteController = {
     }
   },
 
-  // async clearFavourite(req, res) {
-  //   const { userId } = req.params;
+  async clearFavourites(req, res) {
+    const { userId } = req.user;
 
-  //   try {
-  //     const data = await clearCartService(userId);
+    try {
+      const data = await clearFavouritesService(userId);
 
-  //     if (data.EC === 0) {
-  //       return res.status(200).json(data);
-  //     } else {
-  //       return res.status(404).json({ message: data.EM });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error in clearCart:", error);
-  //     return res
-  //       .status(500)
-  //       .json({ message: "Internal server error", error: error.message });
-  //   }
-  // },
+      if (data.EC === 0) {
+        return res.status(200).json(data);
+      } else {
+        return res.status(404).json({ message: data.EM });
+      }
+    } catch (error) {
+      console.error("Error in clearFavourites:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  },
 };
 
 module.exports = favouriteController;

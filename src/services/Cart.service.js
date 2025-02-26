@@ -1,6 +1,6 @@
 const Cart = require("../models/Cart.model");
 
-const updateCartService = async ({ user_id, product_id, quantity }) => {
+const updateCartService = async ({ user_id, product_id }) => {
   try {
     let cart = await Cart.findOne({ user_id });
 
@@ -16,10 +16,10 @@ const updateCartService = async ({ user_id, product_id, quantity }) => {
 
     if (productIndex > -1) {
       // Nếu có rồi, cập nhật số lượng
-      cart.products[productIndex].quantity += quantity;
+      cart.products[productIndex].quantity += 1;
     } else {
       // Nếu chưa có, thêm mới
-      cart.products.push({ product_id, quantity });
+      cart.products.push({ product_id, quantity: 1 });
     }
 
     await cart.save();

@@ -54,4 +54,22 @@ router.patch("/", verifyToken, FavoriteController.updateFavourite);
  *         description: Lỗi máy chủ
  */
 router.get("/", verifyToken, FavoriteController.getFavourite);
+/**
+ * @swagger
+ * /favourite:
+ *   delete:
+ *     summary: Xóa toàn bộ danh sách sản phẩm yêu thích của người dùng
+ *     tags: [Favourite]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Xóa danh sách sản phẩm yêu thích thành công
+ *       401:
+ *         description: Không có quyền truy cập (token không hợp lệ)
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.delete("/", verifyToken, FavoriteController.clearFavourites);
+
 module.exports = router; //export default

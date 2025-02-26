@@ -4,24 +4,24 @@ const {
   removeFromCartService,
   clearCartService,
   decreaseProductQuantity,
-} = require("../services/Cart.serivce");
+} = require("../services/Cart.service");
 
 const cartController = {
   // Thêm sản phẩm vào giỏ hàng
   async addProductToCart(req, res) {
-    const { userId, productId, quantity } = req.body;
+    const { userId } = req.user;
+    const { productId } = req.body;
 
     try {
       const data = await updateCartService({
         user_id: userId,
         product_id: productId,
-        quantity,
       });
 
       if (data.EC === 0) {
         return res.status(201).json(data);
       } else {
-        return res.status(400).json({ message: data.EM });
+        return res.status(400).json({ data });
       }
     } catch (error) {
       console.error("Error in addProductToCart:", error);
@@ -33,7 +33,7 @@ const cartController = {
 
   // Lấy giỏ hàng của user
   async getCart(req, res) {
-    const { userId } = req.params;
+    const { userId } = req.user;
 
     try {
       const data = await getCartService(userId);
@@ -41,7 +41,7 @@ const cartController = {
       if (data.EC === 0) {
         return res.status(200).json(data);
       } else {
-        return res.status(404).json({ message: data.EM });
+        return res.status(400).json({ message: data.EM });
       }
     } catch (error) {
       console.error("Error in getCart:", error);
@@ -53,7 +53,8 @@ const cartController = {
 
   // Xóa sản phẩm khỏi giỏ hàng
   async removeProductFromCart(req, res) {
-    const { userId, productId } = req.body;
+    const { userId } = req.user;
+    const { productId } = req.body;
 
     try {
       const data = await removeFromCartService({
@@ -64,7 +65,7 @@ const cartController = {
       if (data.EC === 0) {
         return res.status(200).json(data);
       } else {
-        return res.status(404).json({ message: data.EM });
+        return res.status(400).json({ message: data.EM });
       }
     } catch (error) {
       console.error("Error in removeProductFromCart:", error);
@@ -76,7 +77,7 @@ const cartController = {
 
   // Xóa toàn bộ giỏ hàng
   async clearCart(req, res) {
-    const { userId } = req.params;
+    const { userId } = req.user;
 
     try {
       const data = await clearCartService(userId);
@@ -84,7 +85,7 @@ const cartController = {
       if (data.EC === 0) {
         return res.status(200).json(data);
       } else {
-        return res.status(404).json({ message: data.EM });
+        return res.status(400).json({ message: data.EM });
       }
     } catch (error) {
       console.error("Error in clearCart:", error);
@@ -95,7 +96,8 @@ const cartController = {
   },
 
   async decreaseProductQuantity(req, res) {
-    const { userId, productId } = req.body;
+    const { userId } = req.user;
+    const { productId } = req.body;
 
     try {
       const response = await decreaseProductQuantity(userId, productId);

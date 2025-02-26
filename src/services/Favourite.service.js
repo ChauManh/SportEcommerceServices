@@ -74,4 +74,21 @@ const getFavouriteService = async (user_id) => {
   }
 };
 
-module.exports = { updateProductToFavourService, getFavouriteService };
+const clearFavouritesService = async (user_id) => {
+  try {
+    await Favourite.deleteOne({ user_id });
+    return { EC: 0, EM: "Favourite list cleared successfully" };
+  } catch (error) {
+    return {
+      EC: 1,
+      EM: "Error clearing Favourite list",
+      details: error.message,
+    };
+  }
+};
+
+module.exports = {
+  updateProductToFavourService,
+  getFavouriteService,
+  clearFavouritesService,
+};
