@@ -45,14 +45,12 @@ const createProduct = async (req, res) => {
 
         let productData = { ...req.body };
 
-        // ✅ Parse variants từ chuỗi JSON nếu cần
         productData.variants = typeof productData.variants === "string" ? JSON.parse(productData.variants) : [];
 
         if (!Array.isArray(productData.variants)) {
             return res.status(400).json({ message: "Invalid variants format. Expected an array." });
         }
 
-        // ✅ Xử lý req.files thành object dễ truy cập
         const filesMap = {};
         if (req.files && Array.isArray(req.files)) {
             req.files.forEach(file => {
@@ -63,7 +61,6 @@ const createProduct = async (req, res) => {
             });
         }
 
-        // ✅ Gán ảnh vào từng biến thể
         productData.variants.forEach((variant, index) => {
             variant.variant_img = {
                 image_main: filesMap[`variant_img_${index}_main`] ? filesMap[`variant_img_${index}_main`][0] : "",
@@ -71,7 +68,6 @@ const createProduct = async (req, res) => {
             };
         });
 
-        // ✅ Kiểm tra nếu có variant nào thiếu image_main
         let missingImages = productData.variants.some(variant => !variant.variant_img.image_main);
         if (missingImages) {
             return res.status(400).json({ message: "Each variant must have an image_main" });
@@ -79,7 +75,6 @@ const createProduct = async (req, res) => {
 
         console.log("Processed variants before saving:", productData.variants);
 
-        // ✅ Lưu sản phẩm vào database
         const response = await productService.createProduct(productData);
         return res.status(200).json(response);
     } catch (error) {
