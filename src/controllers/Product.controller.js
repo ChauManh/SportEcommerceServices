@@ -3,35 +3,38 @@ const upload = require("../middlewares/UploadMiddleWare");
 
 // Middleware upload ảnh sản phẩm + biến thể
 const uploadImgProduct = (req, res, next) => {
-    try {
-        let fields = [];
-        console.log("Received body:", req.body);
-        // Kiểm tra nếu có biến thể, thêm trường ảnh vào Multer
-        if (req.body.variants) {
-            try {
-                let variants = JSON.parse(req.body.variants);
-                variants.forEach((_, index) => {
-                    fields.push({ name: `variant_img_${index}_main`, maxCount: 1 });
-                    fields.push({ name: `variant_img_${index}_subs`, maxCount: 5 });
-                });
-            } catch (error) {
-                return res.status(400).json({ message: "Invalid variants JSON format", error: error.message });
-            }
-        } else {
-            return res.status(400).json({ message: "Variants data is required" });
+    console.log("Received body before Multer:", req.body);
+
+    const multerMiddleware = upload.any(); // Sử dụng `any()` để chấp nhận tất cả các file
+
+    multerMiddleware(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ message: "Upload error", error: err.message });
         }
 
-        const Upload = upload.fields(fields);
-        Upload(req, res, (err) => {
-            if (err) {
-                return res.status(400).json({ message: "Upload error", error: err.message });
+        console.log("Received body after Multer:", req.body);
+        console.log("Received files:", req.files);
+
+        try {
+            if (!req.body.variants) {
+                return res.status(400).json({ message: "Variants data is required" });
             }
+
+            let variants = JSON.parse(req.body.variants);
+            let fields = [];
+
+            variants.forEach((_, index) => {
+                fields.push({ name: `variant_img_${index}_main`, maxCount: 1 });
+                fields.push({ name: `variant_img_${index}_subs`, maxCount: 5 });
+            });
+
             next();
-        });
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+        } catch (error) {
+            return res.status(400).json({ message: "Invalid variants JSON format", error: error.message });
+        }
+    });
 };
+
 
 
 // API tạo sản phẩm mới
@@ -40,20 +43,43 @@ const createProduct = async (req, res) => {
         console.log("Received body:", req.body);
         console.log("Received files:", req.files);
 
-        const productData = req.body ;
+        let productData = { ...req.body };
 
-        productData.variants = productData.variants ? JSON.parse(productData.variants) : [];
+        // ✅ Parse variants từ chuỗi JSON nếu cần
+        productData.variants = typeof productData.variants === "string" ? JSON.parse(productData.variants) : [];
 
-        if (!req.files) req.files = {};
+        if (!Array.isArray(productData.variants)) {
+            return res.status(400).json({ message: "Invalid variants format. Expected an array." });
+        }
 
-        // Gán ảnh vào từng biến thể
+        // ✅ Xử lý req.files thành object dễ truy cập
+        const filesMap = {};
+        if (req.files && Array.isArray(req.files)) {
+            req.files.forEach(file => {
+                if (!filesMap[file.fieldname]) {
+                    filesMap[file.fieldname] = [];
+                }
+                filesMap[file.fieldname].push(file.path);
+            });
+        }
+
+        // ✅ Gán ảnh vào từng biến thể
         productData.variants.forEach((variant, index) => {
             variant.variant_img = {
-                image_main: req.files[`variant_img_${index}_main`]?.[0]?.path || null,
-                image_subs: req.files[`variant_img_${index}_subs`]?.map(file => file.path) || []
+                image_main: filesMap[`variant_img_${index}_main`] ? filesMap[`variant_img_${index}_main`][0] : "",
+                image_subs: filesMap[`variant_img_${index}_subs`] || []
             };
         });
 
+        // ✅ Kiểm tra nếu có variant nào thiếu image_main
+        let missingImages = productData.variants.some(variant => !variant.variant_img.image_main);
+        if (missingImages) {
+            return res.status(400).json({ message: "Each variant must have an image_main" });
+        }
+
+        console.log("Processed variants before saving:", productData.variants);
+
+        // ✅ Lưu sản phẩm vào database
         const response = await productService.createProduct(productData);
         return res.status(200).json(response);
     } catch (error) {
@@ -61,6 +87,9 @@ const createProduct = async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
+
+
 
 module.exports = {
     createProduct,

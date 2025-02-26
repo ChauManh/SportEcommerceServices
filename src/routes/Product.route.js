@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router()
 const ProductController = require('../controllers/Product.controller');
 const multer = require("multer");
-const upload = multer();
+const upload = require("../middlewares/UploadMiddleWare");
 
 router.post("/create", ProductController.uploadImgProduct, ProductController.createProduct);
 // router.patch('/update/:id', ProductController.uploadFields, ProductController.updateProduct)
