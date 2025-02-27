@@ -1,11 +1,11 @@
 const productService = require("../services/Product.service");
 const upload = require("../middlewares/UploadMiddleWare");
+const Product = require("../models/Product.Model");
 
-// Middleware upload ảnh sản phẩm + biến thể
 const uploadImgProduct = (req, res, next) => {
     console.log("Received body before Multer:", req.body);
 
-    const multerMiddleware = upload.any(); // Sử dụng `any()` để chấp nhận tất cả các file
+    const multerMiddleware = upload.any();
 
     multerMiddleware(req, res, (err) => {
         if (err) {
@@ -16,19 +16,16 @@ const uploadImgProduct = (req, res, next) => {
         console.log("Received files:", req.files);
 
         try {
-            if (!req.body.variants) {
-                return res.status(400).json({ message: "Variants data is required" });
-            }
+            // if (!req.body.variants) {
+            //     return res.status(400).json({ message: "Variants data is required" });
+            // }
 
-            let variants = JSON.parse(req.body.variants);
-            let fields = [];
+            // let variants = JSON.parse(req.body.variants);
+            // if (!Array.isArray(variants)) {
+            //     return res.status(400).json({ message: "Invalid variants format. Expected an array." });
+            // }
 
-            variants.forEach((_, index) => {
-                fields.push({ name: `variant_img_${index}_main`, maxCount: 1 });
-                fields.push({ name: `variant_img_${index}_subs`, maxCount: 5 });
-            });
-
-            next();
+            next(); 
         } catch (error) {
             return res.status(400).json({ message: "Invalid variants JSON format", error: error.message });
         }
@@ -37,7 +34,6 @@ const uploadImgProduct = (req, res, next) => {
 
 
 
-// API tạo sản phẩm mới
 const createProduct = async (req, res) => {
     try {
         console.log("Received body:", req.body);
@@ -52,7 +48,7 @@ const createProduct = async (req, res) => {
         }
 
         const filesMap = {};
-        if (req.files && Array.isArray(req.files)) {
+        if (req.files) {
             req.files.forEach(file => {
                 if (!filesMap[file.fieldname]) {
                     filesMap[file.fieldname] = [];
@@ -60,6 +56,15 @@ const createProduct = async (req, res) => {
                 filesMap[file.fieldname].push(file.path);
             });
         }
+
+        if (!filesMap["product_main_img"] || filesMap["product_main_img"].length === 0) {
+            return res.status(400).json({ message: "Main product image is required" });
+        }
+
+        productData.product_img = {
+            image_main: filesMap["product_main_img"] ? filesMap["product_main_img"][0] : "",
+            image_subs: filesMap["product_subs_img"] || []
+        };
 
         productData.variants.forEach((variant, index) => {
             variant.variant_img = {
@@ -73,7 +78,7 @@ const createProduct = async (req, res) => {
             return res.status(400).json({ message: "Each variant must have an image_main" });
         }
 
-        console.log("Processed variants before saving:", productData.variants);
+        console.log("Processed product data before saving:", productData);
 
         const response = await productService.createProduct(productData);
         return res.status(200).json(response);
@@ -84,9 +89,122 @@ const createProduct = async (req, res) => {
 };
 
 
+const updateProduct = async (req, res) => {
+    try {
+        const productId  = req.params.id;
+        // console.log("productId:", productId);
+        // console.log("body:", req.body);
+        // console.log("files:", req.files);
 
+        const existingProduct = await Product.findById(productId);
+        // console.log("product:", existingProduct);
+        if (!existingProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        let productData = { ...req.body };
+
+        if (req.body.variants) {
+            try {
+                productData.variants = JSON.parse(req.body.variants);
+                if (!Array.isArray(productData.variants)) {
+                    return res.status(400).json({ message: "Invalid variants format. Expected an array." });
+                }
+            } catch (error) {
+                return res.status(400).json({ message: "Invalid JSON format for variants" });
+            }
+        } else {
+            productData.variants = existingProduct.variants || [];
+        }
+
+        const filesMap = {};
+        if (req.files) {
+            req.files.forEach(file => {
+                if (!filesMap[file.fieldname]) {
+                    filesMap[file.fieldname] = [];
+                }
+                filesMap[file.fieldname].push(file.path);
+            });
+        }
+
+        productData.product_img = {
+            image_main: filesMap["product_main_img"]?.[0] || existingProduct.product_img.image_main,
+            image_subs: filesMap["product_subs_img"] || existingProduct.product_img.image_subs
+        };
+
+        if (productData.variants) {
+            productData.variants = productData.variants.map((variant, index) => ({
+                ...variant,
+                variant_img: {
+                    image_main: filesMap[`variant_img_${index}_main`]?.[0] 
+                        || variant.variant_img?.image_main 
+                        || existingProduct.variants?.[index]?.variant_img?.image_main 
+                        || "",
+                    image_subs: filesMap[`variant_img_${index}_subs`] 
+                        || variant.variant_img?.image_subs 
+                        || existingProduct.variants?.[index]?.variant_img?.image_subs 
+                        || []
+                }
+            }));
+
+            const missingImages = productData.variants.some(variant => !variant.variant_img.image_main);
+            if (missingImages) {
+                return res.status(400).json({ message: "Each variant must have an image_main" });
+            }
+        }
+
+        console.log("Processed product data before updating:", productData.variants);
+
+        const response = await productService.updateProduct(productId, productData);
+        return res.status(200).json(response);
+    } catch (error) {
+        // console.error("Error updating product:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
+
+const deleteProduct = async(req, res) =>{
+    try {
+        const productId = req.params.id;
+
+        if (!productId) {
+            return res.status(400).json({
+              status: "ERROR",
+              message: "The productId is required",
+            });
+          }
+
+        const response = await productService.deleteProduct(productId);
+
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+const getDetailsProduct = async (req, res) => {
+    try {
+      const productId = req.params.id;
+      if (!productId) {
+        return res.status(200).json({
+          status: "ERR",
+          message: "The productId is required",
+        });
+      }
+      const response = await productService.getDetailsProduct(productId);
+      return res.status(200).json(response);
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
 
 module.exports = {
     createProduct,
-    uploadImgProduct
+    uploadImgProduct,
+    updateProduct,
+    deleteProduct,
+    getDetailsProduct
 };

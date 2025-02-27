@@ -7,6 +7,7 @@ const createProduct = async (newProduct) => {
             product_title,
             product_category,
             product_brand , 
+            product_img, 
             product_description,
             product_display,
             product_famous,
@@ -42,7 +43,6 @@ const createProduct = async (newProduct) => {
             (acc, variant) => acc + variant.product_countInStock, 0
             );
         
-              // Xây dựng dữ liệu sản phẩm mới
               const newProductData = {
                 product_title,
                 product_category,
@@ -52,6 +52,7 @@ const createProduct = async (newProduct) => {
                 product_rate,
                 product_selled,
                 product_brand,
+                product_img,
                 product_percent_discount,
                 variants,
                 product_price,
@@ -75,6 +76,130 @@ const createProduct = async (newProduct) => {
     })
 };
 
+const updateProduct = async (productId, updatedProduct) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          const existingProduct = await Product.findById(productId);
+          console.log(existingProduct)
+          if (!existingProduct) {
+              return reject({
+                  status: "ERR",
+                  message: "Product not found",
+              });
+          }
+
+          let updateData = { ...updatedProduct };
+
+          // console.log("updatedata", updateData.variants)
+          if (updateData.variants) {
+            const validPrices = updateData.variants
+                .map((variant) => Number(variant.variant_price))
+                .filter((price) => !isNaN(price) && price > 0);
+        
+            updateData.product_price = validPrices.length > 0 
+                ? Math.min(...validPrices) 
+                : existingProduct.product_price; 
+        
+            updateData.product_countInStock = updateData.variants.reduce((acc, variant) => {
+              const countInStock = variant._doc 
+                  ? Number(variant._doc.variant_countInStock) 
+                  : Number(variant.variant_countInStock);
+          
+              return acc + (countInStock || 0);
+          }, 0);
+          
+        }
+        
+          // else {
+          //   updateData.product_price = existingProduct.product_price;
+          //   updateData.product_countInStock = existingProduct.product_countInStock;
+          // }
+
+          const updatedProductInstance = await Product.findByIdAndUpdate(
+            productId,
+            updateData,
+            { new: true, runValidators: true }
+          );
+
+          if (updatedProductInstance) {
+              return resolve({
+                  status: "OK",
+                  message: "Product updated successfully",
+                  data: updatedProductInstance,
+              });
+          } else {
+              return reject({
+                  status: "ERR",
+                  message: "Failed to update product",
+              });
+          }
+      } catch (error) {
+          return reject({
+              status: "ERROR",
+              message: error.message,
+          });
+      }
+  });
+};
+
+const getDetailsProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const product = await Product.findOne({
+        _id: id,
+      })
+      // .populate("product_category", "category_title category_parent_id category_level")
+      if (product === null) {
+        resolve({
+          status: "ERR",
+          message: "The product is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "Get details product successfully",
+        data: product,
+      });
+    } catch (error) {
+      return reject({
+        status: "ERROR",
+        message: error.message,
+    });
+    }
+  });
+};
+
+const deleteProduct = (id) => {
+  return new Promise(async(resolve, reject)=>{
+    try {
+      const product = await Product.findOne({
+        _id: id,
+      })
+
+      if (!product) {
+        return resolve({
+          status: "ERROR",
+          message: "The product don't exist",
+        });
+      }
+      await product.delete();
+
+      return resolve({
+        status: "SUCCESS",
+        message: "Delete product successfully"
+      })
+    } catch (error) {
+      return reject({
+        status: "ERROR",
+        message: error.message,
+    });
+    }
+  })
+}
 module.exports = {
-    createProduct
+    createProduct,
+    updateProduct,
+    getDetailsProduct,
+    deleteProduct
 };
