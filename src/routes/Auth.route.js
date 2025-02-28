@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const AuthController = require("../controllers/Auth.controller");
-// const auth = require("../middleware/auth"); // Middleware xác thực
-
+// const { verifyToken } = require("../middlewares/AuthMiddleWare");
 /**
  * @swagger
  * /auth/sign_in:
@@ -102,9 +101,9 @@ router.post("/sign_in", AuthController.createUser);
  *         description: Lỗi máy chủ
  */
 router.post("/login", AuthController.loginUser);
-// router.post('/google', AuthController.handleGoogleAuth);
-// router.post('/forgot-password', AuthController.forgotPassword);
-// router.post('/verify-otp', AuthController.verifyOtp);
-// router.post('/reset-password', AuthController.resetPassword);
+router.post("/send_otp", AuthController.sendOTP);
+router.post("/verify_otp", AuthController.verifyOtp);
+router.patch("/reset_password", AuthController.resetPassword);
+// router.post("/reset_password", verifyToken, AuthController.resetPassword);
 
 module.exports = router; //export default

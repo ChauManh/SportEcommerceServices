@@ -1,6 +1,9 @@
 require("dotenv").config();
 const User = require("../models/User.model");
 const { createJwtPayload } = require("../utils/JwtUtil");
+const generateOTP = require("../utils/GenerateOTP");
+const redis = require("../config/Redis");
+const sendEmail = require("../config/Nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -80,7 +83,120 @@ const loginService = async (user_name, password) => {
   }
 };
 
+const sentOTPService = async (email) => {
+  try {
+    // Kiểm tra email đã tồn tại chưa
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return {
+        EC: 2,
+        EM: "User not found",
+      };
+    }
+    const otp = generateOTP();
+    const expiresIn = 300;
+    // Lưu OTP vào Redis (hết hạn sau 5 phút)
+    await redis.set(`otp:${email}`, otp, { EX: expiresIn });
+    // Gửi email bằng Resend
+    await sendEmail(email, otp);
+    return {
+      EC: 0,
+      EM: "OTP sent successfully",
+    };
+  } catch (e) {
+    return {
+      EC: 1,
+      EM: "Error occurred during OTP sending",
+      Message: e.message,
+    };
+  }
+};
+
+const verifyOTPService = async (email, otp) => {
+  try {
+    // Lấy OTP từ Redis
+    const storedOTP = await redis.get(`otp:${email}`);
+
+    if (!storedOTP) {
+      return {
+        EC: 2,
+        EM: "OTP expired or not found",
+      };
+    }
+
+    // Kiểm tra OTP có khớp không
+    if (storedOTP !== otp) {
+      return {
+        EC: 3,
+        EM: "Invalid OTP",
+      };
+    }
+
+    // Xóa OTP sau khi xác thực thành công
+    await redis.del(`otp:${email}`);
+
+    // Lưu trạng thái xác thực OTP vào Redis (hết hạn sau 10 phút)
+    await redis.set(`otp_verified:${email}`, "true", { EX: 600 });
+
+    return {
+      EC: 0,
+      EM: "OTP verified successfully",
+    };
+  } catch (e) {
+    return {
+      EC: 1,
+      EM: "Error occurred during OTP verification",
+      Message: e.message,
+    };
+  }
+};
+
+const resetPasswordService = async (email, newPassword) => {
+  try {
+    // Kiểm tra xem OTP đã được xác thực chưa
+    const isVerified = await redis.get(`otp_verified:${email}`);
+
+    if (!isVerified) {
+      return {
+        EC: 2,
+        EM: "OTP verification required before resetting password",
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu trong database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return {
+        EC: 3,
+        EM: "User not found",
+      };
+    }
+
+    user.password = hashedPassword;
+    await user.save();
+
+    // Xóa trạng thái OTP đã xác thực
+    await redis.del(`otp_verified:${email}`);
+
+    return {
+      EC: 0,
+      EM: "Password reset successfully",
+    };
+  } catch (e) {
+    return {
+      EC: 1,
+      EM: "Error occurred during password reset",
+      Message: e.message,
+    };
+  }
+};
+
 module.exports = {
   createUserService,
   loginService,
+  sentOTPService,
+  resetPasswordService,
+  verifyOTPService,
 };

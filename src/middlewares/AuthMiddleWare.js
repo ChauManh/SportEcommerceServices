@@ -7,7 +7,7 @@ const verifyToken = expressJwt({
   requestProperty: "user", // Lưu thông tin user vào req.user
 });
 
-const isAdmin = (req, res, next) => {
+const identifyAdmin = (req, res, next) => {
   if (req.user?.role === "admin") {
     next();
   } else {
@@ -18,4 +18,4 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, isAdmin };
+module.exports = { verifyToken, identifyAdmin };
