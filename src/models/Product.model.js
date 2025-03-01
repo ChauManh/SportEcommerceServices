@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
+const mongooseDelete = require("mongoose-delete");
 
 const variantSchema = new mongoose.Schema({
     variant_color: { type: String },
     variant_size: { type: String },
     variant_img: {
-      image_main: { type: String, required: true }, // Ảnh chính
-      image_subs: [{ type: String }] // Mảng chứa ảnh phụ
+      image_main: { type: String, required: true }, 
+      image_subs: [{ type: String }] 
     },
     variant_price: { type: Number, required: true, default: 0 },
     variant_countInStock: { type: Number, required: true, default: 0 },
@@ -16,7 +17,11 @@ const productSchema = new mongoose.Schema(
   {
     product_title: { type: String, required: true },
     product_category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-    product_brand: { type: String, required: true }, // mới thêm, oke không???
+    product_img: {
+      image_main: { type: String, required: true }, 
+      image_subs: [{ type: String }] 
+    },
+    product_brand: { type: String, required: true }, 
     product_description: { type: String, required: true },
     product_display: { type: Boolean, required: true, default: true },
     product_famous: { type: Boolean, required: true, default: false },
@@ -33,6 +38,8 @@ const productSchema = new mongoose.Schema(
     collection: "Product"
   }
 );
+
+productSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: "all" });
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
