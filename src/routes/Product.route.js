@@ -164,12 +164,13 @@ const upload = require("../middlewares/UploadMiddleWare");
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post("/create", ProductController.uploadImgProduct, ProductController.createProduct);
+// router.post("/create", ProductController.uploadImgProduct, ProductController.createProduct);
+router.post("/create", ProductController.createProduct);
 
 /**
  * @swagger
  * /product/update/{id}:
- *   put:
+ *   patch:
  *     summary: Cập nhật thông tin sản phẩm
  *     description: API này cập nhật thông tin sản phẩm, bao gồm hình ảnh và biến thể.
  *     tags:
@@ -325,7 +326,7 @@ router.post("/create", ProductController.uploadImgProduct, ProductController.cre
  *                   example: "Internal server error"
  */
 
-router.patch("/update/:id", ProductController.uploadImgProduct, ProductController.updateProduct)
+router.patch("/update/:id", ProductController.updateProduct)
 /**
  * @swagger
  * /product/delete/{id}:
