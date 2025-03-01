@@ -4,6 +4,7 @@ const {
   sentOTPService,
   verifyOTPService,
   resetPasswordService,
+  changePasswordService,
 } = require("../services/Auth.service");
 
 const authController = {
@@ -109,6 +110,28 @@ const authController = {
     } catch (e) {
       return res.status(500).json({
         EC: 3,
+        EM: "Internal server error",
+        error: e.message,
+      });
+    }
+  },
+
+  async changePassword(req, res) {
+    const { email } = req.user;
+    const { oldPassword, newPassword } = req.body;
+    try {
+      const Data = await changePasswordService(email, oldPassword, newPassword);
+
+      if (Data.EC == 0) return res.status(200).json(Data);
+      else {
+        return res.status(401).json({
+          EC: Data.EC,
+          EM: Data.EM,
+        });
+      }
+    } catch (e) {
+      return res.status(500).json({
+        EC: 4,
         EM: "Internal server error",
         error: e.message,
       });

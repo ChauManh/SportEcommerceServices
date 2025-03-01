@@ -17,7 +17,6 @@ const sendEmail = async (to, otp) => {
       subject: "Mã OTP của bạn",
       html: `<p>Mã OTP của bạn là: <strong>${otp}</strong></p>`,
     });
-    console.log("Email sent successfully");
   } catch (error) {
     console.error("Error sending email:", error);
   }

@@ -193,10 +193,48 @@ const resetPasswordService = async (email, newPassword) => {
   }
 };
 
+const changePasswordService = async (email, oldPassword, newPassword) => {
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return {
+        EC: 1,
+        EM: "User not found",
+      };
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return {
+        EC: 2,
+        EM: "Password is incorrect",
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    return {
+      EC: 0,
+      EM: "Password changed successfully",
+    };
+  } catch (e) {
+    return {
+      EC: 3,
+      EM: "Error occurred during password change",
+      error: e.message,
+    };
+  }
+};
+
 module.exports = {
   createUserService,
   loginService,
   sentOTPService,
   resetPasswordService,
   verifyOTPService,
+  changePasswordService,
 };
