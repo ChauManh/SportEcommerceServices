@@ -11,43 +11,29 @@ const cartController = {
   async addProductToCart(req, res) {
     const { userId } = req.user;
     const { productId } = req.body;
-
     try {
-      const data = await updateCartService({
+      const result = await updateCartService({
         user_id: userId,
         product_id: productId,
       });
-
-      if (data.EC === 0) {
-        return res.status(201).json(data);
-      } else {
-        return res.status(400).json({ data });
-      }
+      return result.EC === 0
+        ? res.success(result.cart, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in addProductToCart:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
   // Lấy giỏ hàng của user
   async getCart(req, res) {
     const { userId } = req.user;
-
     try {
-      const data = await getCartService(userId);
-
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(400).json({ message: data.EM });
-      }
+      const result = await getCartService(userId);
+      return result.EC === 0
+        ? res.success(result.cart, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in getCart:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
@@ -55,64 +41,39 @@ const cartController = {
   async removeProductFromCart(req, res) {
     const { userId } = req.user;
     const { productId } = req.body;
-
     try {
-      const data = await removeFromCartService({
-        user_id: userId,
-        product_id: productId,
-      });
-
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(400).json({ message: data.EM });
-      }
+      const result = await removeFromCartService(userId, productId);
+      return result.EC === 0
+        ? res.success(result.cart, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in removeProductFromCart:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
   // Xóa toàn bộ giỏ hàng
   async clearCart(req, res) {
     const { userId } = req.user;
-
     try {
-      const data = await clearCartService(userId);
-
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(400).json({ message: data.EM });
-      }
+      const result = await clearCartService(userId);
+      return result.EC === 0
+        ? res.success(null, result.EM)
+        : res.error(result.EC, result.EM, 400);
     } catch (error) {
-      console.error("Error in clearCart:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
   async decreaseProductQuantity(req, res) {
     const { userId } = req.user;
     const { productId } = req.body;
-
     try {
-      const response = await decreaseProductQuantity(userId, productId);
-
-      if (response.EC === 0) {
-        return res.status(200).json(response);
-      } else {
-        return res.status(400).json(response);
-      }
+      const result = await decreaseProductQuantity(userId, productId);
+      return result.EC === 0
+        ? res.success(result.cart, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.status(500).json({
-        EC: -1,
-        EM: "Internal server error",
-        details: error.message,
-      });
+      return res.InternalError(error.message);
     }
   },
 };

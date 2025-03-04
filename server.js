@@ -6,7 +6,7 @@ const db = require("./src/config/db");
 const route = require("./src/routes/index.route");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./src/config/swagger");
-
+const responseHandler = require("./src/middlewares/ResponseHandler");
 
 require("dotenv").config();
 
@@ -22,6 +22,7 @@ app.use(express.json()); // Xử lý dữ liệu JSON trong request body.
 app.use(cors());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // api documentation
 
+app.use(responseHandler); // Thêm middleware chuẩn hóa response
 // Routes
 route(app);
 // Start server

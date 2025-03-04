@@ -10,59 +10,39 @@ const favouriteController = {
     try {
       const { userId } = req.user;
       const { productId } = req.body;
-      const data = await updateProductToFavourService({
+      const result = await updateProductToFavourService({
         user_id: userId,
         product_id: productId,
       });
-
-      if (data.EC === 0) {
-        return res.status(201).json(data);
-      } else {
-        return res.status(400).json({ message: data.EM });
-      }
+      return result.EC === 0
+        ? res.success(result.favourite, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in update product into favourite:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
   async getFavourite(req, res) {
     const { userId } = req.user;
-
     try {
-      const data = await getFavouriteService(userId);
-
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(404).json({ message: data.EM });
-      }
+      const result = await getFavouriteService(userId);
+      return result.EC === 0
+        ? res.success(result.favourites, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in Favourite:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 
   async clearFavourites(req, res) {
     const { userId } = req.user;
-
     try {
-      const data = await clearFavouritesService(userId);
-
-      if (data.EC === 0) {
-        return res.status(200).json(data);
-      } else {
-        return res.status(404).json({ message: data.EM });
-      }
+      const result = await clearFavouritesService(userId);
+      return result.EC === 0
+        ? res.success(null, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
-      console.error("Error in clearFavourites:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return res.InternalError(error.message);
     }
   },
 };
