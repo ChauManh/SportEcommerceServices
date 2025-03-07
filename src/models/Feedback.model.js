@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const MongooseDelete = require("mongoose-delete");
 
 const feedbackSchema = new mongoose.Schema(
   {
@@ -20,5 +21,6 @@ const feedbackSchema = new mongoose.Schema(
   }
 );
 
+feedbackSchema.plugin(MongooseDelete, { deletedAt: true, overrideMethods: "all" });
 const Feedback = mongoose.model("Feedback", feedbackSchema);
 module.exports = Feedback;
