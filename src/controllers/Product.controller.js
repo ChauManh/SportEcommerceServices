@@ -42,7 +42,8 @@ const createProduct = async (req, res) => {
 
         const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
         if (!uploadResult.success) {
-            return res.status(400).json({ message: "Upload error", error: uploadResult.error });
+            //return res.status(400).json({ message: "Upload error", error: uploadResult.error });
+            return res.error(1, uploadResult.error);
         }
 
         let productData = { ...req.body };
@@ -50,7 +51,7 @@ const createProduct = async (req, res) => {
         productData.variants = typeof productData.variants === "string" ? JSON.parse(productData.variants) : [];
 
         if (!Array.isArray(productData.variants)) {
-            return res.status(400).json({ message: "Invalid variants format. Expected an array." });
+            return res.error(1, "Invalid variants format. Expected an array.");
         }
 
         const filesMap = processUploadedFiles(req);
@@ -58,7 +59,9 @@ const createProduct = async (req, res) => {
         try {
             productData = mapProductImages(productData, filesMap);
         } catch (error) {
-            return res.status(400).json({ message: error.message });
+            // return res.status(400).json({ message: error.message });
+            return res.error(1, error.message);
+
         }
         // const filesMap = {};
         // if (req.files) {
@@ -93,11 +96,14 @@ const createProduct = async (req, res) => {
 
         console.log("Processed product data before saving:", productData);
 
-        const response = await productService.createProduct(productData);
-        return res.status(200).json(response);
+        const result = await productService.createProduct(productData);
+        //return res.status(200).json(response);
+        result.EC === 0
+                ? res.success(null, result.EM)
+                : res.error(result.EC, result.EM);
     } catch (error) {
         console.error("Error creating product:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        return res.InternalError(error.message);
     }
 };
 
@@ -112,12 +118,13 @@ const updateProduct = async (req, res) => {
         const existingProduct = await Product.findById(productId);
         // console.log("product:", existingProduct);
         if (!existingProduct) {
-            return res.status(404).json({ message: "Product not found" });
+            return res.error(1, "Product doesn't exist")
         }
 
         const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
         if (!uploadResult.success) {
-            return res.status(400).json({ message: "Upload error", error: uploadResult.error });
+            //return res.status(400).json({ message: "Upload error", error: uploadResult.error });
+            return res.error(1, uploadResult.error);
         }
         
         let productData = { ...req.body };
@@ -126,10 +133,11 @@ const updateProduct = async (req, res) => {
             try {
                 productData.variants = JSON.parse(req.body.variants);
                 if (!Array.isArray(productData.variants)) {
-                    return res.status(400).json({ message: "Invalid variants format. Expected an array." });
+                    return res.error(1, "Invalid variants format. Expected an array.");
                 }
             } catch (error) {
-                return res.status(400).json({ message: "Invalid JSON format for variants" });
+                return res.error(1, "Invalid JSON format for variants");
+                //return res.status(400).json({ message: "Invalid JSON format for variants" });
             }
         } else {
             productData.variants = existingProduct.variants || [];
@@ -140,7 +148,8 @@ const updateProduct = async (req, res) => {
         try {
             productData = updateProductImages(filesMap, productData, existingProduct);
         } catch (error) {
-            return res.status(400).json({ message: error.message });
+            return res.error(1, error.message);
+            //return res.status(400).json({ message: error.message });
         }
         // const filesMap = {};
         // if (req.files) {
@@ -180,11 +189,14 @@ const updateProduct = async (req, res) => {
 
         console.log("Processed product data before updating:", productData.variants);
 
-        const response = await productService.updateProduct(productId, productData);
-        return res.status(200).json(response);
+        const result = await productService.updateProduct(productId, productData);
+        result.EC === 0
+                ? res.success(result.data, result.EM)
+                : res.error(result.EC, result.EM);
     } catch (error) {
         // console.error("Error updating product:", error);
-        return res.status(500).json({ message: "Internal server error", error: error.message });
+        return res.InternalError(error.message);
+        //return res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
@@ -193,36 +205,25 @@ const deleteProduct = async(req, res) =>{
     try {
         const productId = req.params.id;
 
-        if (!productId) {
-            return res.status(400).json({
-              status: "ERROR",
-              message: "The productId is required",
-            });
-          }
+        const result = await productService.deleteProduct(productId);
 
-        const response = await productService.deleteProduct(productId);
-
-        return res.status(200).json(response);
+        return result.EC === 0
+                ? res.success(result.data, result.EM)
+                : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.status(500).json({ message: "Internal server error", error: error.message });
+        return res.InternalError(error.message);
     }
 }
 
 const getDetailsProduct = async (req, res) => {
     try {
       const productId = req.params.id;
-      if (!productId) {
-        return res.status(200).json({
-          status: "ERR",
-          message: "The productId is required",
-        });
-      }
-      const response = await productService.getDetailsProduct(productId);
-      return res.status(200).json(response);
+      const result = await productService.getDetailsProduct(productId);
+      result.EC === 0
+                ? res.success(result.data, result.EM)
+                : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.status(500).json({
-        message: error.message,
-      });
+        return res.InternalError(error.message);
     }
   };
 

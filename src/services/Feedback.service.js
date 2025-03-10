@@ -9,7 +9,7 @@ const createFeedback = async(newFeedback) =>{
 
         if (existingFeedback) {
             return {
-                EC: 1,
+                EC: 2,
                 EM: "Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi!",
                 data: null
             };
@@ -35,7 +35,7 @@ const updateFeedback = async (feedbackId, updateData) => {
         );
 
         if (!updatedFeedback) {
-            return { EC: 1, EM: "Feedback không tồn tại", data: null };
+            return { EC: 2, EM: "Feedback không tồn tại", data: null };
         }
 
         return { EC: 0, EM: "Cập nhật feedback thành công", data: updatedFeedback };

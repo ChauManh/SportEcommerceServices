@@ -74,9 +74,28 @@ const updateProductImages = (filesMap, productData, existingProduct) => {
     return productData;
 };
 
+
+const processFiles = (files) => {
+    const images = [];
+    const videos = [];
+
+    (files || []).forEach((file) => {
+        if (file.mimetype.startsWith("image/")) {
+            images.push(file.path);
+        } else if (file.mimetype.startsWith("video/")) {
+            videos.push(file.path);
+        }
+    });
+
+    return { images, videos };
+};
+
+module.exports = { processFiles };
+
 module.exports = { 
     uploadImgProduct,
     processUploadedFiles,
     mapProductImages,
-    updateProductImages 
+    updateProductImages,
+    processFiles
 };
