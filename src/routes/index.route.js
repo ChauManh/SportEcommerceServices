@@ -5,6 +5,7 @@ const favouriteRouter = require("./Favourite.route");
 const productRouter = require('./Product.route')
 const orderRouter = require("./Order.route")
 const feedbackRouter = require("./Feedback.route")
+const discountRouter = require("./Discount.route")
 // const userRouter = require("./user");
 // const adminRouter = require("./admin");
 
@@ -17,6 +18,7 @@ function router(app) {
   app.use("/product", productRouter);
   app.use("/order", orderRouter);
   app.use("/feedback", feedbackRouter);
+  app.use("/discount", discountRouter);
   app.get("/", (req, res) => {
     res.send("Hello WTM Sport Ecommerce Service");
   });
