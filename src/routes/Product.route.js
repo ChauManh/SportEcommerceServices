@@ -450,6 +450,7 @@ router.delete('/delete/:id', ProductController.deleteProduct)
  *                   example: "Internal server error"
  */
 router.get('/get-details/:id', ProductController.getDetailsProduct)
-// router.get('/get-all-product', ProductController.getAllProduct)
+
+router.get('/get-all', ProductController.getAllProduct)
 
 module.exports = router

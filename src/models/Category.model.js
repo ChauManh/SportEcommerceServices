@@ -1,11 +1,26 @@
 const mongoose = require("mongoose");
+const MongooseDelete = require("mongoose-delete");
 
-const CategorySchema = new mongoose.Schema(
+const categorySchema = new mongoose.Schema(
   {
-    category_gender: {type: String},
-    category_type: {type: String, required: true,},
-    category_parent_id: {type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null, },
-    // slug: { 
+    category_gender: {
+      type: String,
+      enum: ["Male", "Female", "Unisex", null], 
+      default: null
+    },
+    category_type: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100, 
+      unique: true 
+    },
+    category_parent_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
+      index: true 
+    },
     //   type: String, 
     //   unique: true, 
     //   required: true, 
@@ -23,4 +38,6 @@ const CategorySchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Category", CategorySchema);
+categorySchema.plugin(MongooseDelete, { deletedAt: true, overrideMethods: "all" });
+
+module.exports = mongoose.model("Category", categorySchema);

@@ -175,9 +175,75 @@ const deleteProduct = async (id) => {
   }
 };
 
+const getAllProduct = async (limit, page, filters) => {
+    try {
+      let query = {};
+  
+      // Tìm danh mục và tất cả danh mục con
+      if (filters.category_type) {
+        const category = await Category.findOne({ category_type: filters.category_type });
+        if (category) {
+          const subCategories = await Category.find({ category_parent_id: category._id });
+  
+          const categoryIds = [category._id, ...subCategories.map(cat => cat._id)];
+  
+          query.product_category = { $in: categoryIds };
+        } else {
+          return { EC: 1, EM: "Danh mục không tồn tại", data: [] };
+        }
+      }
+  
+      // Lọc theo khoảng giá
+      if (filters.price_min || filters.price_max) {
+        query.product_price = {};
+        if (filters.price_min) query.product_price.$gte = Number(filters.price_min);
+        if (filters.price_max) query.product_price.$lte = Number(filters.price_max);
+      }
+  
+      // Lọc theo màu sắc
+      if (filters.product_color) {
+        query["variants.variant_color"] = filters.product_color;
+      }
+  
+      //  Tìm kiếm theo `product_title`
+      if (filters.search) {
+        query.product_title = { $regex: filters.search, $options: "i" }; 
+      }
+  
+      // Phân trang 
+      const pageNumber = page > 0 ? page : 1;
+      const limitNumber = limit > 0 ? limit : 10;
+      const skip = (pageNumber - 1) * limitNumber;
+  
+      // Truy vấn danh sách sản phẩm
+      const products = await Product.find(query)
+        .populate("product_category") 
+        .limit(limitNumber)
+        .skip(skip);
+  
+      // Đếm tổng số sản phẩm 
+      const totalProducts = await Product.countDocuments(query);
+  
+      return {
+        EC: 0,
+        EM: "Lấy danh sách sản phẩm thành công",
+        data: {
+          total: totalProducts,
+          page: pageNumber,
+          limit: limitNumber,
+          products
+        }
+      };
+    } catch (error) {
+      return { EC: 1, EM: "Lỗi khi lấy danh sách sản phẩm", error: error.message };
+    }
+  };
+
+  
 module.exports = {
     createProduct,
     updateProduct,
     getDetailsProduct,
-    deleteProduct
+    deleteProduct,
+    getAllProduct
 };

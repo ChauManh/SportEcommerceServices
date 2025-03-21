@@ -215,7 +215,7 @@ const deleteProduct = async(req, res) =>{
     }
 }
 
-const getDetailsProduct = async (req, res) => {
+const getDetailsProduct = async (req, res) =>{
     try {
       const productId = req.params.id;
       const result = await productService.getDetailsProduct(productId);
@@ -227,10 +227,32 @@ const getDetailsProduct = async (req, res) => {
     }
   };
 
+const getAllProduct = async(req, res)=>{
+    try {
+        const {limit, page, search, category_type, price_min, price_max, product_color} = req.query
+
+        const filters = {
+            category_type,
+            price_min,
+            price_max,
+            product_color,
+            search
+        }
+
+        const result = await productService.getAllProduct(Number(limit) || null, Number(page) || null, filters || null)
+        result.EC === 0
+            ? res.success(result.data, result.EM)
+            : res.error(result.EC, result.EM)
+    } catch (error) {
+        return res.InternalError(error.message)
+    }
+}
+
 module.exports = {
     createProduct,
     uploadImgProduct,
     updateProduct,
     deleteProduct,
-    getDetailsProduct
+    getDetailsProduct,
+    getAllProduct
 };
