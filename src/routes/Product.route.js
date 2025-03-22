@@ -1,9 +1,7 @@
 const express = require("express");
-const router = express.Router()
-const ProductController = require('../controllers/Product.controller');
-const multer = require("multer");
-const upload = require("../middlewares/UploadMiddleWare");
-
+const router = express.Router();
+const ProductController = require("../controllers/Product.controller");
+const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
 
 /**
  * @swagger
@@ -165,7 +163,12 @@ const upload = require("../middlewares/UploadMiddleWare");
  *                   example: "Internal server error"
  */
 // router.post("/create", ProductController.uploadImgProduct, ProductController.createProduct);
-router.post("/create", ProductController.createProduct);
+router.post(
+  "/create",
+  verifyToken,
+  identifyAdmin,
+  ProductController.createProduct
+);
 
 /**
  * @swagger
@@ -326,7 +329,12 @@ router.post("/create", ProductController.createProduct);
  *                   example: "Internal server error"
  */
 
-router.patch("/update/:id", ProductController.updateProduct)
+router.patch(
+  "/update/:id",
+  verifyToken,
+  identifyAdmin,
+  ProductController.updateProduct
+);
 /**
  * @swagger
  * /product/delete/{id}:
@@ -385,7 +393,12 @@ router.patch("/update/:id", ProductController.updateProduct)
  *                   example: "Internal server error"
  */
 
-router.delete('/delete/:id', ProductController.deleteProduct)
+router.delete(
+  "/delete/:id",
+  verifyToken,
+  identifyAdmin,
+  ProductController.deleteProduct
+);
 
 /**
  * @swagger
@@ -449,8 +462,8 @@ router.delete('/delete/:id', ProductController.deleteProduct)
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get('/get-details/:id', ProductController.getDetailsProduct)
+router.get("/get-details/:id", ProductController.getDetailsProduct);
 
-router.get('/get-all', ProductController.getAllProduct)
+router.get("/get-all", ProductController.getAllProduct);
 
-module.exports = router
+module.exports = router;

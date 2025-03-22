@@ -1,6 +1,7 @@
-const express = require ('express')
-const router = express.Router()
-const feedbackController = require('../controllers/Feedback.controller')
+const express = require("express");
+const router = express.Router();
+const feedbackController = require("../controllers/Feedback.controller");
+const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
 
 /**
  * @swagger
@@ -58,7 +59,7 @@ const feedbackController = require('../controllers/Feedback.controller')
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post('/create', feedbackController.createFeedback)
+router.post("/create", verifyToken, feedbackController.createFeedback);
 /**
  * @swagger
  * /feedback/{id}:
@@ -112,7 +113,7 @@ router.post('/create', feedbackController.createFeedback)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch('/update/:id', feedbackController.updateFeedback)
+router.patch("/update/:id", feedbackController.updateFeedback);
 /**
  * @swagger
  * /feedback/{id}:
@@ -136,7 +137,7 @@ router.patch('/update/:id', feedbackController.updateFeedback)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.delete('/delete/:id', feedbackController.deleteFeedback)
+router.delete("/delete/:id", feedbackController.deleteFeedback);
 /**
  * @swagger
  * /feedback/product/{productId}:
@@ -202,5 +203,5 @@ router.delete('/delete/:id', feedbackController.deleteFeedback)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get('/get-all/:productId', feedbackController.getAllFeedback)
-module.exports = router
+router.get("/get-all/:productId", feedbackController.getAllFeedback);
+module.exports = router;

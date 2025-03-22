@@ -144,33 +144,10 @@ const resetPasswordService = async (email, newPassword) => {
   };
 };
 
-const changePasswordService = async (email, oldPassword, newPassword) => {
-  const user = await User.findOne({ email });
-
-  const isMatch = await bcrypt.compare(oldPassword, user.password);
-  if (!isMatch) {
-    return {
-      EC: 1,
-      EM: "Password is incorrect",
-    };
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  user.password = hashedPassword;
-  await user.save();
-
-  return {
-    EC: 0,
-    EM: "Password changed successfully",
-  };
-};
-
 module.exports = {
   createUserService,
   loginService,
   sentOTPService,
   resetPasswordService,
   verifyOTPService,
-  changePasswordService,
 };

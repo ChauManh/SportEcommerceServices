@@ -4,7 +4,6 @@ const {
   sentOTPService,
   verifyOTPService,
   resetPasswordService,
-  changePasswordService,
 } = require("../services/Auth.service");
 
 const authController = {
@@ -64,23 +63,6 @@ const authController = {
     const { email, newPassword } = req.body;
     try {
       const result = await resetPasswordService(email, newPassword);
-      return result.EC === 0
-        ? res.success(null, result.EM)
-        : res.error(result.EC, result.EM);
-    } catch (error) {
-      return res.InternalError(error.message);
-    }
-  },
-
-  async changePassword(req, res) {
-    const { email } = req.user;
-    const { oldPassword, newPassword } = req.body;
-    try {
-      const result = await changePasswordService(
-        email,
-        oldPassword,
-        newPassword
-      );
       return result.EC === 0
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);

@@ -235,57 +235,5 @@ router.post("/verify_otp", AuthController.verifyOtp);
  *         description: Lỗi máy chủ
  */
 router.patch("/reset_password", AuthController.resetPassword);
-/**
- * @swagger
- * /auth/change_password:
- *   patch:
- *     summary: Đổi mật khẩu
- *     description: API cho phép người dùng đổi mật khẩu bằng cách nhập email, mật khẩu cũ và mật khẩu mới.
- *     tags:
- *       - Authentication
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - oldPassword
- *               - newPassword
- *             properties:
- *               oldPassword:
- *                 type: string
- *                 format: password
- *                 description: Mật khẩu cũ của tài khoản
- *                 example: "oldpassword123"
- *               newPassword:
- *                 type: string
- *                 format: password
- *                 description: Mật khẩu mới để thay thế mật khẩu cũ
- *                 example: "newpassword456"
- *     responses:
- *       200:
- *         description: Đổi mật khẩu thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 EC:
- *                   type: integer
- *                   example: 0
- *                 EM:
- *                   type: string
- *                   example: "Password changed successfully"
- *       400:
- *         description: Thiếu thông tin đầu vào hoặc không hợp lệ
- *       401:
- *         description: Mật khẩu cũ không đúng
- *       404:
- *         description: Không tìm thấy người dùng
- *       500:
- *         description: Lỗi máy chủ
- */
-router.patch("/change_password", verifyToken, AuthController.changePassword);
 
 module.exports = router;

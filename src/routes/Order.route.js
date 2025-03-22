@@ -1,6 +1,7 @@
 const express = require("express");
-const router = express.Router()
-const orderController = require('../controllers/Order.controller')
+const router = express.Router();
+const orderController = require("../controllers/Order.controller");
+const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
 
 /**
  * @swagger
@@ -47,7 +48,7 @@ const orderController = require('../controllers/Order.controller')
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post("/create", orderController.createOrder)
+router.post("/create", orderController.createOrder);
 /**
  * @swagger
  * /order/get-all:
@@ -62,7 +63,7 @@ router.post("/create", orderController.createOrder)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-all", orderController.getAllOrder)
+router.get("/get-all", orderController.getAllOrder);
 /**
  * @swagger
  * /order/get-detail/{id}:
@@ -87,7 +88,7 @@ router.get("/get-all", orderController.getAllOrder)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-detail/:id", orderController.getDetailOrder)
+router.get("/get-detail/:id", orderController.getDetailOrder);
 /**
  * @swagger
  * /order/get-by-user:
@@ -103,7 +104,7 @@ router.get("/get-detail/:id", orderController.getDetailOrder)
  *         description: Lỗi máy chủ
  */
 
-router.get("/get-by-user", orderController.getOrderByUser)
+router.get("/get-by-user", orderController.getOrderByUser);
 /**
  * @swagger
  * /order/preview:
@@ -120,7 +121,7 @@ router.get("/get-by-user", orderController.getOrderByUser)
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/preview", orderController.previewOrder )
+router.get("/preview", orderController.previewOrder);
 /**
  * @swagger
  * /order/update-status/{id}:
@@ -159,6 +160,6 @@ router.get("/preview", orderController.previewOrder )
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch("/update-status/:id", orderController.updateStatus)
+router.patch("/update-status/:id", orderController.updateStatus);
 
-module.exports = router
+module.exports = router;

@@ -1,6 +1,7 @@
-const express = require('express')
-const router = express.Router()
-const discountController = require('../controllers/Discount.controller')
+const express = require("express");
+const router = express.Router();
+const discountController = require("../controllers/Discount.controller");
+const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
 
 /**
  * @swagger
@@ -57,7 +58,12 @@ const discountController = require('../controllers/Discount.controller')
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post('/create', discountController.createDiscount);
+router.post(
+  "/create",
+  verifyToken,
+  identifyAdmin,
+  discountController.createDiscount
+);
 /**
  * @swagger
  * /discount/get-detail/{discountId}:
@@ -81,7 +87,7 @@ router.post('/create', discountController.createDiscount);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get('/get-detail/:discountId', discountController.getDetailDiscount);
+router.get("/get-detail/:discountId", discountController.getDetailDiscount);
 /**
  * @swagger
  * /discount/get-all:
@@ -97,7 +103,7 @@ router.get('/get-detail/:discountId', discountController.getDetailDiscount);
  *         description: Lỗi máy chủ
  */
 
-router.get('/get-all', discountController.getAllDiscount);
+router.get("/get-all", discountController.getAllDiscount);
 
 /**
  * @swagger
@@ -148,7 +154,12 @@ router.get('/get-all', discountController.getAllDiscount);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch('/update/:discountId', discountController.updateDiscount);
+router.patch(
+  "/update/:discountId",
+  verifyToken,
+  identifyAdmin,
+  discountController.updateDiscount
+);
 /**
  * @swagger
  * /discount/delete/{discountId}:
@@ -172,6 +183,11 @@ router.patch('/update/:discountId', discountController.updateDiscount);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.delete('/delete/:discountId', discountController.deleteDiscount);
+router.delete(
+  "/delete/:discountId",
+  verifyToken,
+  identifyAdmin,
+  discountController.deleteDiscount
+);
 
-module.exports = router
+module.exports = router;

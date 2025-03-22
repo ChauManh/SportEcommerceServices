@@ -2,11 +2,12 @@
 const authRouter = require("./Auth.route");
 const cartRouter = require("./Cart.route");
 const favouriteRouter = require("./Favourite.route");
-const productRouter = require('./Product.route')
-const orderRouter = require("./Order.route")
-const feedbackRouter = require("./Feedback.route")
-const discountRouter = require("./Discount.route")
-const categoryRouter = require("./Category.route")
+const productRouter = require("./Product.route");
+const orderRouter = require("./Order.route");
+const feedbackRouter = require("./Feedback.route");
+const discountRouter = require("./Discount.route");
+const categoryRouter = require("./Category.route");
+const userRouter = require("./User.route");
 // const userRouter = require("./user");
 // const adminRouter = require("./admin");
 
@@ -21,6 +22,7 @@ function router(app) {
   app.use("/feedback", feedbackRouter);
   app.use("/discount", discountRouter);
   app.use("/category", categoryRouter);
+  app.use("/user", userRouter);
   app.get("/", (req, res) => {
     res.send("Hello WTM Sport Ecommerce Service");
   });

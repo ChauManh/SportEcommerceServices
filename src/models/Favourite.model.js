@@ -15,7 +15,7 @@ const FavouriteSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true, collection: "Favourite" }
 );
 
 const Favourite = mongoose.model("Favourite", FavouriteSchema);
