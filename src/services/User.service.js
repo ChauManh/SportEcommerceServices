@@ -1,5 +1,24 @@
 const User = require("../models/User.model");
 
+const getUserService = async (userId) => {
+  try {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return { EC: 1, EM: "User not found" };
+    }
+    return {
+      EC: 0,
+      EM: "Get user successfully",
+      user,
+    };
+  } catch (error) {
+    return {
+      EC: 1,
+      EM: "Error getting user",
+    };
+  }
+};
+
 const getAllUsersService = async () => {
   try {
     const users = await User.find({ role: { $ne: "admin" } }).select(
@@ -103,4 +122,5 @@ module.exports = {
   updateUserService,
   addAddressService,
   updateAddressService,
+  getUserService,
 };

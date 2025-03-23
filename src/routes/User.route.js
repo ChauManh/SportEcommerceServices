@@ -10,9 +10,10 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *   description: Quản lý người dùng (Admin)
  */
 
+router.get("/", verifyToken, UserController.getUser);
 /**
  * @swagger
- * /user:
+ * /get_all_user:
  *   get:
  *     summary: Lấy danh sách người dùng (chỉ dành cho Admin)
  *     tags: [User]
@@ -26,7 +27,12 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/", verifyToken, identifyAdmin, UserController.getAllUsers);
+router.get(
+  "/get_all_user",
+  verifyToken,
+  identifyAdmin,
+  UserController.getAllUsers
+);
 /**
  * @swagger
  * /user/change_password:

@@ -4,10 +4,23 @@ const {
   updateUserService,
   addAddressService,
   updateAddressService,
+  getUserService,
 } = require("../services/User.service");
 const { uploadAvtUser } = require("../utils/UploadUtil");
 
 const userController = {
+  async getUser(req, res) {
+    try {
+      const { userId } = req.user;
+      const result = await getUserService(userId);
+      return result.EC === 0
+        ? res.success(result.user, result.EM)
+        : res.error(result.EC, result.EM);
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  },
+
   // API lấy danh sách user
   async getAllUsers(req, res) {
     try {
