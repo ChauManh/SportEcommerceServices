@@ -88,7 +88,7 @@ router.get("/get-all", verifyToken, identifyAdmin, orderController.getAllOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-detail/:id", orderController.getDetailOrder);
+router.get("/get-detail/:id", verifyToken, orderController.getDetailOrder);
 /**
  * @swagger
  * /order/get-by-user:
@@ -160,6 +160,11 @@ router.get("/preview", verifyToken, orderController.previewOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch("/update-status/:id", verifyToken, identifyAdmin, orderController.updateStatus);
+router.patch(
+  "/update-status/:id",
+  verifyToken,
+  identifyAdmin,
+  orderController.updateStatus
+);
 
 module.exports = router;

@@ -125,7 +125,7 @@ const createOrder = async (req, res) => {
 const getAllOrder = async (req, res) => {
   try {
     const { orderStatus } = req.query;
-    
+
     if (!orderStatus) {
       return res.error(400, "Order Status is required");
     }
@@ -141,7 +141,7 @@ const getAllOrder = async (req, res) => {
 
 const getOrderByUser = async (req, res) => {
   try {
-    const {orderStatus } = req.query;
+    const { orderStatus } = req.query;
     const { userId } = req.user;
     if (!userId || !orderStatus) {
       return res.error(400, "Order status and userId are required");
@@ -190,14 +190,26 @@ const updateStatus = async (req, res) => {
 const getDetailOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
+    const { userId } = req.user;
+
     if (!orderId) {
       return res.error(400, "OrderId is required");
     }
 
     const response = await orderService.getDetailOrder(orderId);
-    response.EC === 0
-      ? res.success(response.data, response.EM)
-      : res.error(response.EC, response.EM);
+
+    if (response.EC !== 0) {
+      return res.error(response.EC, response.EM);
+    }
+
+    const order = response.data;
+
+    // Kiểm tra quyền truy cập: chỉ chủ đơn hàng hoặc admin mới được xem
+    if (order.user_id.toString() !== userId && req.user.role !== "admin") {
+      return res.error(403, "You are not allowed to view this order");
+    }
+
+    return res.success(order, "Get order detail successfully");
   } catch (error) {
     return res.InternalError(error.message);
   }

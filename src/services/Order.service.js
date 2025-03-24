@@ -575,7 +575,7 @@ const previewOrder = async (newOrder, userId) => {
     );
 
     const previewOrder = {
-      user_id,
+      user_id: userId,
       products: orderProducts,
       delivery_fee,
       shipping_address,
