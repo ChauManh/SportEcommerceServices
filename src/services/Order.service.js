@@ -470,10 +470,10 @@ const getOrderByUser = async (userId, orderStatus) => {
 //     }
 // };
 
-const previewOrder = async (newOrder) => {
+const previewOrder = async (newOrder, userId) => {
   try {
     let {
-      user_id,
+      //user_id,
       shipping_address,
       products,
       order_status = "Chờ xác nhận",
