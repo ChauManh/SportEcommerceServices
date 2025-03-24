@@ -48,7 +48,7 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post("/create", orderController.createOrder);
+router.post("/create", verifyToken, orderController.createOrder);
 /**
  * @swagger
  * /order/get-all:
@@ -63,7 +63,7 @@ router.post("/create", orderController.createOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-all", orderController.getAllOrder);
+router.get("/get-all", verifyToken, identifyAdmin, orderController.getAllOrder);
 /**
  * @swagger
  * /order/get-detail/{id}:
@@ -104,7 +104,7 @@ router.get("/get-detail/:id", orderController.getDetailOrder);
  *         description: Lỗi máy chủ
  */
 
-router.get("/get-by-user", orderController.getOrderByUser);
+router.get("/get-by-user", verifyToken, orderController.getOrderByUser);
 /**
  * @swagger
  * /order/preview:
@@ -121,7 +121,7 @@ router.get("/get-by-user", orderController.getOrderByUser);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/preview", orderController.previewOrder);
+router.get("/preview", verifyToken, orderController.previewOrder);
 /**
  * @swagger
  * /order/update-status/{id}:
@@ -160,6 +160,6 @@ router.get("/preview", orderController.previewOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch("/update-status/:id", orderController.updateStatus);
+router.patch("/update-status/:id", verifyToken, identifyAdmin, orderController.updateStatus);
 
 module.exports = router;

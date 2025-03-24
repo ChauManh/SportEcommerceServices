@@ -49,6 +49,30 @@ const discountSchema = new mongoose.Schema(
   },
 );
 
+discountSchema.pre("save", function (next) {
+  const now = new Date();
+
+  if (this.discount_amount <= 0 || now > this.discount_end_day) {
+    this.status = "expired";
+  }
+
+  next();
+});
+
+discountSchema.pre("findOneAndUpdate", function (next) {
+  const now = new Date();
+  const update = this.getUpdate();
+
+  if (update) {
+    if ((update.discount_amount !== undefined && update.discount_amount <= 0) || 
+        (update.discount_end_day !== undefined && now > update.discount_end_day)) {
+      this.set({ status: "expired" });
+    }
+  }
+
+  next();
+});
+
 discountSchema.plugin(MongooseDelete, { deletedAt: true, overrideMethods: "all" });
 
 const Discount = mongoose.model("Discount", discountSchema);

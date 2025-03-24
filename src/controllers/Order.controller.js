@@ -125,7 +125,7 @@ const createOrder = async (req, res) => {
 const getAllOrder = async (req, res) => {
   try {
     const { orderStatus } = req.query;
-
+    
     if (!orderStatus) {
       return res.error(400, "Order Status is required");
     }
@@ -141,8 +141,8 @@ const getAllOrder = async (req, res) => {
 
 const getOrderByUser = async (req, res) => {
   try {
-    const { userId, orderStatus } = req.query;
-
+    const {orderStatus } = req.query;
+    const { userId } = req.user;
     if (!userId || !orderStatus) {
       return res.error(400, "Order status and userId are required");
     }
@@ -159,7 +159,8 @@ const getOrderByUser = async (req, res) => {
 const previewOrder = async (req, res) => {
   try {
     const newOrder = req.body;
-    const response = await orderService.previewOrder(newOrder);
+    const { userId } = req.user;
+    const response = await orderService.previewOrder(newOrder, userId);
     response.EC === 0
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
