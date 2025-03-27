@@ -66,6 +66,41 @@ const loginService = async (user_name, password) => {
   };
 };
 
+const loginWithGoogleService = async (email, user_name, uidToPassword) => {
+  const user = await User.findOne({
+    $or: [{ user_name: user_name }, { email: email }],
+  });
+
+  if (!user) {
+    const hashedPassword = await bcrypt.hash(uidToPassword, 10);
+    const newUser = new User({
+      user_name,
+      email,
+      password: hashedPassword,
+    });
+    await newUser.save();
+  } else {
+    const isMatchPassword = await bcrypt.compare(uidToPassword, user.password);
+    if (!isMatchPassword) {
+      return {
+        EC: 3,
+        EM: "Invalid password",
+      };
+    }
+  }
+  const payload = createJwtPayload(user);
+
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+
+  return {
+    EC: 0,
+    EM: "Logged in successfully",
+    accessToken,
+  };
+};
+
 const sentOTPService = async (email) => {
   // Kiểm tra email đã tồn tại chưa
   const existingUser = await User.findOne({ email });
@@ -150,4 +185,5 @@ module.exports = {
   sentOTPService,
   resetPasswordService,
   verifyOTPService,
+  loginWithGoogleService,
 };

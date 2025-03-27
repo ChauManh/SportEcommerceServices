@@ -4,6 +4,7 @@ const {
   sentOTPService,
   verifyOTPService,
   resetPasswordService,
+  loginWithGoogleService
 } = require("../services/Auth.service");
 
 const authController = {
@@ -29,6 +30,19 @@ const authController = {
       const result = await loginService(user_name, password);
       return result.EC === 0
         ? res.success({ accessToken: result.accessToken }, result.EM)
+        : res.error(result.EC, result.EM, 401);
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  },
+
+  async loginUserWithGoogle(req, res) {
+    const {email, user_name, uid } = req.body;
+    console.log(email, user_name, uid);
+    try {
+      const result = await loginWithGoogleService(email, user_name, uid);
+      return result.EC === 0
+       ? res.success({ accessToken: result.accessToken }, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
       return res.InternalError(error.message);

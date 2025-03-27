@@ -141,6 +141,7 @@ router.post("/login", AuthController.loginUser);
  *       500:
  *         description: Lỗi máy chủ
  */
+router.post("/login_with_google", AuthController.loginUserWithGoogle);
 router.post("/send_otp", AuthController.sendOTP);
 /**
  * @swagger
