@@ -10,6 +10,8 @@ const createProduct = async (newProduct) => {
       product_description,
       product_display,
       product_famous,
+      product_price: inputPrice,
+      product_countInStock: inputCountInStock,
       product_rate,
       product_selled,
       product_percent_discount,
@@ -26,14 +28,30 @@ const createProduct = async (newProduct) => {
           };
       }
 
-      // Calculate product_price and product_countInStock
-      const product_price = Math.min(
-          ...variants.map((variant) => variant.product_price)
-      );
-      const product_countInStock = variants.reduce(
-          (acc, variant) => acc + variant.product_countInStock,
-          0
-      );
+      let product_price = 0;
+      let product_countInStock = 0;
+      let parsedVariants = [];
+
+      if (variants.length !== 0) {
+          parsedVariants = variants.map(variant => ({
+              ...variant,
+              variant_price: Number(variant.variant_price),
+              variant_countInStock: Number(variant.variant_countInStock),
+              variant_percent_discount: Number(variant.variant_percent_discount),
+          }));
+
+          product_price = Math.min(
+              ...parsedVariants.map(variant => variant.variant_price)
+          );
+
+          product_countInStock = parsedVariants.reduce(
+              (acc, variant) => acc + variant.variant_countInStock,
+              0
+          );
+      } else {
+          product_price = Number(inputPrice); 
+          product_countInStock = Number(inputCountInStock); 
+      }
 
       // Create new product
       const newProductData = {
@@ -47,7 +65,7 @@ const createProduct = async (newProduct) => {
           product_brand,
           product_img,
           product_percent_discount,
-          variants,
+          variants: parsedVariants,
           product_price,
           product_countInStock,
       };
