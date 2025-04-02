@@ -57,9 +57,9 @@ const userController = {
       const uploadResult = await uploadAvtUser(req, res);
 
       const { userId } = req.user;
-      let { dataUpdate } = req.body;
-
-      // Gửi form data nên là string, convert qua JSON
+      let dataUpdate  = req.body;
+      console.log("dataUpdate 111", dataUpdate);
+      // // Gửi form data nên là string, convert qua JSON
       if (typeof dataUpdate === "string") {
         dataUpdate = JSON.parse(dataUpdate);
       }

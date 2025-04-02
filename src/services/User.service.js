@@ -58,6 +58,7 @@ const updateUserService = async (userId, dataUpdate) => {
 
     // Cập nhật thông tin
     Object.assign(user, dataUpdate);
+    console.log(dataUpdate);
     await user.save();
 
     return { EC: 0, EM: "Update User Information Successfully!", user };

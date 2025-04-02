@@ -67,37 +67,7 @@ const createProduct = async (req, res) => {
       // return res.status(400).json({ message: error.message });
       return res.error(1, error.message);
     }
-    // const filesMap = {};
-    // if (req.files) {
-    //     req.files.forEach(file => {
-    //         if (!filesMap[file.fieldname]) {
-    //             filesMap[file.fieldname] = [];
-    //         }
-    //         filesMap[file.fieldname].push(file.path);
-    //     });
-    // }
-
-    // if (!filesMap["product_main_img"] || filesMap["product_main_img"].length === 0) {
-    //     return res.status(400).json({ message: "Main product image is required" });
-    // }
-
-    // productData.product_img = {
-    //     image_main: filesMap["product_main_img"] ? filesMap["product_main_img"][0] : "",
-    //     image_subs: filesMap["product_subs_img"] || []
-    // };
-
-    // productData.variants.forEach((variant, index) => {
-    //     variant.variant_img = {
-    //         image_main: filesMap[`variant_img_${index}_main`] ? filesMap[`variant_img_${index}_main`][0] : "",
-    //         image_subs: filesMap[`variant_img_${index}_subs`] || []
-    //     };
-    // });
-
-    // let missingImages = productData.variants.some(variant => !variant.variant_img.image_main);
-    // if (missingImages) {
-    //     return res.status(400).json({ message: "Each variant must have an image_main" });
-    // }
-
+   
     console.log("Processed product data before saving:", productData);
 
     const result = await productService.createProduct(productData);
@@ -114,19 +84,14 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-    // console.log("productId:", productId);
-    // console.log("body:", req.body);
-    // console.log("files:", req.files);
 
     const existingProduct = await Product.findById(productId);
-    // console.log("product:", existingProduct);
     if (!existingProduct) {
       return res.error(1, "Product doesn't exist");
     }
 
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
     if (!uploadResult.success) {
-      //return res.status(400).json({ message: "Upload error", error: uploadResult.error });
       return res.error(1, uploadResult.error);
     }
 
@@ -140,7 +105,6 @@ const updateProduct = async (req, res) => {
         }
       } catch (error) {
         return res.error(1, "Invalid JSON format for variants");
-        //return res.status(400).json({ message: "Invalid JSON format for variants" });
       }
     } else {
       productData.variants = existingProduct.variants || [];
@@ -152,43 +116,8 @@ const updateProduct = async (req, res) => {
       productData = updateProductImages(filesMap, productData, existingProduct);
     } catch (error) {
       return res.error(1, error.message);
-      //return res.status(400).json({ message: error.message });
     }
-    // const filesMap = {};
-    // if (req.files) {
-    //     req.files.forEach(file => {
-    //         if (!filesMap[file.fieldname]) {
-    //             filesMap[file.fieldname] = [];
-    //         }
-    //         filesMap[file.fieldname].push(file.path);
-    //     });
-    // }
-
-    // productData.product_img = {
-    //     image_main: filesMap["product_main_img"]?.[0] || existingProduct.product_img.image_main,
-    //     image_subs: filesMap["product_subs_img"] || existingProduct.product_img.image_subs
-    // };
-
-    // if (productData.variants) {
-    //     productData.variants = productData.variants.map((variant, index) => ({
-    //         ...variant,
-    //         variant_img: {
-    //             image_main: filesMap[`variant_img_${index}_main`]?.[0]
-    //                 || variant.variant_img?.image_main
-    //                 || existingProduct.variants?.[index]?.variant_img?.image_main
-    //                 || "",
-    //             image_subs: filesMap[`variant_img_${index}_subs`]
-    //                 || variant.variant_img?.image_subs
-    //                 || existingProduct.variants?.[index]?.variant_img?.image_subs
-    //                 || []
-    //         }
-    //     }));
-
-    //     const missingImages = productData.variants.some(variant => !variant.variant_img.image_main);
-    //     if (missingImages) {
-    //         return res.status(400).json({ message: "Each variant must have an image_main" });
-    //     }
-    // }
+    
 
     console.log(
       "Processed product data before updating:",
@@ -200,9 +129,7 @@ const updateProduct = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    // console.error("Error updating product:", error);
-    return res.InternalError(error.message);
-    //return res.status(500).json({ message: "Internal server error", error: error.message });
+    return res.InternalError(error.message);z
   }
 };
 
@@ -235,17 +162,18 @@ const getDetailsProduct = async (req, res) => {
 const getAllProduct = async (req, res) => {
   try {
     const {
-      limit,
-      page,
       search,
-      category_type,
+      category,
+      category_sub,
       price_min,
       price_max,
       product_color,
     } = req.query;
 
+    console.log("abc", req.query);
     const filters = {
-      category_type,
+      category,
+      category_sub,
       price_min,
       price_max,
       product_color,
@@ -253,8 +181,6 @@ const getAllProduct = async (req, res) => {
     };
 
     const result = await productService.getAllProduct(
-      Number(limit) || null,
-      Number(page) || null,
       filters || null
     );
     result.EC === 0

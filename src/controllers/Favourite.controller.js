@@ -5,7 +5,6 @@ const {
 } = require("../services/Favourite.service");
 
 const favouriteController = {
-  // Thêm sản phẩm vào giỏ hàng
   async updateFavourite(req, res) {
     try {
       const { userId } = req.user;

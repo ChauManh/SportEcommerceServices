@@ -43,9 +43,9 @@ const getDetailCategory = async(categoryId) =>{
     }
 }
 
-const getAllCategory = async(category_level) =>{
+const getAllCategory = async() =>{
     try {
-        const listCategory = await Category.find({category_level: category_level});
+        const listCategory = await Category.find();
 
         return{
             EC: 0,

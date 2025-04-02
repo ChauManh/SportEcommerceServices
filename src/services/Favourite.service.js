@@ -21,15 +21,6 @@ const updateProductToFavourService = async ({ user_id, product_id }) => {
     if (index !== -1) {
       // Nếu có rồi, xóa nó khỏi danh sách
       favourite.products.splice(index, 1);
-      // Nếu danh sách trống sau khi xóa, thì xóa luôn document Favourite
-      if (favourite.products.length === 0) {
-        await Favourite.deleteOne({ user_id });
-      }
-      return {
-        EC: 0,
-        EM: "Favourite list updated successfully",
-        favourite,
-      };
     } else {
       // Nếu chưa có, thêm mới vào danh sách
       favourite.products.push(productObjectId);
@@ -47,13 +38,25 @@ const updateProductToFavourService = async ({ user_id, product_id }) => {
 };
 
 const getFavouriteService = async (user_id) => {
-  // const cart = await Cart.findOne({ user_id }).populate(
-  //   "products.product_id"
-  // );
+  console.log("user_id", user_id);
+
+  // Tìm danh sách yêu thích của user
   const favourite = await Favourite.findOne({ user_id });
+
+  console.log("favourite", favourite);
+
+  // Nếu không tìm thấy danh sách yêu thích
   if (!favourite) {
-    return { EC: 2, EM: "Favourite not found" };
+    return { EC: 0, EM: "Favourite list is empty", favourites: [] };
   }
+
+  console.log("favourite.products", favourite.products);
+
+  // Nếu danh sách sản phẩm rỗng, trả về mảng rỗng thay vì truy cập thuộc tính không tồn tại
+  if (!favourite.products || favourite.products.length === 0) {
+    return { EC: 0, EM: "Favourite list is empty", favourites: [] };
+  }
+
   return {
     EC: 0,
     EM: "Favourite fetched successfully",
@@ -61,10 +64,23 @@ const getFavouriteService = async (user_id) => {
   };
 };
 
+
 const clearFavouritesService = async (user_id) => {
-  await Favourite.deleteOne({ user_id });
+  
+  let favourite = await Favourite.findOne( {user_id} );
+  if (!favourite) {
+    return { EC: 2, EM: "Favourite not found" };
+  }
+
+  // Xóa tất cả sản phẩm khỏi mảng products
+  favourite.products = [];
+
+  // Lưu lại vào database
+  await favourite.save();
+
   return { EC: 0, EM: "Favourite list cleared successfully" };
 };
+
 
 module.exports = {
   updateProductToFavourService,

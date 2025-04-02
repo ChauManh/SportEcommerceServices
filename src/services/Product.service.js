@@ -193,13 +193,26 @@ const deleteProduct = async (id) => {
   }
 };
 
-const getAllProduct = async (limit, page, filters) => {
+const getAllProduct = async (filters) => {
     try {
       let query = {};
   
       // Tìm danh mục và tất cả danh mục con
-      if (filters.category_type) {
-        const category = await Category.findOne({ category_type: filters.category_type });
+      if (filters.category) {
+        const category = await Category.findOne({ category_type: filters.category });
+        if (category) {
+          const subCategories = await Category.find({ category_parent_id: category._id });
+  
+          const categoryIds = [category._id, ...subCategories.map(cat => cat._id)];
+  
+          query.product_category = { $in: categoryIds };
+        } else {
+          return { EC: 1, EM: "Danh mục không tồn tại", data: [] };
+        }
+      }
+
+      if (filters.category_sub) {
+        const category = await Category.findOne({ category_type: filters.category_sub });
         if (category) {
           const subCategories = await Category.find({ category_parent_id: category._id });
   
@@ -228,16 +241,10 @@ const getAllProduct = async (limit, page, filters) => {
         query.product_title = { $regex: filters.search, $options: "i" }; 
       }
   
-      // Phân trang 
-      const pageNumber = page > 0 ? page : 1;
-      const limitNumber = limit > 0 ? limit : 10;
-      const skip = (pageNumber - 1) * limitNumber;
-  
+      
       // Truy vấn danh sách sản phẩm
       const products = await Product.find(query)
         .populate("product_category") 
-        .limit(limitNumber)
-        .skip(skip);
   
       // Đếm tổng số sản phẩm 
       const totalProducts = await Product.countDocuments(query);
@@ -247,8 +254,6 @@ const getAllProduct = async (limit, page, filters) => {
         EM: "Lấy danh sách sản phẩm thành công",
         data: {
           total: totalProducts,
-          page: pageNumber,
-          limit: limitNumber,
           products
         }
       };
