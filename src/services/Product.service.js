@@ -145,7 +145,7 @@ const updateProduct = async (productId, updatedProduct) => {
 
 const getDetailsProduct = async (id) => {
   try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(id).populate("product_category");
       // .populate("product_category", "category_title category_parent_id category_level");
 
       if (!product) {

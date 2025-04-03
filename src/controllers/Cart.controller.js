@@ -40,9 +40,9 @@ const cartController = {
   // Xóa sản phẩm khỏi giỏ hàng
   async removeProductFromCart(req, res) {
     const { userId } = req.user;
-    const { productId } = req.body;
+    const { productId } = req.params;
     try {
-      const result = await removeFromCartService(userId, productId);
+      const result = await removeFromCartService({ user_id: userId, product_id: productId });
       return result.EC === 0
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
@@ -54,8 +54,10 @@ const cartController = {
   // Xóa toàn bộ giỏ hàng
   async clearCart(req, res) {
     const { userId } = req.user;
+    console.log(req);
     try {
-      const result = await clearCartService(userId);
+      const result = await clearCartService({user_id: userId});
+      console.log(result);
       return result.EC === 0
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM, 400);

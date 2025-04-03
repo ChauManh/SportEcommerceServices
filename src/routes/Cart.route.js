@@ -82,7 +82,7 @@ router.get("/", verifyToken, CartController.getCart);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.delete("/", verifyToken, CartController.removeProductFromCart);
+router.delete("/:productId", verifyToken, CartController.removeProductFromCart);
 /**
  * @swagger
  * /cart/clear:

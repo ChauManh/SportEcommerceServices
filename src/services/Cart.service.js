@@ -26,10 +26,11 @@ const getCartService = async (user_id) => {
   // const cart = await Cart.findOne({ user_id }).populate(
   //   "products.product_id"
   // );
-  const cart = await Cart.findOne({ user_id });
+  let cart = await Cart.findOne({ user_id }).populate("products.product_id");
   if (!cart) {
-    return { EC: 2, EM: "Cart not found" };
+    cart = new Cart({ user_id, products: [] });
   }
+  await cart.save();
   return { EC: 0, EM: "Cart fetched successfully", cart };
 };
 
@@ -39,19 +40,37 @@ const removeFromCartService = async ({ user_id, product_id }) => {
   if (!cart) {
     return { EC: 2, EM: "Cart not found" };
   }
+
+  // Lọc và xóa sản phẩm khỏi giỏ hàng
   cart.products = cart.products.filter(
     (p) => p.product_id.toString() !== product_id
   );
+
+  // Lưu lại giỏ hàng đã được cập nhật
   await cart.save();
+
   return { EC: 0, EM: "Product removed from cart", cart };
 };
 
+
 // Xóa toàn bộ giỏ hàng
-const clearCartService = async (user_id) => {
-  let cart = await Cart.findOne({ user_id });
-  await Cart.deleteOne({ user_id });
-  return { EC: 0, EM: "Cart cleared successfully" };
+const clearCartService = async ({user_id}) => {
+  const cart = await Cart.findOneAndUpdate(
+    { user_id }, // Tìm giỏ hàng của người dùng
+    { $set: { products: [] } }, // Xóa tất cả sản phẩm trong giỏ
+    { new: true } // Trả về giỏ hàng đã cập nhật
+  );
+  
+  console.log(cart);
+
+  if (!cart) {
+    return { EC: 2, EM: "Cart not found!" };
+  }
+
+  // Trả về thông báo thành công
+  return { EC: 0, EM: "Cart cleared successfully", cart };
 };
+
 
 const decreaseProductQuantity = async (user_id, product_id) => {
   const cart = await Cart.findOne({ user_id });
