@@ -54,10 +54,8 @@ const cartController = {
   // Xóa toàn bộ giỏ hàng
   async clearCart(req, res) {
     const { userId } = req.user;
-    console.log(req);
     try {
-      const result = await clearCartService({user_id: userId});
-      console.log(result);
+      const result = await clearCartService(userId);
       return result.EC === 0
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM, 400);

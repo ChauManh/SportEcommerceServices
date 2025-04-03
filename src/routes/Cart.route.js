@@ -99,7 +99,7 @@ router.delete("/:productId", verifyToken, CartController.removeProductFromCart);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.delete("/clear", verifyToken, CartController.clearCart);
+router.delete("/", verifyToken, CartController.clearCart);
 /**
  * @swagger
  * /cart/decrease_quantity:
