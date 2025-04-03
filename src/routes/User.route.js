@@ -269,4 +269,70 @@ router.patch("/address/:index", verifyToken, UserController.updateAddress);
  */
 router.post("/address", verifyToken, UserController.addAddress);
 
+/**
+ * @swagger
+ * /user/save-discount:
+ *   patch:
+ *     summary: Lưu mã giảm giá cho người dùng
+ *     description: Thêm một mã giảm giá vào danh sách mã giảm giá đã lưu của người dùng.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               discount:
+ *                 type: string
+ *                 example: "660afcabcdef9876"
+ *     responses:
+ *       200:
+ *         description: Lưu mã giảm giá thành công
+ *       400:
+ *         description: Lỗi đầu vào hoặc mã giảm giá đã tồn tại
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.patch("/save-discount", verifyToken, UserController.saveDiscount);
+
+/**
+ * @swagger
+ * /user/get-discount:
+ *   get:
+ *     summary: Lấy danh sách mã giảm giá đã lưu của người dùng
+ *     description: Trả về danh sách các mã giảm giá mà người dùng đã lưu trước đó.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy thành công danh sách mã giảm giá
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: Get discounts successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Discount'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.get("/get-discount", verifyToken, UserController.getDiscountUser);
 module.exports = router;

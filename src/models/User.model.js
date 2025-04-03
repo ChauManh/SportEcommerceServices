@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     phone: { type: String },
     addresses: [addressSchema], // Nhúng trực tiếp mảng địa chỉ vào User
+    discounts:
+      [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Discount",
+        required: false,
+      }],
     birth: { type: Date },
     gender: {
       type: String,

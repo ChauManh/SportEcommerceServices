@@ -1,3 +1,4 @@
+const Discount = require("../models/Discount.Model");
 const User = require("../models/User.model");
 
 const getUserService = async (userId) => {
@@ -117,6 +118,38 @@ const updateAddressService = async (userId, index, updateData) => {
   }
 };
 
+const saveDiscount = async(userId, discountId)=>{
+  try {
+    const user = await User.findById(userId);
+    if (!user) return { EC: 1, EM: "User not found" };
+
+    const discount = await Discount.findById(discountId);
+    if (!discount) return { EC: 2, EM: "Discount not found" };
+
+    const alreadySaved = user.discounts.some(d => d.equals(discount._id));
+    if (alreadySaved) return { EC: 0, EM: "Discount already saved"};
+
+    user.discounts.push(discount._id);
+    await user.save();
+    return { EC: 0, EM: "Save discount successfully", data: user.discounts };
+  } catch (error) {
+    return { EC: 3, EM: error.message };
+  }
+}
+
+const getDiscountUser = async(userId) =>{
+  try {
+    const user = await User.findById(userId);
+    if (!user) return { EC: 1, EM: "User not found" };
+
+    const discounts = await Discount.find({_id : {$in: user.discounts}})
+
+    return {EC: 0, EM: "Get discounts successfully", data: discounts}
+  } catch (error) {
+    return { EC: 3, EM: error.message };
+  }
+}
+
 module.exports = {
   getAllUsersService,
   changePasswordService,
@@ -124,4 +157,6 @@ module.exports = {
   addAddressService,
   updateAddressService,
   getUserService,
+  saveDiscount,
+  getDiscountUser,
 };

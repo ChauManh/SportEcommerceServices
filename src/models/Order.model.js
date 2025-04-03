@@ -30,8 +30,7 @@ const orderSchema = new mongoose.Schema(
         },
         quantity: { type: Number, required: true, default: 1 },
         variant: { type: mongoose.Schema.Types.ObjectId, required: true },
-        product_order_type: { type: String }, // mới thêm, oke không???
-        // product_price: { type: Number, required: true, default: 0 },
+        //product_order_type: { type: String }
       },
     ],
     order_status: {

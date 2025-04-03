@@ -75,11 +75,26 @@ const deleteDiscount = async(req, res) =>{
     }
 }
 
+const getForOrder = async(req, res) =>{
+    try {
+        const {userId} = req.user;
+        const {products} = req.body;
 
+        const result = await discountService.getForOrder(userId, products);
+
+        result.EC === 0
+            ? res.success(result.data, result.EM)
+            : res.error(result.EC, result.EM);
+    } catch (error) {
+        console.log(error.message)
+        return res.InternalError(error.message)
+    }
+}
 module.exports = {
     createDiscount,
     getDetailDiscount,
     getAllDiscount,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    getForOrder
 }

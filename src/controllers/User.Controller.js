@@ -5,6 +5,8 @@ const {
   addAddressService,
   updateAddressService,
   getUserService,
+  saveDiscount,
+  getDiscountUser,
 } = require("../services/User.service");
 const { uploadAvtUser } = require("../utils/UploadUtil");
 
@@ -121,6 +123,37 @@ const userController = {
       return res.status(500).json({ EC: -1, EM: "Internal server error" });
     }
   },
+
+  async saveDiscount (req, res){
+    try {
+      const { userId} = req.user;
+      const {discount} = req.body;
+  
+      const result = await saveDiscount(userId, discount)
+
+      return result.EC === 0
+        ? res.success(result.data, result.EM)
+        : res.error(result.EC, result.EM)
+      
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  },
+
+  async getDiscountUser (req, res){
+    try {
+      const { userId} = req.user;
+
+      const result = await getDiscountUser(userId)
+
+      return result.EC === 0
+        ? res.success(result.data, result.EM)
+        : res.error(result.EC, result.EM)
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  }
 };
+
 
 module.exports = userController;

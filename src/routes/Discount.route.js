@@ -190,4 +190,55 @@ router.delete(
   discountController.deleteDiscount
 );
 
+/**
+ * @swagger
+ * /discount/get-for-order:
+ *   get:
+ *     summary: Lấy danh sách mã giảm giá có thể áp dụng cho đơn hàng
+ *     description: Trả về các mã giảm giá user đã lưu và có thể áp dụng cho các sản phẩm cụ thể trong đơn hàng hiện tại.
+ *     tags:
+ *       - Discount
+ *     security:
+ *       - bearerAuth: []   # Nếu route có verifyToken thì cần khai báo xác thực Bearer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["6618a3f5e6b6a8e82bc8b1c2", "6618a40ae6b6a8e82bc8b1c4"]
+ *     responses:
+ *       200:
+ *         description: Danh sách mã giảm giá áp dụng được
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: Get discount successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Discount'
+ *       401:
+ *         description: Unauthorized – cần token hợp lệ
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.get(
+  "/get-for-order",
+  verifyToken,
+  discountController.getForOrder
+)
+
 module.exports = router;

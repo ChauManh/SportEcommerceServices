@@ -8,161 +8,87 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  * /product/create:
  *   post:
  *     summary: Tạo sản phẩm mới
- *     description: API cho phép tạo một sản phẩm mới, bao gồm thông tin sản phẩm, hình ảnh và biến thể.
+ *     description: Chỉ admin có thể tạo sản phẩm mới.
  *     tags:
  *       - Product
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
  *               - product_title
  *               - product_category
- *               - product_brand
- *               - product_description
  *               - product_price
  *               - product_countInStock
- *               - product_main_img
  *             properties:
  *               product_title:
  *                 type: string
- *                 description: Tên sản phẩm
- *                 example: "Áo thể thao Nike"
+ *                 example: Áo thể thao nam Nike
  *               product_category:
  *                 type: string
- *                 format: ObjectId
- *                 description: ID danh mục sản phẩm
- *                 example: "65fd13d4a7e8a234c4a5b123"
+ *                 example: 6618a27ce6b6a8e82bc8b0c3
  *               product_brand:
  *                 type: string
- *                 description: Thương hiệu của sản phẩm
- *                 example: "Nike"
+ *                 example: Nike
+ *               product_img:
+ *                 type: string
+ *                 example: /uploads/products/image1.jpg
  *               product_description:
  *                 type: string
- *                 description: Mô tả chi tiết về sản phẩm
- *                 example: "Áo thể thao chính hãng Nike với chất liệu cao cấp"
- *               product_price:
- *                 type: number
- *                 description: Giá sản phẩm
- *                 example: 500000
- *               product_countInStock:
- *                 type: integer
- *                 description: Số lượng sản phẩm còn trong kho
- *                 example: 20
+ *                 example: Áo thể thao chất liệu thoáng mát, co giãn tốt.
  *               product_display:
  *                 type: boolean
- *                 description: Trạng thái hiển thị sản phẩm
  *                 example: true
  *               product_famous:
  *                 type: boolean
- *                 description: Đánh dấu sản phẩm nổi bật
  *                 example: false
+ *               product_price:
+ *                 type: number
+ *                 example: 499000
+ *               product_countInStock:
+ *                 type: number
+ *                 example: 20
  *               product_rate:
  *                 type: number
- *                 description: Đánh giá trung bình của sản phẩm
  *                 example: 4.5
  *               product_selled:
- *                 type: integer
- *                 description: Số lượng sản phẩm đã bán
- *                 example: 100
+ *                 type: number
+ *                 example: 120
  *               product_percent_discount:
  *                 type: number
- *                 description: Phần trăm giảm giá sản phẩm
  *                 example: 10
- *               product_main_img:
- *                 type: string
- *                 format: binary
- *                 description: Ảnh chính của sản phẩm (bắt buộc)
- *               product_subs_img:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Danh sách ảnh phụ của sản phẩm
  *               variants:
  *                 type: array
- *                 description: Danh sách các biến thể của sản phẩm
  *                 items:
  *                   type: object
- *                   required:
- *                     - variant_color
- *                     - variant_size
- *                     - variant_price
- *                     - variant_countInStock
- *                     - variant_img_main
  *                   properties:
  *                     variant_color:
  *                       type: string
- *                       description: Màu sắc của biến thể
- *                       example: "Đỏ"
+ *                       example: Đỏ
  *                     variant_size:
  *                       type: string
- *                       description: Kích thước của biến thể
- *                       example: "L"
+ *                       example: L
  *                     variant_price:
  *                       type: number
- *                       description: Giá của biến thể
- *                       example: 550000
+ *                       example: 499000
  *                     variant_countInStock:
- *                       type: integer
- *                       description: Số lượng tồn kho của biến thể
- *                       example: 15
- *                     variant_img_main:
- *                       type: string
- *                       format: binary
- *                       description: Ảnh chính của biến thể (bắt buộc)
- *                     variant_img_subs:
- *                       type: array
- *                       items:
- *                         type: string
- *                         format: binary
- *                       description: Danh sách ảnh phụ của biến thể
+ *                       type: number
+ *                       example: 10
+ *                     variant_percent_discount:
+ *                       type: number
+ *                       example: 5
  *     responses:
  *       200:
  *         description: Tạo sản phẩm thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "SUCCESS"
- *                 message:
- *                   type: string
- *                   example: "Product created successfully"
- *                 data:
- *                   $ref: '#/components/schemas/Product'
  *       400:
- *         description: Lỗi do dữ liệu đầu vào không hợp lệ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Main product image is required"
+ *         description: Sản phẩm đã tồn tại hoặc dữ liệu không hợp lệ
  *       500:
  *         description: Lỗi máy chủ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
  */
-// router.post("/create", ProductController.uploadImgProduct, ProductController.createProduct);
 router.post(
   "/create",
   verifyToken,
@@ -174,161 +100,80 @@ router.post(
  * @swagger
  * /product/update/{id}:
  *   patch:
- *     summary: Cập nhật thông tin sản phẩm
- *     description: API này cập nhật thông tin sản phẩm, bao gồm hình ảnh và biến thể.
+ *     summary: Cập nhật sản phẩm
+ *     description: Chỉ admin mới được cập nhật thông tin sản phẩm.
  *     tags:
  *       - Product
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của sản phẩm cần cập nhật
  *         schema:
  *           type: string
- *           format: ObjectId
+ *         description: ID của sản phẩm cần cập nhật
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               product_title:
  *                 type: string
- *                 description: Tiêu đề sản phẩm
- *                 example: "Áo thể thao Adidas"
+ *                 example: Áo bóng đá Real Madrid 2024
  *               product_category:
  *                 type: string
- *                 format: ObjectId
- *                 description: ID danh mục sản phẩm
- *                 example: "65fd13d4a7e8a234c4a5b123"
  *               product_brand:
  *                 type: string
- *                 description: Thương hiệu sản phẩm
- *                 example: "Adidas"
+ *               product_img:
+ *                 type: string
  *               product_description:
  *                 type: string
- *                 description: Mô tả chi tiết sản phẩm
- *                 example: "Áo thể thao Adidas chính hãng với chất liệu cao cấp"
- *               product_price:
- *                 type: number
- *                 description: Giá sản phẩm
- *                 example: 600000
- *               product_countInStock:
- *                 type: integer
- *                 description: Số lượng sản phẩm trong kho
- *                 example: 30
  *               product_display:
  *                 type: boolean
- *                 description: Trạng thái hiển thị sản phẩm
- *                 example: true
  *               product_famous:
  *                 type: boolean
- *                 description: Đánh dấu sản phẩm nổi bật
- *                 example: false
+ *               product_price:
+ *                 type: number
+ *               product_countInStock:
+ *                 type: number
+ *               product_rate:
+ *                 type: number
+ *               product_selled:
+ *                 type: number
  *               product_percent_discount:
  *                 type: number
- *                 description: Phần trăm giảm giá
- *                 example: 15
- *               product_main_img:
- *                 type: string
- *                 format: binary
- *                 description: Ảnh chính của sản phẩm (có thể cập nhật)
- *               product_subs_img:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Danh sách ảnh phụ của sản phẩm
  *               variants:
  *                 type: array
- *                 description: Danh sách biến thể sản phẩm
  *                 items:
  *                   type: object
  *                   properties:
  *                     variant_color:
  *                       type: string
- *                       description: Màu sắc biến thể
- *                       example: "Xanh"
  *                     variant_size:
  *                       type: string
- *                       description: Kích thước biến thể
- *                       example: "XL"
  *                     variant_price:
  *                       type: number
- *                       description: Giá biến thể
- *                       example: 650000
  *                     variant_countInStock:
- *                       type: integer
- *                       description: Số lượng tồn kho của biến thể
- *                       example: 10
- *                     variant_img_main:
- *                       type: string
- *                       format: binary
- *                       description: Ảnh chính của biến thể (có thể cập nhật)
- *                     variant_img_subs:
- *                       type: array
- *                       items:
- *                         type: string
- *                         format: binary
- *                       description: Danh sách ảnh phụ của biến thể
+ *                       type: number
+ *                     variant_percent_discount:
+ *                       type: number
  *     responses:
  *       200:
  *         description: Cập nhật sản phẩm thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "SUCCESS"
- *                 message:
- *                   type: string
- *                   example: "Product updated successfully"
- *                 data:
- *                   $ref: '#/components/schemas/Product'
  *       400:
- *         description: Dữ liệu không hợp lệ hoặc thiếu ảnh bắt buộc
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Invalid request data"
+ *         description: Dữ liệu không hợp lệ
+ *       401:
+ *         description: Không xác thực
+ *       403:
+ *         description: Không có quyền admin
  *       404:
  *         description: Không tìm thấy sản phẩm
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Product not found"
  *       500:
  *         description: Lỗi máy chủ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
  */
-
 router.patch(
   "/update/:id",
   verifyToken,
@@ -464,6 +309,35 @@ router.delete(
  */
 router.get("/get-details/:id", ProductController.getDetailsProduct);
 
+/**
+ * @swagger
+ * /product/get-all:
+ *   get:
+ *     summary: Lấy tất cả sản phẩm
+ *     description: Trả về danh sách tất cả các sản phẩm có trong hệ thống.
+ *     tags:
+ *       - Product
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: Get all products successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.get("/get-all", ProductController.getAllProduct);
 
 module.exports = router;
