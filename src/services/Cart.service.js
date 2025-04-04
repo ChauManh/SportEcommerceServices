@@ -26,7 +26,7 @@ const getCartService = async (user_id) => {
   // const cart = await Cart.findOne({ user_id }).populate(
   //   "products.product_id"
   // );
-  let cart = await Cart.findOne({ user_id }).populate("products.product_id");
+  let cart = await Cart.findOne({ user_id }).populate("products.product_id").populate("user_id", "full_name email phone addresses ");
   if (!cart) {
     return { EC: 0, EM: "Cart is empty" };
   }

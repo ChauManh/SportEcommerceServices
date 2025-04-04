@@ -112,7 +112,6 @@ const createOrder = async (req, res) => {
   try {
     const { userId } = req.user;
     const newOrder = { ...req.body };
-    console.log(newOrder);
     const response = await orderService.createOrder(newOrder, userId);
     response.EC === 0
       ? res.success(response.data, response.EM)

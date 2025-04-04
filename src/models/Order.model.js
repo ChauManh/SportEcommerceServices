@@ -12,14 +12,12 @@ const orderSchema = new mongoose.Schema(
     user_id: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true,},
     delivery_fee: { type: Number, required: true, default: 0 },
     shipping_address: {
-      full_name: { type: String, required: true },
+      name: { type: String, required: true },
       phone: { type: String, required: true },
-      address: {
-        home_address: { type: String, require: true },
-        province: { type: String, required: true },
-        district: { type: String, required: true },
-        commune: { type: String, required: true },
-      },
+      home_address: { type: String, require: true },
+      province: { type: String, required: true },
+      district: { type: String, required: true },
+      ward: { type: String, required: true },
     },
     products: [
       {
@@ -29,8 +27,8 @@ const orderSchema = new mongoose.Schema(
           required: true,
         },
         quantity: { type: Number, required: true, default: 1 },
-        variant: { type: mongoose.Schema.Types.ObjectId, required: true },
-        product_order_type: { type: String }, // mới thêm, oke không???
+        // variant: { type: mongoose.Schema.Types.ObjectId, required: true },
+        // product_order_type: { type: String }, // mới thêm, oke không???
         // product_price: { type: Number, required: true, default: 0 },
       },
     ],

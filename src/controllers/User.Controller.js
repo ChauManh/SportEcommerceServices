@@ -5,6 +5,7 @@ const {
   addAddressService,
   updateAddressService,
   getUserService,
+  deleteAddressService,
 } = require("../services/User.service");
 const { uploadAvtUser } = require("../utils/UploadUtil");
 
@@ -84,8 +85,9 @@ const userController = {
   async addAddress(req, res) {
     try {
       const { userId } = req.user;
-      const { newAddress } = req.body;
-
+      const newAddress = req.body;
+      console.log("newAddress", newAddress);
+      console.log("userId", userId);
       // if (!addressData || !addressData.name || !addressData.phone) {
       //   return res.status(400).json({ EC: 1, EM: "Thiếu thông tin địa chỉ!" });
       // }
@@ -105,8 +107,8 @@ const userController = {
     try {
       const { userId } = req.user;
       const index = parseInt(req.params.index);
-      const { updateData } = req.body;
-
+      const updateData = req.body;
+      console.log("abc", req);
       // if (isNaN(index)) {
       //   return res.status(400).json({ EC: 1, EM: "Index không hợp lệ!" });
       // }
@@ -116,6 +118,23 @@ const userController = {
         ? res
             .status(200)
             .json({ EC: 0, EM: result.EM, addresses: result.addresses })
+        : res.status(400).json({ EC: result.EC, EM: result.EM });
+    } catch (error) {
+      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+    }
+  },
+
+  async deleteAddress(req, res) {
+    try {
+      const { userId } = req.user;
+      const index = parseInt(req.params.index);
+      // if (isNaN(index)) {
+      //   return res.status(400).json({ EC: 1, EM: "Index không hợp lệ!" });
+      // }
+
+      const result = await deleteAddressService(userId, index);
+      return result.EC === 0
+        ? res.status(200).json({ EC: 0, EM: result.EM })
         : res.status(400).json({ EC: result.EC, EM: result.EM });
     } catch (error) {
       return res.status(500).json({ EC: -1, EM: "Internal server error" });
