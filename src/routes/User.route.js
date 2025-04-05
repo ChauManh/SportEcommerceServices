@@ -269,6 +269,8 @@ router.patch("/address/:index", verifyToken, UserController.updateAddress);
  */
 router.post("/address", verifyToken, UserController.addAddress);
 
+router.delete("/address/:index", verifyToken, UserController.deleteAddress);
+
 /**
  * @swagger
  * /user/save-discount:

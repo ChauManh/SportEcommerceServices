@@ -7,7 +7,7 @@ const addressSchema = new mongoose.Schema(
     home_address: { type: String },
     province: { type: String, required: true },
     district: { type: String, required: true },
-    commune: { type: String, required: true },
+    ward: { type: String, required: true },
     is_default: { type: Boolean, default: false },
   },
   { _id: false }

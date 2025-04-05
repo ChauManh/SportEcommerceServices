@@ -1,6 +1,6 @@
 const Discount = require("../models/Discount.Model");
 const User = require("../models/User.model");
-
+const bcrypt = require("bcrypt");
 const getUserService = async (userId) => {
   try {
     const user = await User.findById(userId).select("-password");
@@ -150,6 +150,31 @@ const getDiscountUser = async(userId) =>{
   }
 }
 
+const deleteAddressService = async (userId, index) => {
+  try {
+    const user = await User.findById(userId);
+
+    if (index < 0 || index >= user.addresses.length) {
+      return { EC: 2, EM: "Address not found" };
+    }
+
+    if (user.addresses[index].is_default) {
+      // Nếu địa chỉ xóa là mặc định, đặt mặc định cho địa chỉ đầu tiên còn lại
+      const newDefaultIndex = index === 0 ? 1 : 0;
+      if (user.addresses[newDefaultIndex]) {
+        user.addresses[newDefaultIndex].is_default = true;
+      }
+    }
+    user.addresses.splice(index, 1);
+  
+    await user.save();
+
+    return { EC: 0, EM: "Deleted address successfully" };
+  } catch (error) {
+    return { EC: 3, EM: error.message };
+  }
+};
+
 module.exports = {
   getAllUsersService,
   changePasswordService,
@@ -159,4 +184,5 @@ module.exports = {
   getUserService,
   saveDiscount,
   getDiscountUser,
+  deleteAddressService,
 };
