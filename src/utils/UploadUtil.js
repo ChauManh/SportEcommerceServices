@@ -32,25 +32,22 @@ const processUploadedFiles = (req) => {
 
 const mapProductImages = (productData, filesMap) => {
   if (
-    !filesMap["product_main_img"] ||
-    filesMap["product_main_img"].length === 0
+    !filesMap["product_img"] ||
+    filesMap["product_img"].length === 0
   ) {
     throw new Error("Main product image is required");
   }
 
-  productData.product_img = {
-    image_main: filesMap["product_main_img"]
-      ? filesMap["product_main_img"][0]
-      : "",
-    image_subs: filesMap["product_subs_img"] || [],
-  };
+  productData.product_img = filesMap["product_img"]
+    ? filesMap["product_img"][0]
+    : "";
 
-  productData.variants.forEach((variant, index) => {
-    variant.variant_img = {
-      image_main: filesMap[`variant_img_${index}_main`]
-        ? filesMap[`variant_img_${index}_main`][0]
+  productData.colors.forEach((color, index) => {
+    color.imgs = {
+      img_main: filesMap[`color_img_${index}_main`]
+        ? filesMap[`color_img_${index}_main`][0]
         : "",
-      image_subs: filesMap[`variant_img_${index}_subs`] || [],
+        img_subs: filesMap[`color_img_${index}_subs`] || [],
     };
   });
 
@@ -58,30 +55,30 @@ const mapProductImages = (productData, filesMap) => {
 };
 
 const updateProductImages = (filesMap, productData, existingProduct) => {
-  productData.product_img = {
-    image_main:
-      filesMap["product_main_img"]?.[0] ||
-      existingProduct?.product_img?.image_main ||
-      "",
-    image_subs:
-      filesMap["product_subs_img"] ||
-      existingProduct?.product_img?.image_subs ||
-      [],
-  };
+  if (
+    !filesMap["product_img"] ||
+    filesMap["product_img"].length === 0
+  ) {
+    throw new Error("Main product image is required");
+  }
+  productData.product_img = filesMap["product_img"]
+  ? filesMap["product_img"][0]
+  : "";
 
-  if (productData.variants) {
-    productData.variants = productData.variants.map((variant, index) => ({
-      ...variant,
-      variant_img: {
-        image_main:
-          filesMap[`variant_img_${index}_main`]?.[0] ||
-          variant?.variant_img?.image_main ||
-          existingProduct?.variants?.[index]?.variant_img?.image_main ||
+
+  if (productData.colors) {
+    productData.colors = productData.colors.map((color, index) => ({
+      ...color,
+      imgs: {
+        img_main:
+          filesMap[`color_img_${index}_main`]?.[0] ||
+          color?.imgs?.img_main ||
+          existingProduct?.colors?.[index]?.imgs?.img_main ||
           "",
-        image_subs:
-          filesMap[`variant_img_${index}_subs`] ||
-          variant?.variant_img?.image_subs ||
-          existingProduct?.variants?.[index]?.variant_img?.image_subs ||
+          img_subs:
+          filesMap[`color_img_${index}_subs`] ||
+          color?.imgs?.img_subs ||
+          existingProduct?.colors?.[index]?.imgs?.imgs_subs ||
           [],
       },
     }));

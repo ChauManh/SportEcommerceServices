@@ -50,13 +50,13 @@ const createProduct = async (req, res) => {
 
     let productData = { ...req.body };
 
-    productData.variants =
-      typeof productData.variants === "string"
-        ? JSON.parse(productData.variants)
+    productData.colors =
+      typeof productData.colors === "string"
+        ? JSON.parse(productData.colors)
         : [];
 
-    if (!Array.isArray(productData.variants)) {
-      return res.error(1, "Invalid variants format. Expected an array.");
+    if (!Array.isArray(productData.colors)) {
+      return res.error(1, "Invalid colors format. Expected an array.");
     }
 
     const filesMap = processUploadedFiles(req);
@@ -97,17 +97,17 @@ const updateProduct = async (req, res) => {
 
     let productData = { ...req.body };
 
-    if (req.body.variants) {
+    if (req.body.colors) {
       try {
-        productData.variants = JSON.parse(req.body.variants);
-        if (!Array.isArray(productData.variants)) {
+        productData.colors = JSON.parse(req.body.colors);
+        if (!Array.isArray(productData.colors)) {
           return res.error(1, "Invalid variants format. Expected an array.");
         }
       } catch (error) {
         return res.error(1, "Invalid JSON format for variants");
       }
     } else {
-      productData.variants = existingProduct.variants || [];
+      productData.colors = existingProduct.colors || [];
     }
 
     const filesMap = processUploadedFiles(req);
@@ -121,7 +121,7 @@ const updateProduct = async (req, res) => {
 
     console.log(
       "Processed product data before updating:",
-      productData.variants
+      productData.colors
     );
 
     const result = await productService.updateProduct(productId, productData);
