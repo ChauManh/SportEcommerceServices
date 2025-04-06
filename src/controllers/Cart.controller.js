@@ -10,11 +10,13 @@ const cartController = {
   // Thêm sản phẩm vào giỏ hàng
   async addProductToCart(req, res) {
     const { userId } = req.user;
-    const { productId } = req.body;
+    const { product_id, color_name, variant_name } = req.body;
     try {
       const result = await updateCartService({
         user_id: userId,
-        product_id: productId,
+        product_id,
+        color_name,
+        variant_name,
       });
       return result.EC === 0
         ? res.success(result.cart, result.EM)

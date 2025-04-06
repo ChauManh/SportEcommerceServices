@@ -1,24 +1,54 @@
 const Cart = require("../models/Cart.model");
+const mongoose = require("mongoose");
+const Product = require("../models/Product.Model");
 
-const updateCartService = async ({ user_id, product_id }) => {
+const updateCartService = async ({ user_id, product_id, color_name, variant_name }) => {
+
+  const product = await Product.findOneWithDeleted({ _id: product_id });
+  if (!product) {
+    return { EC: 1, EM: "Sản phẩm không tồn tại", cart: null };
+  }
+
+  const color = product.colors.find((c) => c.color_name === color_name);
+  if (!color) {
+    return { EC: 1, EM: "Màu sắc không tồn tại trong sản phẩm", cart: null };
+  }
+  
+  const variant = color.variants.find((v) => v.variant_size === variant_name);
+  if (!variant) {
+    return { EC: 1, EM: "Size không tồn tại trong màu đã chọn", cart: null };
+  }
+  const color_id = color._id;
+  const variant_id = variant._id;
+
   let cart = await Cart.findOne({ user_id });
+
   if (!cart) {
-    // Nếu user chưa có giỏ hàng, tạo mới
     cart = new Cart({ user_id, products: [] });
   }
-  // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+
   const productIndex = cart.products.findIndex(
-    (p) => p.product_id.toString() === product_id
+    (p) =>
+      console.log(p) &&
+      p.product_id.toString() === product_id.toString() &&
+      p.color_id.toString() === color_id.toString() &&
+      p.variant_id.toString() === variant_id.toString()
   );
+
   if (productIndex > -1) {
-    // Nếu có rồi, cập nhật số lượng
     cart.products[productIndex].quantity += 1;
   } else {
-    // Nếu chưa có, thêm mới
-    cart.products.push({ product_id, quantity: 1 });
+    cart.products.push({
+      product_id,
+      color_name,
+      variant_name,
+      quantity: 1,
+    });
   }
+
   await cart.save();
-  return { EC: 0, EM: "Cart updated successfully", cart };
+
+  return { EC: 0, EM: "Cập nhật giỏ hàng thành công", cart };
 };
 
 // Lấy giỏ hàng của user
@@ -26,7 +56,7 @@ const getCartService = async (user_id) => {
   // const cart = await Cart.findOne({ user_id }).populate(
   //   "products.product_id"
   // );
-  let cart = await Cart.findOne({ user_id }).populate("products.product_id").populate("user_id", "full_name email phone addresses ");
+  let cart = await Cart.findOne({ user_id }).populate("products.product_id").populate("user_id");
   if (!cart) {
     return { EC: 0, EM: "Cart is empty" };
   }
