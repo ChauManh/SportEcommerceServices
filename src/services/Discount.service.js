@@ -10,6 +10,14 @@ const createDiscount = async (newDiscount) => {
         }
         const discountData = new Discount(newDiscount);
         await discountData.save();
+        await User.updateMany(
+            {},
+            {
+                $push: {
+                    discounts: discountData._id
+                  }
+            }
+        )
         return {
             EC: 0,
             EM: "Create new discount successfully",

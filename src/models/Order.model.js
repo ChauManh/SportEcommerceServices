@@ -27,6 +27,7 @@ const orderSchema = new mongoose.Schema(
           required: true,
         },
         quantity: { type: Number, required: true, default: 1 },
+        color: {type: mongoose.Schema.Types.ObjectId, require: true},
         variant: { type: mongoose.Schema.Types.ObjectId, required: true },
         //product_order_type: { type: String }
       },
@@ -55,7 +56,8 @@ const orderSchema = new mongoose.Schema(
     order_total_final: {type: Number, required: true,},
     order_total_discount: {type: Number, required: true,},
     order_note: { type: String },
-    is_feedback: { type: Boolean}
+    is_feedback: { type: Boolean},
+    order_loyalty: {type: Number}
   },
   {
     timestamps: true,

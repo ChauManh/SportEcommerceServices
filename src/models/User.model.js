@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema(
         ref: "Discount",
         required: false,
       }],
+    user_loyalty: {type: Number},
     birth: { type: Date },
     gender: {
       type: String,

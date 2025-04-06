@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema(
     }, // Danh mục
     product_description: { type: String, required: true }, // Mô tả sản phẩm
     product_img: { type: String, required: true }, //
-    product_price: { type: Number, required: true, default: 0 }, // Giá gốc (trước giảm giá)
+    product_price: { type: Number,  default: 0 }, // Giá gốc (trước giảm giá)
     product_percent_discount: { type: Number, default: 0 }, // Giảm giá chung
     colors: [colorSchema], // Danh sách màu (mỗi màu có nhiều size)
     product_display: { type: Boolean, required: true, default: true }, // Có hiển thị không?
