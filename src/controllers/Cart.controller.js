@@ -43,8 +43,13 @@ const cartController = {
   async removeProductFromCart(req, res) {
     const { userId } = req.user;
     const { productId } = req.params;
+    const { color_name, variant_name } = req.body;
     try {
-      const result = await removeFromCartService({ user_id: userId, product_id: productId });
+      const result = await removeFromCartService({ 
+        user_id: userId,
+        product_id: productId,
+        color_name,
+        variant_name, });
       return result.EC === 0
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
@@ -68,9 +73,15 @@ const cartController = {
 
   async decreaseProductQuantity(req, res) {
     const { userId } = req.user;
-    const { productId } = req.body;
+    const { productId, color_name, variant_name} = req.body;
     try {
-      const result = await decreaseProductQuantity(userId, productId);
+      const result = await decreaseProductQuantity(
+        userId,
+        productId,
+        color_name,
+        variant_name,
+      );
+      
       return result.EC === 0
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);

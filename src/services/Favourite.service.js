@@ -38,12 +38,9 @@ const updateProductToFavourService = async ({ user_id, product_id }) => {
 };
 
 const getFavouriteService = async (user_id) => {
-  console.log("user_id", user_id);
 
   // Tìm danh sách yêu thích của user
   const favourite = await Favourite.findOne({ user_id });
-
-  console.log("favourite", favourite);
 
   // Nếu không tìm thấy danh sách yêu thích
   if (!favourite) {

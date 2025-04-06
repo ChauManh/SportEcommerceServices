@@ -21,14 +21,15 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
+        _id: false,
         product_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
         },
         quantity: { type: Number, required: true, default: 1 },
-        color: {type: mongoose.Schema.Types.ObjectId, require: true},
-        variant: { type: mongoose.Schema.Types.ObjectId, required: true },
+        color: {type: String, require: true},
+        variant: { type: String, required: true },
         //product_order_type: { type: String }
       },
     ],
