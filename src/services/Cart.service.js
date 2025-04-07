@@ -2,8 +2,7 @@ const Cart = require("../models/Cart.model");
 const mongoose = require("mongoose");
 const Product = require("../models/Product.Model");
 
-const updateCartService = async ({ user_id, product_id, color_name, variant_name }) => {
-
+const updateCartService = async ({ user_id, product_id, color_name, variant_name, quantity }) => {
   const product = await Product.findOneWithDeleted({ _id: product_id });
   if (!product) {
     return { EC: 1, EM: "Sản phẩm không tồn tại", cart: null };
@@ -31,18 +30,32 @@ const updateCartService = async ({ user_id, product_id, color_name, variant_name
       p.color_name === color.color_name &&
       p.variant_name === variant.variant_size
   );
-  console.log(productIndex);
 
-  if (productIndex > -1) {
-    cart.products[productIndex].quantity += 1;
+  console.log(quantity);
+  if (quantity !== undefined) {
+    if (productIndex > -1) {
+      cart.products[productIndex].quantity += quantity;
+    } else {
+      cart.products.push({
+        product_id,
+        color_name,
+        variant_name,
+        quantity: quantity,
+      });
+    }
   } else {
-    cart.products.push({
-      product_id,
-      color_name,
-      variant_name,
-      quantity: 1,
-    });
+    if (productIndex > -1) {
+      cart.products[productIndex].quantity += 1;
+    } else {
+      cart.products.push({
+        product_id,
+        color_name,
+        variant_name,
+        quantity: 1,
+      });
+    }
   }
+ 
 
   await cart.save();
 

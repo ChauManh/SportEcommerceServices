@@ -10,13 +10,15 @@ const cartController = {
   // Thêm sản phẩm vào giỏ hàng
   async addProductToCart(req, res) {
     const { userId } = req.user;
-    const { product_id, color_name, variant_name } = req.body;
+    const { product_id, color_name, variant_name, quantity } = req.body;
+    console.log(req.body);
     try {
       const result = await updateCartService({
         user_id: userId,
         product_id,
         color_name,
         variant_name,
+        quantity,
       });
       return result.EC === 0
         ? res.success(result.cart, result.EM)
@@ -43,13 +45,14 @@ const cartController = {
   async removeProductFromCart(req, res) {
     const { userId } = req.user;
     const { productId } = req.params;
-    const { color_name, variant_name } = req.body;
+    const { color_name, variant_name} = req.body;
     try {
       const result = await removeFromCartService({ 
         user_id: userId,
         product_id: productId,
         color_name,
-        variant_name, });
+        variant_name, 
+      });
       return result.EC === 0
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);

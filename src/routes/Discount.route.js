@@ -235,7 +235,7 @@ router.delete(
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get(
+router.post(
   "/get-for-order",
   verifyToken,
   discountController.getForOrder

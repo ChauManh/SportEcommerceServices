@@ -19,21 +19,34 @@ const createOrder = async (newOrder, user_id) => {
     }
     let delivery_fee = 50000;
     let order_total_price = 0;
+    const productMap = new Map();
 
-    const orderProducts = await Promise.all(
-      products.map(async (item) => {
-        const product = await Product.findById(item.product_id);
-        if (!product)
-          return { EC: 2, EM: `Product not found: ${item.product_id}` };
+    for (const item of products) {
+      if (!productMap.has(item.product_id)) {
+        productMap.set(item.product_id, []);
+      }
+      productMap.get(item.product_id).push(item);
+    }
 
+    const orderProducts = [];
+
+    for (const [productId, items] of productMap.entries()) {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return { EC: 2, EM: `Product not found: ${productId}` };
+      }
+
+      let totalQuantity = 0;
+
+      for (const item of items) {
         const color = product.colors.find(c => c.color_name === item.color_name);
         if (!color) {
-          return { EC: 3, EM: `Color not found: ${item.color_id}` };
+          return { EC: 3, EM: `Color not found: ${item.color_name}` };
         }
 
         const variant = color.variants.find(v => v.variant_size === item.variant_name);
         if (!variant) {
-          return { EC: 4, EM: `Variant not found: ${item.variant_id}` };
+          return { EC: 4, EM: `Variant not found: ${item.variant_name}` };
         }
 
         if (variant.variant_countInStock < item.quantity) {
@@ -41,12 +54,10 @@ const createOrder = async (newOrder, user_id) => {
         }
 
         variant.variant_countInStock -= item.quantity;
-        product.product_countInStock -= item.quantity;
-        product.product_selled += item.quantity;
+        totalQuantity += item.quantity;
 
-        await product.save();
-
-        return {
+        orderProducts.push({
+          EC: 0,
           product_id: product._id,
           quantity: item.quantity,
           color: item.color_name,
@@ -54,9 +65,13 @@ const createOrder = async (newOrder, user_id) => {
           product_order_type: item.product_order_type || "default",
           product_price: product.product_price * item.quantity,
           category_id: product.category_id,
-        };
-      })
-    );
+        });
+      }
+
+      product.product_selled += totalQuantity;
+      product.product_countInStock -= totalQuantity;
+      await product.save();
+    }
 
     if (orderProducts.some((item) => item.EC)) {
       return orderProducts.find((item) => item.EC);

@@ -78,9 +78,10 @@ const deleteDiscount = async(req, res) =>{
 const getForOrder = async(req, res) =>{
     try {
         const {userId} = req.user;
-        const {products} = req.body;
-
-        const result = await discountService.getForOrder(userId, products);
+        const {productIds} = req.body;
+        console.log(productIds);
+        console.log(req.body);
+        const result = await discountService.getForOrder(userId, productIds);
 
         result.EC === 0
             ? res.success(result.data, result.EM)

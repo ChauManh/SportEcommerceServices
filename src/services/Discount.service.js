@@ -106,8 +106,9 @@ const deleteDiscount = async (discountId) => {
 
 const getForOrder = async (userId, productIds) => {
     try {
+        // console.log(userId);
+        console.log(productIds);
         const user = await User.findById(userId);
-        console.log(user.discounts);
         if (!user) return { EC: 2, EM: "User not found" };
 
         const products = await Product.find({ _id: { $in: productIds } }).populate("product_category");
