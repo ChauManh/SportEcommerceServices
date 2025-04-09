@@ -113,7 +113,7 @@ router.post("/create", verifyToken, feedbackController.createFeedback);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.patch("/update/:id", feedbackController.updateFeedback);
+router.patch("/update/:id", verifyToken, identifyAdmin, feedbackController.updateFeedback);
 /**
  * @swagger
  * /feedback/{id}:
@@ -137,7 +137,7 @@ router.patch("/update/:id", feedbackController.updateFeedback);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.delete("/delete/:id", feedbackController.deleteFeedback);
+router.delete("/delete/:id", verifyToken, identifyAdmin, feedbackController.deleteFeedback);
 /**
  * @swagger
  * /feedback/product/{productId}:
@@ -203,5 +203,5 @@ router.delete("/delete/:id", feedbackController.deleteFeedback);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-all/:productId", feedbackController.getAllFeedback);
+router.get("/get-all/:productId", verifyToken, identifyAdmin, feedbackController.getAllFeedback);
 module.exports = router;
