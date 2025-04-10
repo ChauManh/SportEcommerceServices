@@ -1,20 +1,6 @@
-const createPaymentService = require("../services/Payment.service");
-const verifyPayOSSignature = require("../middlewares/AuthMiddleWare");
 require("dotenv").config();
 
 const paymentController = {
-  // Thêm sản phẩm vào giỏ hàng
-  async createPayment(req, res) {
-    const { amount, description } = req.body;
-    try {
-      const result = await createPaymentService(amount, description);
-      return result.EC === 0
-        ? res.success(result.result, result.EM)
-        : res.error(result.EC, result.EM);
-    } catch (error) {
-      return res.InternalError(error.message);
-    }
-  },
 
   async handleWebhook(req, res) {
     const data = req.body;

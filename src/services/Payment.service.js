@@ -1,35 +1,31 @@
 const axios = require("axios");
-const crypto = require("crypto");
 const payOS = require("../config/PayOS");
-const generateSignature = require("../utils/RenerateSignature");
 require("dotenv").config();
 
-const createPaymentService = async (amount, description) => {
+const createPaymentService = async (
+  orderCode,
+  amount,
+  description,
+  products
+) => {
   const DOMAIN = process.env.DOMAIN;
-
+  const items = products.map((item) => ({
+    name: `${item.product_name} ${item.color} Size ${item.variant}`,
+    quantity: item.quantity,
+    price: item.product_price, // đơn giá
+  }));
   const body = {
-    orderCode: Number(String(Date.now()).slice(-6)),
-    amount: Number(amount),
+    orderCode,
+    amount,
     description,
+    items,
     returnUrl: `${DOMAIN}/checkout`,
     cancelUrl: `${DOMAIN}/checkout`,
   };
   console.log(body);
 
-  try {
-    const result = await payOS.createPaymentLink(body);
-    return {
-      EC: 0,
-      EM: "Tạo link thanh toán thành công",
-      result,
-    };
-  } catch (error) {
-    console.error("Lỗi tạo payment link:", error);
-    return {
-      EC: 1,
-      EM: error.message,
-    };
-  }
+  const result = await payOS.createPaymentLink(body);
+  return result;
 };
 
 module.exports = createPaymentService;
