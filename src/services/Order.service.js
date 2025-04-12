@@ -3,7 +3,7 @@ const Product = require("../models/Product.Model");
 const Discount = require("../models/Discount.Model");
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
-const createPaymentService = require("./Payment.service");
+const { createPaymentService } = require("./Payment.service");
 
 const createOrder = async (newOrder, user_id) => {
   try {
@@ -185,8 +185,16 @@ const createOrder = async (newOrder, user_id) => {
         orderCode,
         order_total_final,
         description,
-        orderProducts
+        orderProducts,
+        savedOrder._id.toString()
       );
+    }
+
+    if (!resultPayOS) { 
+      return {
+        EC: 2,
+        EM: "Failed to create payment link",
+      };
     }
 
     await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });

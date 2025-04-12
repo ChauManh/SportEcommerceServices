@@ -1,8 +1,6 @@
 const { rawListeners } = require("../models/Product.Model");
 const orderService = require("../services/Order.service");
 
-
-
 const createOrder = async (req, res) => {
   try {
     const { userId } = req.user;

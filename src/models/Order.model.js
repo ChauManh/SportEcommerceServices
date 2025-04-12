@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema(
     order_total_discount: {type: Number, required: true,},
     order_note: { type: String },
     is_feedback: { type: Boolean},
+    is_paid: { type: Boolean, default: false },
+    order_code: { type: Number },
     order_loyalty: {type: Number}
   },
   {
