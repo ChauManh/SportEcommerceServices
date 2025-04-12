@@ -128,7 +128,6 @@ const createOrder = async (newOrder, user_id) => {
       estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
     );
 
-    console.log(order_total_final * 0.0001);
     await User.updateOne(
       { _id: user_id },
       { $inc: { user_loyalty: order_total_final * 0.0001 } },
@@ -138,6 +137,7 @@ const createOrder = async (newOrder, user_id) => {
         },
       }
     );
+    const orderCode = Math.floor(Math.random() * 900000) + 100000; // Generate a random 6-digit order code
 
     const newOrderData = new Order({
       user_id,
@@ -153,16 +153,13 @@ const createOrder = async (newOrder, user_id) => {
       order_status: "Chờ xác nhận",
       estimated_delivery_date: estimatedDeliveryDate,
       is_feedback: false,
+      order_code: orderCode,
     });
 
     const savedOrder = await newOrderData.save();
     let resultPayOS = null;
     // tạo QR trước khi update cart
     if (order_payment_method == "paypal") {
-      const orderCode = Number.parseInt(
-        savedOrder._id.toString().slice(-6),
-        16
-      );
       const description = `Mã thanh toán #${orderCode}`;
       resultPayOS = await createPaymentService(
         orderCode,
@@ -173,15 +170,7 @@ const createOrder = async (newOrder, user_id) => {
       );
     }
 
-    if (!resultPayOS) { 
-      return {
-        EC: 2,
-        EM: "Failed to create payment link",
-      };
-    }
-
     await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
-    console.log(savedOrder);
     return {
       EC: 0,
       EM: "Order created successfully",
