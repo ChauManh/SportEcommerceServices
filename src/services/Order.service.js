@@ -69,7 +69,7 @@ const createOrder = async (newOrder, user_id) => {
           color: item.color_name,
           variant: item.variant_name,
           product_order_type: item.product_order_type || "default",
-          product_price: product.product_price * item.quantity,
+          product_price: variant.variant_price * item.quantity,
           category_id: product.category_id,
         });
       }
@@ -107,25 +107,8 @@ const createOrder = async (newOrder, user_id) => {
         }
 
         if (discount.discount_type === "product") {
-          let discountableTotal = 0;
-          orderProducts.forEach((item) => {
-            if (
-              discount.applicable_products.some((p) =>
-                p.equals(item.product_id)
-              ) ||
-              discount.applicable_categories.some((c) =>
-                c.equals(item.category_id)
-              )
-            ) {
-              discountableTotal += item.product_price;
-              discountUsed.push(discount);
-            }
-          });
-
-          if (discountableTotal > 0) {
-            totalDiscount +=
-              (discountableTotal * discount.discount_number) / 100;
-          }
+          totalDiscount = discount.discount_number /100  * order_total_price;
+          
         } else if (discount.discount_type === "shipping") {
           delivery_fee -= (delivery_fee * discount.discount_number) / 100;
           if (delivery_fee < 0) delivery_fee = 0;
@@ -445,20 +428,18 @@ const updateStatus = async (orderId, status) => {
     if (!validStatuses.includes(status)) {
       return { EC: 2, EM: "Invalid order status" };
     }
-
+    
     if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
       const products = order.products;
 
       const updateStockPromises = products.map(async (product) => {
         const productInfo = await Product.findById(product.product_id);
         if (!productInfo) return null;
-
-        const color = productInfo.colors.find((c) =>
-          c._id.equals(product.color)
-        );
+    
+        const color = productInfo.colors.find(c => c.color_name === product.color);
 
         const variantIndex = color.variants.findIndex((v) =>
-          v._id.equals(product.variant)
+          v.variant_size === product.variant
         );
 
         if (variantIndex === -1) return null;

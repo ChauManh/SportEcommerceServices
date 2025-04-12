@@ -65,7 +65,7 @@ const previewOrder = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { statusOrder } = req.body;
+    const statusOrder = req.body.status;
     console.log(req.body);
     if (!orderId || !statusOrder) {
       return res.error(400, "OrderId and status are required");

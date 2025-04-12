@@ -162,22 +162,28 @@ const getDetailsProduct = async (req, res) => {
 const getAllProduct = async (req, res) => {
   try {
     const {
-      search,
       category,
+      category_gender,
       category_sub,
       price_min,
       price_max,
       product_color,
+      product_brand,
     } = req.query;
+    console.log("Received query parameters:", req.query);
 
-    console.log("abc", req.query);
+    let genderFilter = category_gender
+      ? [category_gender]
+      : ['Nam', 'Nữ', 'Unisex'];
+    
     const filters = {
       category,
+      category_gender: genderFilter,
       category_sub,
       price_min,
       price_max,
       product_color,
-      search,
+      product_brand,
     };
 
     const result = await productService.getAllProduct(

@@ -8,6 +8,7 @@ const discountRouter = require("./Discount.route");
 const categoryRouter = require("./Category.route");
 const userRouter = require("./User.route");
 const paymentRouter = require("./Payment.route");
+const chatbotRouter = require("./Chatbot.route");
 
 
 function router(app) {
@@ -21,6 +22,7 @@ function router(app) {
   app.use("/category", categoryRouter);
   app.use("/user", userRouter);
   app.use("/payment", paymentRouter);
+  app.use("/chat", chatbotRouter);
   app.get("/", (req, res) => {
     res.send("Hello WTM Sport Ecommerce Service");
   });

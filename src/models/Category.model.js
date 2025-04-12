@@ -13,7 +13,6 @@ const categorySchema = new mongoose.Schema(
       required: true,
       trim: true,
       maxlength: 100, 
-      // unique: true 
     },
     category_parent_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,16 +20,8 @@ const categorySchema = new mongoose.Schema(
       default: null,
       index: true 
     },
-    //   type: String, 
-    //   unique: true, 
-    //   required: true, 
-    //   default: function() { return ""; } // Đảm bảo `slug` không bị lưu null
-    // },
     category_level: { type: Number, required: true, default: 1,},
-    // isActive: {
-    //   type: Boolean,
-    //   default: false,
-    // },
+    
   },
   {
     timestamps: true,
