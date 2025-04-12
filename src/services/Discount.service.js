@@ -124,11 +124,11 @@ const getForOrder = async (userId, productIds) => {
         if (discounts.length === 0) return { EC: 0, EM: "Discount not found", discounts: [] };
 
         const applicableDiscounts = discounts.filter(discount => {
-            const appliesToProduct = products.some(product =>
+            const appliesToProduct = products.every(product =>
                 discount.applicable_products.some(dpid => dpid.equals(product._id))
             );
 
-            const appliesToCategory = products.some(product =>
+            const appliesToCategory = products.every(product =>
                 discount.applicable_categories.some(dcid => dcid.equals(product.product_category._id))
             );
 
