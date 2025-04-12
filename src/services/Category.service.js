@@ -2,6 +2,7 @@ const Category = require('../models/Category.Model')
 
 const createCategory = async(categoryData) =>{
     try {
+        console.log(categoryData);
         const {category_gender, category_type, category_parent_id, category_level} = categoryData
         const existingCategory = await Category.findOne({category_type: category_type, category_gender: category_gender});
         if(existingCategory){

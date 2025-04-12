@@ -3,6 +3,7 @@ const Product = require("../models/Product.Model");
 const Discount = require("../models/Discount.Model");
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
+const createPaymentService = require("./Payment.service");
 
 const createOrder = async (newOrder, user_id) => {
   try {
@@ -39,12 +40,16 @@ const createOrder = async (newOrder, user_id) => {
       let totalQuantity = 0;
 
       for (const item of items) {
-        const color = product.colors.find(c => c.color_name === item.color_name);
+        const color = product.colors.find(
+          (c) => c.color_name === item.color_name
+        );
         if (!color) {
           return { EC: 3, EM: `Color not found: ${item.color_name}` };
         }
 
-        const variant = color.variants.find(v => v.variant_size === item.variant_name);
+        const variant = color.variants.find(
+          (v) => v.variant_size === item.variant_name
+        );
         if (!variant) {
           return { EC: 4, EM: `Variant not found: ${item.variant_name}` };
         }
@@ -59,6 +64,7 @@ const createOrder = async (newOrder, user_id) => {
         orderProducts.push({
           EC: 0,
           product_id: product._id,
+          product_name: product.product_title,
           quantity: item.quantity,
           color: item.color_name,
           variant: item.variant_name,
@@ -112,7 +118,7 @@ const createOrder = async (newOrder, user_id) => {
               )
             ) {
               discountableTotal += item.product_price;
-              discountUsed.push(discount)
+              discountUsed.push(discount);
             }
           });
 
@@ -128,9 +134,8 @@ const createOrder = async (newOrder, user_id) => {
 
       await Discount.updateMany(
         { _id: { $in: discount_ids } },
-        { $inc: { discount_amount: -1 } },
+        { $inc: { discount_amount: -1 } }
       );
-      
     }
 
     const order_total_final = order_total_price + delivery_fee - totalDiscount;
@@ -140,20 +145,15 @@ const createOrder = async (newOrder, user_id) => {
       estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
     );
 
-    console.log(order_total_final*0.0001)
+    console.log(order_total_final * 0.0001);
     await User.updateOne(
-      { _id: user_id},
-      {$inc: {user_loyalty: order_total_final*0.0001}},
+      { _id: user_id },
+      { $inc: { user_loyalty: order_total_final * 0.0001 } },
       {
         $pull: {
-          discounts: { $in: discountUsed }
-        }
+          discounts: { $in: discountUsed },
+        },
       }
-    )
-
-    await Cart.updateOne(
-      { user_id: user_id },
-      { $set: { products: [] } } 
     );
 
     const newOrderData = new Order({
@@ -171,14 +171,39 @@ const createOrder = async (newOrder, user_id) => {
       estimated_delivery_date: estimatedDeliveryDate,
       is_feedback: false,
     });
-    
+
     const savedOrder = await newOrderData.save();
-    return { EC: 0, EM: "Order created successfully", data: savedOrder, cart: [] };
+    let resultPayOS = null;
+    // tạo QR trước khi update cart
+    if (order_payment_method == "paypal") {
+      const orderCode = Number.parseInt(
+        savedOrder._id.toString().slice(-6),
+        16
+      );
+      const description = `Mã thanh toán #${orderCode}`;
+      resultPayOS = await createPaymentService(
+        orderCode,
+        order_total_final,
+        description,
+        orderProducts
+      );
+    }
+
+    await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
+    console.log(savedOrder);
+    return {
+      EC: 0,
+      EM: "Order created successfully",
+      data: {
+        ...savedOrder.toObject(),
+        resultPayOS,
+      },
+      cart: [],
+    };
   } catch (error) {
     return { EC: 5, EM: error.message };
   }
 };
-
 
 const getAllOrder = async (orderStatus) => {
   try {
@@ -280,12 +305,16 @@ const previewOrder = async (newOrder, userId) => {
         if (!product)
           return { EC: 2, EM: `Product not found: ${item.product_id}` };
 
-        const color = product.colors.find(c => c._id.toString() === item.color);
+        const color = product.colors.find(
+          (c) => c._id.toString() === item.color
+        );
         if (!color) {
           return { EC: 3, EM: `Color not found: ${item.color_id}` };
         }
 
-        const variant = color.variants.find(v => v._id.toString() === item.variant);
+        const variant = color.variants.find(
+          (v) => v._id.toString() === item.variant
+        );
         if (!variant) {
           return { EC: 4, EM: `Variant not found: ${item.variant_id}` };
         }
@@ -293,7 +322,6 @@ const previewOrder = async (newOrder, userId) => {
         if (variant.variant_countInStock < item.quantity) {
           return { EC: 5, EM: `Product ${item.product_id} is out of stock` };
         }
-
 
         return {
           product_id: product._id,
@@ -412,7 +440,7 @@ const updateStatus = async (orderId, status) => {
     
     if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
       const products = order.products;
-    
+
       const updateStockPromises = products.map(async (product) => {
         const productInfo = await Product.findById(product.product_id);
         if (!productInfo) return null;
@@ -422,19 +450,18 @@ const updateStatus = async (orderId, status) => {
         const variantIndex = color.variants.findIndex((v) =>
           v.variant_size === product.variant
         );
-    
+
         if (variantIndex === -1) return null;
-    
+
         color.variants[variantIndex].variant_countInStock += product.quantity;
-    
+
         productInfo.product_countInStock += product.quantity;
-    
+
         return productInfo.save();
       });
-    
+
       await Promise.all(updateStockPromises);
     }
-    
 
     const updateOrder = await Order.findByIdAndUpdate(
       orderId,

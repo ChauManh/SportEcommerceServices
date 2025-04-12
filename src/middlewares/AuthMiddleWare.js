@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { expressjwt: expressJwt } = require("express-jwt");
+const crypto = require("crypto");
 
 const verifyToken = expressJwt({
   secret: process.env.JWT_SECRET,

@@ -5,7 +5,7 @@ const categorySchema = new mongoose.Schema(
   {
     category_gender: {
       type: String,
-      enum: ["Male", "Female", "Unisex", null], 
+      enum: ["Nam", "Nữ", "Unisex", null], 
       default: null
     },
     category_type: {
@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema(
       required: true,
       trim: true,
       maxlength: 100, 
-      unique: true 
+      // unique: true 
     },
     category_parent_id: {
       type: mongoose.Schema.Types.ObjectId,

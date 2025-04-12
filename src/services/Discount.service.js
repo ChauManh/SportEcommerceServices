@@ -121,7 +121,7 @@ const getForOrder = async (userId, productIds) => {
             discount_start_day: { $lte: now },
             discount_end_day: { $gte: now },
         });
-        if (discounts.length === 0) return { EC: 4, EM: "Discount not found" };
+        if (discounts.length === 0) return { EC: 0, EM: "Discount not found", discounts: [] };
 
         const applicableDiscounts = discounts.filter(discount => {
             const appliesToProduct = products.some(product =>
