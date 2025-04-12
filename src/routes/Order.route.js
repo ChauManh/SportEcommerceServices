@@ -163,7 +163,6 @@ router.get("/preview", verifyToken, orderController.previewOrder);
 router.patch(
   "/update-status/:id",
   verifyToken,
-  identifyAdmin,
   orderController.updateStatus
 );
 

@@ -409,7 +409,7 @@ const updateStatus = async (orderId, status) => {
     if (!validStatuses.includes(status)) {
       return { EC: 2, EM: "Invalid order status" };
     }
-
+    
     if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
       const products = order.products;
     
@@ -417,10 +417,10 @@ const updateStatus = async (orderId, status) => {
         const productInfo = await Product.findById(product.product_id);
         if (!productInfo) return null;
     
-        const color = productInfo.colors.find(c => c._id.equals(product.color));
+        const color = productInfo.colors.find(c => c.color_name === product.color);
 
         const variantIndex = color.variants.findIndex((v) =>
-          v._id.equals(product.variant)
+          v.variant_size === product.variant
         );
     
         if (variantIndex === -1) return null;
