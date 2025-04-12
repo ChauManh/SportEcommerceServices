@@ -216,6 +216,7 @@ const deleteProduct = async (id) => {
 };
 
 const getAllProduct = async (filters) => {
+  console.log("filters", filters);
   try {
     let query = {};
 
@@ -223,10 +224,12 @@ const getAllProduct = async (filters) => {
     if (filters.category) {
       const category = await Category.findOne({
         category_type: filters.category,
+        category_gender: {$in: filters.category_gender},
       });
       if (category) {
         const subCategories = await Category.find({
           category_parent_id: category._id,
+          category_gender: {$in: filters.category_gender},
         });
 
         const categoryIds = [
@@ -243,10 +246,12 @@ const getAllProduct = async (filters) => {
     if (filters.category_sub) {
       const category = await Category.findOne({
         category_type: filters.category_sub,
+        category_gender: {$in: filters.category_gender},
       });
       if (category) {
         const subCategories = await Category.find({
           category_parent_id: category._id,
+          category_gender: {$in: filters.category_gender},
         });
 
         const categoryIds = [
@@ -274,9 +279,8 @@ const getAllProduct = async (filters) => {
       query["colors.color_name"] = filters.product_color;
     }
 
-    //  Tìm kiếm theo `product_title`
-    if (filters.search) {
-      query.product_title = { $regex: filters.search, $options: "i" };
+    if (filters.product_brand) {
+      query.product_brand = filters.product_brand;
     }
 
     // Truy vấn danh sách sản phẩm
