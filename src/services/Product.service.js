@@ -220,48 +220,72 @@ const getAllProduct = async (filters) => {
   try {
     let query = {};
 
-    // Tìm danh mục và tất cả danh mục con
-    if (filters.category) {
-      const category = await Category.findOne({
-        category_type: filters.category,
-        category_gender: {$in: filters.category_gender},
+    if (filters.category_gender?.length > 0 && !filters.category?.length) {
+      const categories = await Category.find({
+        category_gender: { $in: filters.category_gender },
       });
-      if (category) {
-        const subCategories = await Category.find({
-          category_parent_id: category._id,
-          category_gender: {$in: filters.category_gender},
-        });
-
-        const categoryIds = [
-          category._id,
-          ...subCategories.map((cat) => cat._id),
-        ];
-
-        query.product_category = { $in: categoryIds };
-      } else {
-        return { EC: 1, EM: "Danh mục không tồn tại", data: [] };
-      }
+    
+      const categoryIds = categories.map((cat) => cat._id);
+    
+      query.product_category = { $in: categoryIds };
     }
 
-    if (filters.category_sub) {
-      const category = await Category.findOne({
-        category_type: filters.category_sub,
-        category_gender: {$in: filters.category_gender},
-      });
-      if (category) {
-        const subCategories = await Category.find({
-          category_parent_id: category._id,
-          category_gender: {$in: filters.category_gender},
+    // Xử lý lọc theo danh mục cha (category)
+    if (filters.category?.length > 0) {
+      let categoryIds = [];
+
+      for (const categoryType of filters.category) {
+        const category = await Category.findOne({
+          category_type: categoryType,
+          category_gender: { $in: filters.category_gender },
         });
 
-        const categoryIds = [
-          category._id,
-          ...subCategories.map((cat) => cat._id),
-        ];
+        if (category) {
+          const subCategories = await Category.find({
+            category_parent_id: category._id,
+            category_gender: { $in: filters.category_gender },
+          });
 
-        query.product_category = { $in: categoryIds };
-      } else {
+          categoryIds.push(category._id, ...subCategories.map((cat) => cat._id));
+        }
+      }
+
+      if (categoryIds.length === 0) {
         return { EC: 1, EM: "Danh mục không tồn tại", data: [] };
+      }
+
+      query.product_category = { $in: categoryIds };
+    }
+
+    // Xử lý lọc theo danh mục con (category_sub)
+    if (filters.category_sub?.length > 0) {
+      let categorySubIds = [];
+
+      for (const categoryType of filters.category_sub) {
+        const category = await Category.findOne({
+          category_type: categoryType,
+          category_gender: { $in: filters.category_gender },
+        });
+
+        if (category) {
+          const subCategories = await Category.find({
+            category_parent_id: category._id,
+            category_gender: { $in: filters.category_gender },
+          });
+
+          categorySubIds.push(category._id, ...subCategories.map((cat) => cat._id));
+        }
+      }
+
+      if (categorySubIds.length === 0) {
+        return { EC: 1, EM: "Danh mục con không tồn tại", data: [] };
+      }
+
+      // Gộp với filter category nếu có
+      if (query.product_category) {
+        query.product_category.$in.push(...categorySubIds);
+      } else {
+        query.product_category = { $in: categorySubIds };
       }
     }
 
@@ -275,12 +299,13 @@ const getAllProduct = async (filters) => {
     }
 
     // Lọc theo màu sắc
-    if (filters.product_color) {
-      query["colors.color_name"] = filters.product_color;
+    if (filters.product_color?.length > 0) {
+      query["colors.color_name"] = { $in: filters.product_color };
     }
 
-    if (filters.product_brand) {
-      query.product_brand = filters.product_brand;
+    // Lọc theo thương hiệu
+    if (filters.product_brand?.length > 0) {
+      query.product_brand = { $in: filters.product_brand };
     }
 
     // Truy vấn danh sách sản phẩm
@@ -289,6 +314,7 @@ const getAllProduct = async (filters) => {
     // Đếm tổng số sản phẩm
     const totalProducts = await Product.countDocuments(query);
 
+    console.log("query", query);  
     return {
       EC: 0,
       EM: "Lấy danh sách sản phẩm thành công",
@@ -305,6 +331,7 @@ const getAllProduct = async (filters) => {
     };
   }
 };
+
 
 module.exports = {
   createProduct,
