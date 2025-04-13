@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const AuthController = require("../controllers/Auth.controller");
-const { verifyToken } = require("../middlewares/AuthMiddleWare");
 /**
  * @swagger
  * /auth/sign_in:
@@ -236,5 +235,7 @@ router.post("/verify_otp", AuthController.verifyOtp);
  *         description: Lỗi máy chủ
  */
 router.patch("/reset_password", AuthController.resetPassword);
+router.post("/refresh_token", AuthController.refreshToken);
+
 
 module.exports = router;

@@ -4,7 +4,8 @@ const {
   sentOTPService,
   verifyOTPService,
   resetPasswordService,
-  loginWithGoogleService
+  loginWithGoogleService,
+  refreshTokenService,
 } = require("../services/Auth.service");
 
 const authController = {
@@ -29,7 +30,7 @@ const authController = {
     try {
       const result = await loginService(user_name, password);
       return result.EC === 0
-        ? res.success({ accessToken: result.accessToken }, result.EM)
+        ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
       return res.InternalError(error.message);
@@ -42,7 +43,7 @@ const authController = {
     try {
       const result = await loginWithGoogleService(email, user_name, uid);
       return result.EC === 0
-       ? res.success({ accessToken: result.accessToken }, result.EM)
+       ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
       return res.InternalError(error.message);
@@ -80,6 +81,18 @@ const authController = {
       return result.EC === 0
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  },
+
+  async refreshToken(req, res) {
+    const { refreshToken } = req.body;
+    try {
+      const result = await refreshTokenService(refreshToken);
+      return result.EC === 0
+        ? res.success(result.result, result.EM)
+        : res.error(result.EC, result.EM, 401);
     } catch (error) {
       return res.InternalError(error.message);
     }

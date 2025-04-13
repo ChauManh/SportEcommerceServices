@@ -1,11 +1,13 @@
-require("dotenv").config();
 const User = require("../models/User.model");
-const { createJwtPayload } = require("../utils/JwtUtil");
+const {
+  createAccessToken,
+  createRefreshToken,
+  verifyRefreshToken,
+} = require("../utils/JwtUtil");
 const generateOTP = require("../utils/GenerateOTP");
 const redis = require("../config/Redis");
 const sendEmail = require("../config/Nodemailer");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 const createUserService = async ({ user_name, email, password }) => {
   // Check exists
@@ -53,16 +55,22 @@ const loginService = async (user_name, password) => {
     };
   }
 
-  const payload = createJwtPayload(user);
-
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
 
   return {
     EC: 0,
-    EM: "Logged in successfully",
-    accessToken,
+    EM: "Đăng nhập thành công",
+    result: {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        user_name: user.user_name,
+        email: user.email,
+        role: user.role,
+      },
+    },
   };
 };
 
@@ -88,16 +96,22 @@ const loginWithGoogleService = async (email, user_name, uidToPassword) => {
       };
     }
   }
-  const payload = createJwtPayload(user);
-
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
 
   return {
     EC: 0,
     EM: "Logged in successfully",
-    accessToken,
+    result: {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        user_name: user.user_name,
+        email: user.email,
+        role: user.role,
+      },
+    },
   };
 };
 
@@ -180,6 +194,32 @@ const resetPasswordService = async (email, newPassword) => {
   };
 };
 
+const refreshTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    return {
+      EC: 1,
+      EM: "Refresh token is required",
+    };
+  }
+  const user = verifyRefreshToken(refreshToken);
+  console.log(user);
+  if (!user) {
+    return {
+      EC: 2,
+      EM: "Lỗi xác thực refresh token",
+    };
+  }
+  const newAccessToken = createAccessToken(user);
+
+  return {
+    EC: 0,
+    EM: "Làm mới token thành công",
+    result: {
+      accessToken: newAccessToken,
+    },
+  };
+};
+
 module.exports = {
   createUserService,
   loginService,
@@ -187,4 +227,5 @@ module.exports = {
   resetPasswordService,
   verifyOTPService,
   loginWithGoogleService,
+  refreshTokenService,
 };
