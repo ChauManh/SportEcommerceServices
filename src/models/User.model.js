@@ -36,6 +36,13 @@ const userSchema = new mongoose.Schema(
       default: "Nam",
     },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    searchhistory: [
+      {
+        message: { type: String },
+        filters: { type: String }, 
+        searchedAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true, collection: "User" }
 );

@@ -337,4 +337,10 @@ router.patch("/save-discount", verifyToken, UserController.saveDiscount);
  *         description: Lỗi máy chủ
  */
 router.get("/get-discount", verifyToken, UserController.getDiscountUser);
+
+router.delete(
+  "/delete-search-history/:searchedAt",
+  verifyToken,
+  UserController.deleteSearchHistory
+);
 module.exports = router;

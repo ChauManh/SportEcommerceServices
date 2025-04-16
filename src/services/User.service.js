@@ -175,6 +175,27 @@ const deleteAddressService = async (userId, index) => {
   }
 };
 
+const deleteSearchHistoryService = async (userId, index) => {
+  try {
+    if (!userId) {
+      return { EC: 2, EM: "Bạn cần đăng nhập để xoá lịch sử tìm kiếm." };
+    }
+
+    const user = await User.findById(userId);
+
+    if (index < 0 || index >= user.searchhistory.length) {
+      return { EC: 2, EM: "Chỉ số không phù hợp." };
+    }
+
+    user.searchhistory.splice(index, 1);
+    await user.save();
+
+    return { EC: 0, EM: "Xóa tìm kiếm thành công." };
+  } catch (error) {
+    return { EC: 3, EM: error.message };
+  }
+}
+
 module.exports = {
   getAllUsersService,
   changePasswordService,
@@ -185,4 +206,5 @@ module.exports = {
   saveDiscount,
   getDiscountUser,
   deleteAddressService,
+  deleteSearchHistoryService,
 };

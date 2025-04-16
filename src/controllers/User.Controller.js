@@ -96,12 +96,10 @@ const userController = {
 
       const result = await addAddressService(userId, newAddress);
       return result.EC === 0
-        ? res
-            .status(200)
-            .json({ EC: 0, EM: result.EM, addresses: result.addresses })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -117,12 +115,10 @@ const userController = {
 
       const result = await updateAddressService(userId, index, updateData);
       return result.EC === 0
-        ? res
-            .status(200)
-            .json({ EC: 0, EM: result.EM, addresses: result.addresses })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -136,10 +132,10 @@ const userController = {
 
       const result = await deleteAddressService(userId, index);
       return result.EC === 0
-        ? res.status(200).json({ EC: 0, EM: result.EM })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -171,7 +167,23 @@ const userController = {
     } catch (error) {
       return res.InternalError(error.message);
     }
-  }
+  },
+
+  async deleteSearchHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+      const index = req.params.index;
+  
+      const response = await deleteSearchHistoryService(userId, index);
+      return response.EC === 0
+        ? res.success({ EC: 0, EM: response.EM })
+        : res.error({ EC: response.EC, EM: response.EM });
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
+  },
+
 };
 
 
