@@ -13,7 +13,7 @@ const createFeedback = async (req, res) => {
 
       const { product_id, variant_id, order_id, content, rating } = req.body;
 
-      if (!product_id || !order_id || !user_id || !content || !rating) {
+      if (!product_id || !order_id || !content || !rating || !color || !variant) {
         return res.error(3, "Information is required");
       }
 
@@ -33,7 +33,8 @@ const createFeedback = async (req, res) => {
 
       const feedbackData = {
         product_id,
-        variant_id,
+        color,
+        variant,
         order_id,
         user_id: userId,
         content,

@@ -9,7 +9,7 @@ const categoryRouter = require("./Category.route");
 const userRouter = require("./User.route");
 const paymentRouter = require("./Payment.route");
 const chatbotRouter = require("./Chatbot.route");
-
+const notificationRouter = require("./Notification.route");
 
 function router(app) {
   app.use("/auth", authRouter);
@@ -23,6 +23,7 @@ function router(app) {
   app.use("/user", userRouter);
   app.use("/payment", paymentRouter);
   app.use("/chat", chatbotRouter);
+  app.use("/notification", notificationRouter);
   app.get("/", (req, res) => {
     res.send("Hello WTM Sport Ecommerce Service");
   });

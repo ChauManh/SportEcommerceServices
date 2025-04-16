@@ -4,7 +4,8 @@ const MongooseDelete = require("mongoose-delete");
 const feedbackSchema = new mongoose.Schema(
   {
     product_id: {type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true,},
-    variant_id: { type: String, required: false },
+    color: {type: String, require: true},
+    variant: { type: String, required: true },
     order_id: {type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true,},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true,},
     content: { type: String, required: true },
