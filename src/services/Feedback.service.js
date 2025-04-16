@@ -3,9 +3,9 @@ const Product = require('../models/Product.Model');
 
 const createFeedback = async(newFeedback) =>{
     try {
-        const { order_id, product_id, user_id } = newFeedback;
+        const { order_id, product_id, user_id, variant, color } = newFeedback;
 
-        const existingFeedback = await Feedback.findOne({ order_id, product_id, user_id });
+        const existingFeedback = await Feedback.findOne({ order_id, product_id, user_id, variant, color });
 
         if (existingFeedback) {
             return {
@@ -65,7 +65,7 @@ const getAllFeedback = async(productId) =>{
             return { EC: 1, EM: "Product không tồn tại", data: null };
         }
 
-        const list_feedback = await Feedback.find({product_id: productId})
+        const list_feedback = await Feedback.find({product_id: productId}) .populate('user_id', 'user_name avt_img');;
         return { EC: 0, EM: "Get feedback thành công", data: list_feedback};
     } catch (error) {
         throw error

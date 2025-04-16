@@ -9,9 +9,10 @@ const createFeedback = async (req, res) => {
         // return res.status(400).json({ success: false, message: err.message });
         return res.error(-1, err.message);
       }
+      console.log("req", req);
       const { userId } = req.user;
 
-      const { product_id, variant_id, order_id, content, rating } = req.body;
+      const { product_id, variant_id, order_id, content, rating, color, variant } = req.body;
 
       if (!product_id || !order_id || !content || !rating || !color || !variant) {
         return res.error(3, "Information is required");

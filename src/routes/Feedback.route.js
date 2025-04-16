@@ -203,5 +203,5 @@ router.delete("/delete/:id", verifyToken, identifyAdmin, feedbackController.dele
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-all/:productId", verifyToken, identifyAdmin, feedbackController.getAllFeedback);
+router.get("/get-all/:productId", verifyToken, feedbackController.getAllFeedback);
 module.exports = router;
