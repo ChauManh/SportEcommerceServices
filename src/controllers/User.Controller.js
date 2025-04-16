@@ -8,8 +8,10 @@ const {
   saveDiscount,
   getDiscountUser,
   deleteAddressService,
+  deleteSearchHistoryService,
 } = require("../services/User.service");
 const { uploadAvtUser } = require("../utils/UploadUtil");
+const ChatHistory = require("../models/ChatHistory.model");
 
 const userController = {
   async getUser(req, res) {
@@ -96,12 +98,10 @@ const userController = {
 
       const result = await addAddressService(userId, newAddress);
       return result.EC === 0
-        ? res
-            .status(200)
-            .json({ EC: 0, EM: result.EM, addresses: result.addresses })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -117,12 +117,10 @@ const userController = {
 
       const result = await updateAddressService(userId, index, updateData);
       return result.EC === 0
-        ? res
-            .status(200)
-            .json({ EC: 0, EM: result.EM, addresses: result.addresses })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -136,10 +134,10 @@ const userController = {
 
       const result = await deleteAddressService(userId, index);
       return result.EC === 0
-        ? res.status(200).json({ EC: 0, EM: result.EM })
-        : res.status(400).json({ EC: result.EC, EM: result.EM });
+        ? res.success({ EC: 0, EM: result.EM })
+        : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.status(500).json({ EC: -1, EM: "Internal server error" });
+      return res.InternalError(error.message);
     }
   },
 
@@ -171,8 +169,55 @@ const userController = {
     } catch (error) {
       return res.InternalError(error.message);
     }
+  },
+
+  async deleteSearchHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+      const index = req.params.index;
+  
+      const response = await deleteSearchHistoryService(userId, index);
+      return response.EC === 0
+        ? res.success({ EC: 0, EM: response.EM })
+        : res.error({ EC: response.EC, EM: response.EM });
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
+  },
+
+  async getChatHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+  
+      const response = await ChatHistory.findOne({ userId });
+      if (!response) {
+        return res.error(1, "Không có đoạn chat của user này.");
+      }
+      return res.success(response.messages, "Lấy lịch sử chat thành công.");
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
+  },
+
+  async deleteChatHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+  
+      const response = await ChatHistory.findOneAndDelete({ userId });
+      if (!response) {
+        return res.error(1, "Không có đoạn chat của user này.");
+      }
+      return res.success(null, "Xóa đoạn chat thành công.");
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
   }
 };
+
+
 
 
 module.exports = userController;

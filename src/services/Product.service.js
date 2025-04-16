@@ -231,78 +231,97 @@ const getAllProduct = async (filters) => {
     }
 
     // Xử lý lọc theo danh mục cha (category)
-    if (filters.category?.length > 0) {
+    if (filters.category) {
+      let categoryArray = [];
+    
+      if (Array.isArray(filters.category)) {
+        categoryArray = filters.category;
+      } else if (typeof filters.category === 'string') {
+        categoryArray = [filters.category];
+      }
+    
       let categoryIds = [];
-
-      for (const categoryType of filters.category) {
+    
+      for (const categoryType of categoryArray) {
         const category = await Category.findOne({
           category_type: categoryType,
           category_gender: { $in: filters.category_gender },
         });
-
+    
         if (category) {
           const subCategories = await Category.find({
             category_parent_id: category._id,
             category_gender: { $in: filters.category_gender },
           });
-
+    
           categoryIds.push(category._id, ...subCategories.map((cat) => cat._id));
         }
       }
-
+    
       if (categoryIds.length === 0) {
         return { EC: 1, EM: "Danh mục không tồn tại", data: [] };
       }
-
+    
       query.product_category = { $in: categoryIds };
     }
-
+    
     // Xử lý lọc theo danh mục con (category_sub)
-    if (filters.category_sub?.length > 0) {
+    if (filters.category_sub) {
+      let subArray = [];
+  
+      if (Array.isArray(filters.category_sub)) {
+        subArray = filters.category_sub;
+      } else if (typeof filters.category_sub === 'string') {
+        subArray = [filters.category_sub];
+      }
+  
       let categorySubIds = [];
-
-      for (const categoryType of filters.category_sub) {
+  
+      for (const categoryType of subArray) {
         const category = await Category.findOne({
           category_type: categoryType,
           category_gender: { $in: filters.category_gender },
         });
-
+  
         if (category) {
           const subCategories = await Category.find({
             category_parent_id: category._id,
             category_gender: { $in: filters.category_gender },
           });
-
+  
           categorySubIds.push(category._id, ...subCategories.map((cat) => cat._id));
         }
       }
-
+  
       if (categorySubIds.length === 0) {
         return { EC: 1, EM: "Danh mục con không tồn tại", data: [] };
       }
-
-      // Gộp với filter category nếu có
-      if (query.product_category) {
+  
+      if (query.product_category?.$in) {
         query.product_category.$in.push(...categorySubIds);
       } else {
         query.product_category = { $in: categorySubIds };
       }
     }
-
+  
     // Lọc theo khoảng giá
     if (filters.price_min || filters.price_max) {
       query.product_price = {};
-      if (filters.price_min)
-        query.product_price.$gte = Number(filters.price_min);
-      if (filters.price_max)
-        query.product_price.$lte = Number(filters.price_max);
+      if (filters.price_min) query.product_price.$gte = Number(filters.price_min);
+      if (filters.price_max) query.product_price.$lte = Number(filters.price_max);
     }
-
+  
     // Lọc theo màu sắc
-    if (filters.product_color?.length > 0) {
-      query["colors.color_name"] = { $in: filters.product_color };
+    if (filters.product_color) {
+      const colorArray = Array.isArray(filters.product_color)
+        ? filters.product_color
+        : [filters.product_color];
+  
+      if (colorArray.length > 0) {
+        query["colors.color_name"] = { $in: colorArray };
+      }
     }
-
+  
     // Lọc theo thương hiệu
     if (filters.product_brand?.length > 0) {
       query.product_brand = { $in: filters.product_brand };
