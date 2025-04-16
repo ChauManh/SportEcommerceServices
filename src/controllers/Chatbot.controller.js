@@ -6,8 +6,9 @@ dotenv.config();
 
 const ChatbotController = {
     async chatWithBot(req, res) {
-        const { message } = req.body;
-        const result = await ChatbotService.chatWithBotService(message, req.user);
+        const { message, history } = req.body;
+        console.log("history: ", history);
+        const result = await ChatbotService.chatWithBotService(message, req.user, history);
         result.EC === 0
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)

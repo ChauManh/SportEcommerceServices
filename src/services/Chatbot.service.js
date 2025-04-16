@@ -4,55 +4,86 @@ dotenv.config();
 const ChatHistory = require('../models/ChatHistory.model');
 const Category = require('../models/Category.Model');
 
-const chatWithBotService = async (message, user) => {
-    try {
-        console.log("User: ", user);
-        if (!user) {
-            throw new Error('Người dùng không hợp lệ');
-        }
-        let chat = await ChatHistory.findOne({ userId: user.userId });
-        if (!chat) {
-            chat = new ChatHistory({
-                userId: user.userId,
-                messages: [
-                    {
-                        role: 'system',
-                        content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM, bạn đang phục vụ khách hàng có tên là ${user.user_name}.`,
-                    }
-                ]
-            });
-        }
-
-        // Thêm câu hỏi mới của user
-        chat.messages.push({ role: 'user', content: message });
-
-        // Gọi OpenAI API
-        const response = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
+const chatWithBotService = async (message, user, history = []) => {
+  try {
+    let messages = [];
+    console.log("user: ", user);
+    if (user) {
+      let chat = await ChatHistory.findOne({ userId: user.userId });
+      if (!chat) {
+        chat = new ChatHistory({
+          userId: user.userId,
+          messages: [
             {
-                model: 'gpt-3.5-turbo',
-                messages: chat.messages
+              role: 'system',
+              content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM, bạn đang phục vụ khách hàng có tên là ${user.user_name}.`,
             },
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+          ],
+        });
+      }
 
-        const reply = response.data.choices[0].message.content;
+      // Thêm câu hỏi mới
+      chat.messages.push({ role: 'user', content: message });
 
-        // Lưu câu trả lời vào DB
-        chat.messages.push({ role: 'assistant', content: reply });
-        chat.updatedAt = new Date();
-        await chat.save();
-        return { EC: 0, EM: "Reply success", reply };
+      // Gọi OpenAI API
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-3.5-turbo',
+          messages: chat.messages,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-    } catch (error) {
-        console.error(error.response?.data || error.message);
+      const reply = response.data.choices[0].message.content;
+
+      // Lưu vào DB
+      chat.messages.push({ role: 'assistant', content: reply });
+      chat.updatedAt = new Date();
+      await chat.save();
+
+      return { EC: 0, EM: "Reply success", data: reply };
+    } else {
+      messages = [
+        {
+          role: 'system',
+          content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM.`,
+        },
+        ...history,
+        {
+          role: 'user',
+          content: message,
+        }
+      ];
+
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-3.5-turbo',
+          messages: messages,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      const reply = response.data.choices[0].message.content;
+      return { EC: 0, EM: "Reply success", data: reply };
     }
-}
+  } catch (error) {
+    console.error("Chatbot error:", error.message);
+    return { EC: 2, EM: error.message };
+  }
+};
+
 
 const SearchProductService = async (message) => {
     try {

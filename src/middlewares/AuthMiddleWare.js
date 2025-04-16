@@ -22,10 +22,8 @@ const identifyAdmin = (req, res, next) => {
 
 const optionalVerifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
-
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded; // nếu verify thành công, gán user vào req
