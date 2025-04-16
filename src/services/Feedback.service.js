@@ -3,7 +3,7 @@ const Product = require('../models/Product.Model');
 
 const createFeedback = async(newFeedback) =>{
     try {
-        const { order_id, product_id, user_id } = newFeedback;
+        const { order_id, product_id, user_id, rating } = newFeedback;
 
         const existingFeedback = await Feedback.findOne({ order_id, product_id, user_id });
 
@@ -16,6 +16,16 @@ const createFeedback = async(newFeedback) =>{
         }
         const feedback = new Feedback(newFeedback);
         await feedback.save();
+        
+        const allFeedbacks = await Feedback.find({ product_id });
+        const totalRating = allFeedbacks.reduce((sum, fb) => sum + fb.rating, 0);
+        const avgRating = totalRating / allFeedbacks.length;
+    
+        // Cập nhật product_rate
+        await Product.findByIdAndUpdate(product_id, {
+          $set: { product_rate: avgRating.toFixed(1) }
+        });
+
         return {
             EC: 0,
             EM: "Create feedback successfully",
