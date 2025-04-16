@@ -8,8 +8,10 @@ const {
   saveDiscount,
   getDiscountUser,
   deleteAddressService,
+  deleteSearchHistoryService,
 } = require("../services/User.service");
 const { uploadAvtUser } = require("../utils/UploadUtil");
+const ChatHistory = require("../models/ChatHistory.model");
 
 const userController = {
   async getUser(req, res) {
@@ -184,7 +186,38 @@ const userController = {
     }
   },
 
+  async getChatHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+  
+      const response = await ChatHistory.findOne({ userId });
+      if (!response) {
+        return res.error(1, "Không có đoạn chat của user này.");
+      }
+      return res.success(response.messages, "Lấy lịch sử chat thành công.");
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
+  },
+
+  async deleteChatHistory(req, res) {
+    try {
+      const userId = req.user.userId;
+  
+      const response = await ChatHistory.findOneAndDelete({ userId });
+      if (!response) {
+        return res.error(1, "Không có đoạn chat của user này.");
+      }
+      return res.success(null, "Xóa đoạn chat thành công.");
+    } catch (error) {
+      console.error(error);
+      return res.InternalError(error.message);
+    }
+  }
 };
+
+
 
 
 module.exports = userController;
