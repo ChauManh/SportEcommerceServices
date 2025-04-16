@@ -33,7 +33,8 @@ const createFeedback = async (req, res) => {
 
       const feedbackData = {
         product_id,
-        variant_id,
+        color,
+        variant,
         order_id,
         user_id: userId,
         content,
