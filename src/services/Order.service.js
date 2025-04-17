@@ -3,7 +3,10 @@ const Product = require("../models/Product.Model");
 const Discount = require("../models/Discount.Model");
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
-const { createPaymentService } = require("./Payment.service");
+const {
+  createPaymentService,
+  checkPaymentIsCancelService,
+} = require("./Payment.service");
 
 const createOrder = async (newOrder, user_id) => {
   try {
@@ -107,8 +110,7 @@ const createOrder = async (newOrder, user_id) => {
         }
 
         if (discount.discount_type === "product") {
-          totalDiscount = discount.discount_number /100  * order_total_price;
-          
+          totalDiscount = (discount.discount_number / 100) * order_total_price;
         } else if (discount.discount_type === "shipping") {
           delivery_fee -= (delivery_fee * discount.discount_number) / 100;
           if (delivery_fee < 0) delivery_fee = 0;
@@ -159,18 +161,25 @@ const createOrder = async (newOrder, user_id) => {
     const savedOrder = await newOrderData.save();
     let resultPayOS = null;
     // tạo QR trước khi update cart
-    if (order_payment_method == "paypal") {
-      const description = `Mã thanh toán #${orderCode}`;
-      resultPayOS = await createPaymentService(
+    if (order_payment_method == "Paypal") {
+      const description = `Thanh toán đơn #${orderCode}`;
+      result = await createPaymentService(
         orderCode,
         order_total_final,
         description,
         orderProducts,
         savedOrder._id.toString()
       );
+      if (result.EC === 0) {
+        resultPayOS = result.result;
+      } else {
+        return result;
+      }
+    }
+    if (user_id) {
+      await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
     }
 
-    await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
     return {
       EC: 0,
       EM: "Order created successfully",
@@ -194,7 +203,7 @@ const getAllOrder = async (orderStatus) => {
         "Chờ xác nhận",
         "Đang chuẩn bị hàng",
         "Đang giao",
-        "Giao hàng thành công",
+        "Hoàn thành",
         "Hoàn hàng",
         "Hủy hàng",
       ];
@@ -236,7 +245,7 @@ const getOrderByUser = async (userId, orderStatus) => {
         "Chờ xác nhận",
         "Đang chuẩn bị hàng",
         "Đang giao",
-        "Giao hàng thành công",
+        "Hoàn thành",
         "Hoàn hàng",
         "Hủy hàng",
       ];
@@ -398,18 +407,40 @@ const previewOrder = async (newOrder, userId) => {
   }
 };
 
-const updateStatus = async (orderId, status) => {
+const updateStatus = async (
+  orderId,
+  status,
+  currentUserId,
+  currentUserRole
+) => {
   try {
     const order = await Order.findById(orderId);
     if (!order) {
       return { EC: 1, EM: "Order doesn't exist" };
+    }
+    const isOwner = order.user_id.toString() === currentUserId;
+    const isAdmin = currentUserRole === "admin";
+
+    if (!isAdmin) {
+      if (
+        !(
+          isOwner &&
+          order.order_status === "Chờ xác nhận" &&
+          status === "Hủy hàng"
+        )
+      ) {
+        return {
+          EC: 403,
+          EM: "Bạn không có quyền cập nhật trạng thái đơn hàng",
+        };
+      }
     }
 
     const validStatuses = [
       "Chờ xác nhận",
       "Đang chuẩn bị hàng",
       "Đang giao",
-      "Giao hàng thành công",
+      "Hoàn thành",
       "Hoàn hàng",
       "Hủy hàng",
     ];
@@ -417,18 +448,21 @@ const updateStatus = async (orderId, status) => {
     if (!validStatuses.includes(status)) {
       return { EC: 2, EM: "Invalid order status" };
     }
-    
+
     if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
+      console.log("Updating stock for order:", orderId);
       const products = order.products;
 
       const updateStockPromises = products.map(async (product) => {
         const productInfo = await Product.findById(product.product_id);
         if (!productInfo) return null;
-    
-        const color = productInfo.colors.find(c => c.color_name === product.color);
 
-        const variantIndex = color.variants.findIndex((v) =>
-          v.variant_size === product.variant
+        const color = productInfo.colors.find(
+          (c) => c.color_name === product.color
+        );
+
+        const variantIndex = color.variants.findIndex(
+          (v) => v.variant_size === product.variant
         );
 
         if (variantIndex === -1) return null;
@@ -443,11 +477,19 @@ const updateStatus = async (orderId, status) => {
       await Promise.all(updateStockPromises);
     }
 
-    const updateOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { order_status: status },
-      { new: true, runValidators: true }
-    );
+    const updateFields = {
+      order_status: status,
+    };
+
+    if (status === "Hoàn thành") {
+      updateFields.is_paid = true;
+      updateFields.received_date = new Date();
+    }
+
+    const updateOrder = await Order.findByIdAndUpdate(orderId, updateFields, {
+      new: true,
+      runValidators: true,
+    });
 
     return {
       EC: 0,
@@ -477,6 +519,99 @@ const getDetailOrder = async (orderId) => {
   }
 };
 
+const handleCancelPaymentService = async (
+  orderCode,
+  currentUserId,
+  currentUserRole
+) => {
+  if (!orderCode) {
+    return { EC: 1, EM: "Order code is required" };
+  }
+  if (!checkPaymentIsCancelService(orderCode)) {
+    return { EC: 2, EM: "Invalid Information" };
+  } else {
+    const order = await Order.findOne({ order_code: orderCode });
+    if (!order) {
+      return { EC: 3, EM: "Order doesn't exist" };
+    }
+    if (order.order_payment_method === "Paypal" && order.is_paid === false) {
+      const result = await updateStatus(
+        order._id,
+        "Hủy hàng",
+        currentUserId,
+        currentUserRole
+      );
+      if (result.EC === 0) {
+        return { EC: 0, EM: "Order cancelled successfully", data: result.data };
+      } else {
+        return { EC: 4, EM: result.EM };
+      }
+    }
+  }
+};
+
+const requireRefundService = async (orderId, userId) => {
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return { EC: 2, EM: "Đơn hàng không tồn tại" };
+  }
+  if (order.user_id.toString() !== userId) {
+    return { EC: 3, EM: "Bạn không có quyền hoàn tiền đơn hàng này" };
+  }
+  if (order.is_require_refund === true) {
+    return { EC: 4, EM: "Đơn hàng đang được yêu cầu hoàn tiền" };
+  }
+  if (order.is_paid === false) {
+    return {
+      EC: 5,
+      EM: "Đơn hàng chưa được thanh toán",
+    };
+  }
+  if (!order.received_date) {
+    return {
+      EC: 6,
+      EM: "Đơn hàng chưa xác nhận đã nhận hàng",
+    };
+  }
+  const now = new Date();
+  const receivedDate = new Date(order.received_date);
+  const diffInDays = Math.ceil((now - receivedDate) / (1000 * 60 * 60 * 24));
+  if (diffInDays > 3) {
+    return {
+      EC: 7,
+      EM: "Đã qua thời hạn yêu cầu hoàn tiền (3 ngày)",
+    };
+  }
+  order.is_require_refund = true;
+  await order.save();
+  return {
+    EC: 0,
+    EM: "Gửi yêu cầu hoàn tiền thành công",
+    data: order,
+  };
+};
+
+// const deleteOrderService = async (orderCode) => {
+//   // try {
+//   //   const order = await Order.findOne({ order_code: orderCode });
+//   //   if (!order) {
+//   //     return { EC: 1, EM: "Order doesn't exist" };
+//   //   }
+//   //   if (order.order_payment_method === "Cod") {
+//   //       if(order.order_status === "Chờ xác nhận") {
+//   //         // Xóa đơn hàng nếu trạng thái là "Chờ xác nhận"
+//   //         await order.remove();
+//   //       } else {
+//   //         // Nếu trạng thái không phải là "Chờ xác nhận", chỉ cập nhật trạng thái
+//   //         order.order_status = "Hủy hàng";
+//   //         await order.save();
+//   //       }
+//   //   }
+//   // } catch (error) {
+//   //   return { EC: 99, EM: error.message };
+//   // }
+// };
+
 module.exports = {
   createOrder,
   getAllOrder,
@@ -484,4 +619,7 @@ module.exports = {
   previewOrder,
   updateStatus,
   getDetailOrder,
+  handleCancelPaymentService,
+  requireRefundService,
+  // deleteOrderService,
 };

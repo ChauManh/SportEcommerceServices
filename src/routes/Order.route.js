@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/Order.controller");
-const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
+const {
+  verifyToken,
+  identifyAdmin,
+  optionalVerifyToken,
+} = require("../middlewares/AuthMiddleWare");
 
 /**
  * @swagger
@@ -48,7 +52,7 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post("/create", verifyToken, orderController.createOrder);
+router.post("/create", optionalVerifyToken, orderController.createOrder);
 /**
  * @swagger
  * /order/get-all:
@@ -103,7 +107,6 @@ router.get("/get-detail/:id", verifyToken, orderController.getDetailOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-
 router.get("/get-by-user", verifyToken, orderController.getOrderByUser);
 /**
  * @swagger
@@ -160,10 +163,12 @@ router.get("/preview", verifyToken, orderController.previewOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
+router.patch("/update-status/:id", verifyToken, orderController.updateStatus);
 router.patch(
-  "/update-status/:id",
-  verifyToken,
-  orderController.updateStatus
+  "/handle-cancel-payment/:orderCode",
+  optionalVerifyToken,
+  orderController.handleCancelPayment
 );
-
+// router.delete(":orderCode", verifyToken, identifyAdmin, orderController.deleteOrder);
+router.patch("require-refund/:id", verifyToken, orderController.requireRefund);
 module.exports = router;

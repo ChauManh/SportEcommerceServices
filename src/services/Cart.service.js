@@ -31,7 +31,6 @@ const updateCartService = async ({ user_id, product_id, color_name, variant_name
       p.variant_name === variant.variant_size
   );
 
-  console.log(quantity);
   if (quantity !== undefined) {
     if (productIndex > -1) {
       cart.products[productIndex].quantity += quantity;
@@ -78,7 +77,6 @@ const getCartService = async (user_id) => {
 // Xóa sản phẩm khỏi giỏ hàng
 const removeFromCartService = async ({ user_id, product_id, color_name, variant_name }) => {
   const product = await Product.findOneWithDeleted({ _id: product_id });
-  console.log(product_id, color_name, variant_name);
   if (!product) {
     return { EC: 1, EM: "Sản phẩm không tồn tại", cart: null };
   }
@@ -94,7 +92,6 @@ const removeFromCartService = async ({ user_id, product_id, color_name, variant_
   }
 
   let cart = await Cart.findOne({ user_id });
-  console.log(cart);
   if (!cart) {
     return { EC: 2, EM: "Cart not found" };
   }

@@ -8,7 +8,6 @@ const paymentController = {
     const { signature } = req.body;
     try {
       const response = await handleWebhookService(data, signature);
-      console.log("response", response);
       response.EC === 0
         ? res.success(data, response.EM)
         : res.error(response.EC, response.EM, 403);
@@ -19,7 +18,7 @@ const paymentController = {
   },
 
   async getInfoOfPayment(req, res) {
-    const { orderCode } = req.body;
+    const { orderCode } = req.params;
     try {
       const response = await getInfoOfPaymentService(orderCode);
       response.EC === 0

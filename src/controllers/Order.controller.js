@@ -3,7 +3,7 @@ const orderService = require("../services/Order.service");
 
 const createOrder = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req?.user?.userId;
     const newOrder = { ...req.body };
     // console.log(newOrder);
     const response = await orderService.createOrder(newOrder, userId);
@@ -66,12 +66,17 @@ const updateStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
     const statusOrder = req.body.status;
-    console.log(req.body);
+    const { userId, role } = req.user;
     if (!orderId || !statusOrder) {
       return res.error(400, "OrderId and status are required");
     }
 
-    const response = await orderService.updateStatus(orderId, statusOrder);
+    const response = await orderService.updateStatus(
+      orderId,
+      statusOrder,
+      userId,
+      role
+    );
     response.EC === 0
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
@@ -108,6 +113,53 @@ const getDetailOrder = async (req, res) => {
   }
 };
 
+const handleCancelPayment = async (req, res) => {
+  try {
+    const orderCode = req.params.orderCode;
+    const { userId, role } = req.user;
+
+    const response = await orderService.handleCancelPaymentService(orderCode, userId, role);
+    console.log("response", response);
+    response.EC === 0
+      ? res.success(response.data, response.EM)
+      : res.error(response.EC, response.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
+
+const requireRefund = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { userId } = req.user;
+
+    const response = await orderService.requireRefundService(orderId, userId);
+    response.EC === 0
+      ? res.success(response.data, response.EM)
+      : res.error(response.EC, response.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
+
+// const deleteOrder = async (req, res) => {
+//   try {
+//     const { orderCode } = req.params;
+//     const { userId } = req.user;
+
+//     if (!orderId) {
+//       return res.error(400, "OrderId is required");
+//     }
+
+//     const response = await orderService.deleteOrderService(orderCode);
+//     response.EC === 0
+//       ? res.success(response.data, response.EM)
+//       : res.error(response.EC, response.EM);
+//   } catch (error) {
+//     return res.InternalError(error.message);
+//   }
+// }
+
 module.exports = {
   createOrder,
   getAllOrder,
@@ -115,4 +167,7 @@ module.exports = {
   previewOrder,
   updateStatus,
   getDetailOrder,
+  handleCancelPayment,
+  requireRefund
+  // deleteOrder
 };

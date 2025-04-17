@@ -13,10 +13,8 @@ const identifyAdmin = (req, res, next) => {
   if (req.user?.role === "admin") {
     next();
   } else {
-    return res.status(403).json({
-      EC: 3,
-      EM: "Forbidden! Admin access required",
-    });
+    // chuyển hướng qua trang đăng nhập user
+    res.error(1, "Bạn không có quyền truy cập vào trang này", 403);
   }
 };
 

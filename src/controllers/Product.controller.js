@@ -39,9 +39,6 @@ const {
 
 const createProduct = async (req, res) => {
   try {
-    console.log("Received body:", req.body);
-    console.log("Received files:", req.files);
-
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
     if (!uploadResult.success) {
       //return res.status(400).json({ message: "Upload error", error: uploadResult.error });
@@ -67,8 +64,6 @@ const createProduct = async (req, res) => {
       // return res.status(400).json({ message: error.message });
       return res.error(1, error.message);
     }
-   
-    console.log("Processed product data before saving:", productData);
 
     const result = await productService.createProduct(productData);
     //return res.status(200).json(response);
@@ -117,19 +112,14 @@ const updateProduct = async (req, res) => {
     } catch (error) {
       return res.error(1, error.message);
     }
-    
-
-    console.log(
-      "Processed product data before updating:",
-      productData.colors
-    );
 
     const result = await productService.updateProduct(productId, productData);
     result.EC === 0
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);z
+    return res.InternalError(error.message);
+    z;
   }
 };
 
@@ -170,12 +160,11 @@ const getAllProduct = async (req, res) => {
       product_color,
       product_brand,
     } = req.query;
-    console.log("Received query parameters:", req.query);
 
     let genderFilter = category_gender
       ? [category_gender]
-      : ['Nam', 'Nữ', 'Unisex'];
-    
+      : ["Nam", "Nữ", "Unisex"];
+
     const filters = {
       category,
       category_gender: genderFilter,
@@ -186,9 +175,7 @@ const getAllProduct = async (req, res) => {
       product_brand,
     };
 
-    const result = await productService.getAllProduct(
-      filters || null
-    );
+    const result = await productService.getAllProduct(filters || null);
     result.EC === 0
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
