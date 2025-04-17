@@ -34,7 +34,6 @@
 
 // module.exports = upload;
 
-
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
@@ -44,13 +43,26 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const isVideo = file.mimetype.startsWith("video/");
-    const folder = file.fieldname === "avatar" ? "avatars" : isVideo ? "videos" : "products";
+    const folder =
+      file.fieldname === "avatar" ? "avatars" : isVideo ? "videos" : "products";
 
     return {
       folder,
       resource_type: isVideo ? "video" : "image", // rất quan trọng cho video
       public_id: Date.now() + "-" + file.originalname.replace(/\s+/g, "_"),
       // Không ép định dạng, để giữ nguyên gốc
+      ...(isVideo
+        ? {} // Không áp dụng transformation cho video
+        : {
+            transformation: [
+              {
+                width: 1000, // Resize ảnh nếu vượt quá
+                crop: "limit",
+                quality: "auto",
+                fetch_format: "auto",
+              },
+            ],
+          }),
     };
   },
 });

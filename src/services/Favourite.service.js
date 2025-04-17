@@ -47,8 +47,6 @@ const getFavouriteService = async (user_id) => {
     return { EC: 0, EM: "Favourite list is empty", favourites: [] };
   }
 
-  console.log("favourite.products", favourite.products);
-
   // Nếu danh sách sản phẩm rỗng, trả về mảng rỗng thay vì truy cập thuộc tính không tồn tại
   if (!favourite.products || favourite.products.length === 0) {
     return { EC: 0, EM: "Favourite list is empty", favourites: [] };

@@ -59,7 +59,6 @@ const updateUserService = async (userId, dataUpdate) => {
 
     // Cập nhật thông tin
     Object.assign(user, dataUpdate);
-    console.log(dataUpdate);
     await user.save();
 
     return { EC: 0, EM: "Update User Information Successfully!", user };
@@ -93,7 +92,6 @@ const addAddressService = async (userId, addressData) => {
 const updateAddressService = async (userId, index, updateData) => {
   try {
     const user = await User.findById(userId);
-    console.log(updateData);
 
     if (index < 0 || index >= user.addresses.length) {
       return { EC: 2, EM: "Address not found" };

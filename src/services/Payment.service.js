@@ -25,7 +25,18 @@ const createPaymentService = async (
   };
 
   const result = await payOS.createPaymentLink(body);
-  return result;
+  if (!result) {
+    return {
+      EC: 1,
+      EM: "Tạo thông tin thanh toán không thành công",
+    };
+  } else {
+    return {
+      EC: 0,
+      EM: "Tạo thông tin thanh toán thành công",
+      result,
+    };
+  }
 };
 
 const handleWebhookService = async (data, signature) => {
@@ -76,7 +87,10 @@ const getInfoOfPaymentService = async (orderCode) => {
 };
 
 const deletePaymentService = async (orderCode) => {
-  const result = await payOS.cancelPaymentLink(orderCode, "Lý do xóa là người dùng không thực hiện thanh toán hoặc hủy");
+  const result = await payOS.cancelPaymentLink(
+    orderCode,
+    "Người dùng không thực hiện thanh toán hoặc hủy"
+  );
   if (!result) {
     return {
       EC: 1,
@@ -89,11 +103,18 @@ const deletePaymentService = async (orderCode) => {
       data: result,
     };
   }
-}
+};
+
+const checkPaymentIsCancelService = async (orderCode) => {
+  const result = await payOS.getPaymentLinkInformation(orderCode);
+  if (!result) return false; 
+  if (result.status === "CANCELLED") return true;
+};
 
 module.exports = {
   createPaymentService,
   handleWebhookService,
   getInfoOfPaymentService,
-  deletePaymentService
+  deletePaymentService,
+  checkPaymentIsCancelService
 };

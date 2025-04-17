@@ -63,16 +63,14 @@ const userController = {
 
       const { userId } = req.user;
       let dataUpdate  = req.body;
-      console.log("dataUpdate 111", dataUpdate);
       // // Gửi form data nên là string, convert qua JSON
       if (typeof dataUpdate === "string") {
         dataUpdate = JSON.parse(dataUpdate);
       }
 
       // Nếu có file avatar, thêm vào dataUpdate
-      if (uploadResult.success) {
-        const avatarFile = req.files.req.files[0].path;
-        dataUpdate.avt_img = avatarFile.path; // Lưu đường dẫn avatar
+      if (uploadResult.success && uploadResult.avatar) {
+        dataUpdate.avt_img = uploadResult.avatar; // Đây là đường dẫn avatar file
       }
 
       const updateResult = await updateUserService(userId, dataUpdate);

@@ -11,7 +11,6 @@ const cartController = {
   async addProductToCart(req, res) {
     const { userId } = req.user;
     const { product_id, color_name, variant_name, quantity } = req.body;
-    console.log(req.body);
     try {
       const result = await updateCartService({
         user_id: userId,

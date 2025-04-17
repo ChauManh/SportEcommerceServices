@@ -5,7 +5,7 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
 
 router.post("/payos-webhook", PaymentController.handleWebhook);
 router.get(
-  "/info-of-payment",
+  "/info-of-payment/:orderCode",
   verifyToken,
   identifyAdmin,
   PaymentController.getInfoOfPayment
