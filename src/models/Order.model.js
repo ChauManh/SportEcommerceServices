@@ -38,6 +38,7 @@ const orderSchema = new mongoose.Schema(
       enum: [
         "Chờ xác nhận",
         "Đang chuẩn bị hàng",
+        "Yêu cầu hoàn",
         "Đang giao",
         "Hoàn thành",
         "Hoàn hàng",
@@ -59,7 +60,6 @@ const orderSchema = new mongoose.Schema(
     order_note: { type: String },
     is_feedback: { type: Boolean },
     is_paid: { type: Boolean, default: false },
-    is_require_refund: { type: Boolean, default: false },
     received_date: { type: Date },
     order_code: { type: Number },
     order_loyalty: { type: Number },

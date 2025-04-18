@@ -170,5 +170,4 @@ router.patch(
   orderController.handleCancelPayment
 );
 // router.delete(":orderCode", verifyToken, identifyAdmin, orderController.deleteOrder);
-router.patch("require-refund/:id", verifyToken, orderController.requireRefund);
 module.exports = router;

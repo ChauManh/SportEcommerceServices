@@ -128,20 +128,6 @@ const handleCancelPayment = async (req, res) => {
   }
 };
 
-const requireRefund = async (req, res) => {
-  try {
-    const orderId = req.params.id;
-    const { userId } = req.user;
-
-    const response = await orderService.requireRefundService(orderId, userId);
-    response.EC === 0
-      ? res.success(response.data, response.EM)
-      : res.error(response.EC, response.EM);
-  } catch (error) {
-    return res.InternalError(error.message);
-  }
-};
-
 // const deleteOrder = async (req, res) => {
 //   try {
 //     const { orderCode } = req.params;
@@ -168,6 +154,5 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPayment,
-  requireRefund
   // deleteOrder
 };

@@ -420,30 +420,89 @@ const updateStatus = async (
     }
     const isOwner = order.user_id.toString() === currentUserId;
     const isAdmin = currentUserRole === "admin";
-
-    if (!isAdmin) {
-      if (
-        !(
-          isOwner &&
-          order.order_status === "Chờ xác nhận" &&
-          status === "Hủy hàng"
-        )
-      ) {
-        return {
-          EC: 403,
-          EM: "Bạn không có quyền cập nhật trạng thái đơn hàng",
-        };
-      }
-    }
+    const currentStatus = order.order_status;
 
     const validStatuses = [
       "Chờ xác nhận",
       "Đang chuẩn bị hàng",
       "Đang giao",
       "Hoàn thành",
-      "Hoàn hàng",
       "Hủy hàng",
+      "Yêu cầu hoàn",
+      "Hoàn hàng",
     ];
+
+    // Kiểm tra quyền cập nhật trạng thái
+    const canUpdateOrderStatus = ({
+      role,
+      currentStatus,
+      newStatus,
+      isOwner,
+    }) => {
+      const disallowedTargets = ["Yêu cầu hoàn", "Hoàn hàng", "Hủy hàng"];
+
+      if (isAdmin) {
+        if (currentStatus === "Hoàn thành") return false;
+        if (["Hủy hàng", "Hoàn hàng"].includes(currentStatus)) return false;
+
+        if (
+          ["Chờ xác nhận", "Đang chuẩn bị hàng", "Đang giao"].includes(
+            currentStatus
+          )
+        ) {
+          return !disallowedTargets.includes(newStatus);
+        }
+
+        if (
+          currentStatus === "Yêu cầu hoàn" &&
+          ["Hoàn hàng", "Hoàn thành"].includes(newStatus)
+        ) {
+          return true;
+        }
+
+        return false;
+      }
+
+      if (
+        isOwner &&
+        currentStatus === "Chờ xác nhận" &&
+        newStatus === "Hủy hàng"
+      ) {
+        return true;
+      }
+
+      if (
+        isOwner &&
+        currentStatus === "Hoàn thành" &&
+        newStatus === "Yêu cầu hoàn"
+      ) {
+        return true;
+      }
+
+      if (
+        isOwner &&
+        currentStatus === "Yêu cầu hoàn" &&
+        newStatus === "Hoàn thành"
+      ) {
+        return true;
+      }
+
+      return false;
+    };
+
+    if (
+      !canUpdateOrderStatus({
+        role: currentUserRole,
+        currentStatus,
+        newStatus: status,
+        isOwner,
+      })
+    ) {
+      return {
+        EC: 403,
+        EM: "Không thể cập nhật, hãy kiểm tra lại trạng thái",
+      };
+    }
 
     if (!validStatuses.includes(status)) {
       return { EC: 2, EM: "Invalid order status" };
@@ -481,7 +540,7 @@ const updateStatus = async (
       order_status: status,
     };
 
-    if (status === "Hoàn thành") {
+    if (isAdmin && status === "Hoàn thành") {
       updateFields.is_paid = true;
       updateFields.received_date = new Date();
     }
@@ -493,7 +552,7 @@ const updateStatus = async (
 
     return {
       EC: 0,
-      EM: "Update order status successfully",
+      EM: "Cập nhật trạng thái đơn hàng thành công",
       data: updateOrder,
     };
   } catch (error) {
@@ -550,47 +609,6 @@ const handleCancelPaymentService = async (
   }
 };
 
-const requireRefundService = async (orderId, userId) => {
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return { EC: 2, EM: "Đơn hàng không tồn tại" };
-  }
-  if (order.user_id.toString() !== userId) {
-    return { EC: 3, EM: "Bạn không có quyền hoàn tiền đơn hàng này" };
-  }
-  if (order.is_require_refund === true) {
-    return { EC: 4, EM: "Đơn hàng đang được yêu cầu hoàn tiền" };
-  }
-  if (order.is_paid === false) {
-    return {
-      EC: 5,
-      EM: "Đơn hàng chưa được thanh toán",
-    };
-  }
-  if (!order.received_date) {
-    return {
-      EC: 6,
-      EM: "Đơn hàng chưa xác nhận đã nhận hàng",
-    };
-  }
-  const now = new Date();
-  const receivedDate = new Date(order.received_date);
-  const diffInDays = Math.ceil((now - receivedDate) / (1000 * 60 * 60 * 24));
-  if (diffInDays > 3) {
-    return {
-      EC: 7,
-      EM: "Đã qua thời hạn yêu cầu hoàn tiền (3 ngày)",
-    };
-  }
-  order.is_require_refund = true;
-  await order.save();
-  return {
-    EC: 0,
-    EM: "Gửi yêu cầu hoàn tiền thành công",
-    data: order,
-  };
-};
-
 // const deleteOrderService = async (orderCode) => {
 //   // try {
 //   //   const order = await Order.findOne({ order_code: orderCode });
@@ -620,6 +638,5 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPaymentService,
-  requireRefundService,
   // deleteOrderService,
 };
