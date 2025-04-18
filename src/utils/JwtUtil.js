@@ -5,6 +5,7 @@ const createAccessToken = (user) => {
   const payload = {
     userId: user?._id || user.userId,
     user_name: user.user_name,
+    full_name: user.full_name,
     email: user.email,
     role: user.role,
   };

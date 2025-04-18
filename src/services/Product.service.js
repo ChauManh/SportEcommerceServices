@@ -16,36 +16,17 @@ const createProduct = async (newProduct) => {
   } = newProduct;
 
   try {
-    const checkProductTitle = await Product.findOne({ product_title });
-    // Check if product title already exists
-    if (checkProductTitle !== null) {
-      return {
-        EC: 1,
-        EM: "Product already exists",
-      };
-    }
+    // const checkProductTitle = await Product.findOne({ product_title });
+    // // Check if product title already exists
+    // if (checkProductTitle !== null) {
+    //   return {
+    //     EC: 1,
+    //     EM: "Product already exists",
+    //   };
+    // }
 
     let product_price = 0;
     let product_countInStock = 0;
-
-    // let parsedColors = JSON.stringify(colors);
-    // console.log("parese", typeof parsedColors)
-    // console.log("colors", typeof colors);
-
-    // let parsedColors = JSON.parse(colors);
-
-    // let parsedVariants = [];
-    // if (colors.length !== 0) {
-    //   parsedColors = colors.map((color) => ({
-    //     ...color,
-    //     color_name: color.color_name.trim(),
-    //     variants: color.variants.map((variant) => ({
-    //       ...variant,
-    //       variant_size: variant.variant_size,
-    //       variant_price: Number(variant.variant_price),
-    //       variant_countInStock: Number(variant.variant_countInStock),
-    //     })),
-    //   }));
 
     const allPrices = colors.flatMap((color) =>
       color.variants.map((variant) => Number(variant.variant_price))
@@ -329,11 +310,9 @@ const getAllProduct = async (filters) => {
 
     // Truy vấn danh sách sản phẩm
     const products = await Product.find(query).populate("product_category");
-
     // Đếm tổng số sản phẩm
     const totalProducts = await Product.countDocuments(query);
 
-    console.log("query", query);  
     return {
       EC: 0,
       EM: "Lấy danh sách sản phẩm thành công",
