@@ -16,7 +16,7 @@ const chatWithBotService = async (message, user, history = []) => {
           messages: [
             {
               role: 'system',
-              content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM, bạn đang phục vụ khách hàng có tên là ${user.user_name}.`,
+              content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM, bạn đang phục vụ khách hàng có tên là ${user.full_name}.`,
             },
           ],
         });
@@ -29,7 +29,7 @@ const chatWithBotService = async (message, user, history = []) => {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4',
           messages: chat.messages,
         },
         {
@@ -64,7 +64,7 @@ const chatWithBotService = async (message, user, history = []) => {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4',
           messages: messages,
         },
         {
@@ -96,12 +96,12 @@ const SearchProductService = async (message) => {
         const response = await axios.post(
             'https://api.openai.com/v1/chat/completions',
             {
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4',
                 messages: [
                     {
                         role: 'system',
                         content: `Dựa vào thông tin message, hãy tạo string như sau:
-                            {"category": string (phải nằm trong danh sách: [${category_name.join(', ')}]; và lấy category_type) "category_gender": string (phải nằm trong danh sách: [Nam, Nữ, Unisex], nếu không có thì để trống) "category_sub": string (nếu có)(phải nằm trong danh sách: [${category_sub.join(', ')}]; và lấy category_type) "price_min": number (nếu có - không có thì bằng 0) "price_max": number (nếu có - không có thì bằng 0) "product_color": string (nếu có) "product_brand": string (nếu có)}
+                            {"category": string (phải nằm trong danh sách: [${category_name.join(', ')}]; và lấy category_type) "category_gender": string (phải nằm trong danh sách: [Nam, Nữ, Unisex], nếu không có thì để trống) "category_sub": string (nếu có)(phải nằm trong danh sách: [${category_sub.join(', ')}]; và lấy category_type) "price_min": number (nếu có - không có thì không gửi) "price_max": number (nếu có - không có thì không gửi) "product_color": string (nếu có - viết hoa chữ đầu) "product_brand - viết hoa chữ đầu": string (nếu có)}
                             Chỉ trả về string,`,
                     },
                     { role: 'user', content: message }
@@ -119,7 +119,7 @@ const SearchProductService = async (message) => {
         return { EC: 0, EM: "Reply success", data: filters };
 
     } catch (error) {
-        console.error(error.response?.data || error.message);
+      return { EC: 2, EM: error.message, data: null};
     }
 }
 module.exports = {
