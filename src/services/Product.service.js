@@ -1,5 +1,6 @@
 const Product = require("../models/Product.Model"); // Import model
 const Category = require("../models/Category.Model");
+const { createNotificationForAll } = require("../services/Notification.service")
 // Hàm tạo sản phẩm mới
 const createProduct = async (newProduct) => {
   const {
@@ -16,15 +17,6 @@ const createProduct = async (newProduct) => {
   } = newProduct;
 
   try {
-    // const checkProductTitle = await Product.findOne({ product_title });
-    // // Check if product title already exists
-    // if (checkProductTitle !== null) {
-    //   return {
-    //     EC: 1,
-    //     EM: "Product already exists",
-    //   };
-    // }
-
     let product_price = 0;
     let product_countInStock = 0;
 
@@ -44,7 +36,6 @@ const createProduct = async (newProduct) => {
       );
     }, 0);
 
-    // Create new product
     const newProductData = {
       product_title,
       product_category,

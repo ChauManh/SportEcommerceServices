@@ -10,7 +10,9 @@ const notificationSchema = new mongoose.Schema(
     notify_type: { type: String, enum: ['Khuyến mãi', 'Tình trạng đơn hàng', 'Tài khoản', 'Sản phẩm'], required: true },
     notify_title: { type: String, required: true },
     notify_desc: { type: String, required: true },
-    isRead: { type: Boolean, default: false }
+    isRead: { type: Boolean, default: false },
+    img: { type: String, required: false, default: null },
+    redirect_url: { type: String, required: false, default: null }
   },
   {
     timestamps: true,
