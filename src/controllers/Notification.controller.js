@@ -1,75 +1,90 @@
-const notificationService = require('../services/Notification.service')
+const notificationService = require("../services/Notification.service");
 
-const createNotification = async(req, res) =>{
-    try {
-        const newNotification = req.body;
+const createNotificationForAll = async (req, res) => {
+  try {
+    const notificationData = req.body;
 
-        const result =  await notificationService.createNotification(newNotification);
-        result.EC === 0
-            ? res.success(result.data, result.EM)
-            : res.error(result.EC, result.EM);
-    } catch (error) {
-        return res.InternalError(error.message);
-    }
-}
+    const result = await notificationService.createNotificationForAll(
+      notificationData
+    );
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 
-const readNotification = async(req, res) =>{
-    try {
-        const notificationId = req.params.id;
+const readNotification = async (req, res) => {
+  try {
+    const notificationId = req.params.id;
 
-        const result = await notificationService.readNotification(notificationId);
+    const result = await notificationService.readNotification(notificationId);
 
-        result.EC === 0
-            ? res.success(result.data, result.EM)
-            : res.error(result.EC, result.EM);
-    } catch (error) {
-        return res.InternalError(error.message)
-    }
-}
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 
-const getNotification = async(req, res) => {
-    try {
-        const notificationId = req.params.id;
+const getNotification = async (req, res) => {
+  const notificationId = req.params.id;
+  try {
+    const result = await notificationService.getNotification(notificationId);
 
-        const result = await notificationService.getNotification(notificationId);
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 
-        result.EC === 0
-            ? res.success(result.data, result.EM)
-            : res.error(result.EC, result.EM);
-    } catch (error) {
-        return res.InternalError(error.message)
-    }
-}
+const getUserNotifications = async (req, res) => {
+  const { userId } = req.user;
+  try {
+    const result = await notificationService.getUserNotifications(userId);
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 
-const getAllNotification = async(req, res) => {
-    try {
-        const result = await notificationService.getAllNotification();
+const getAllNotification = async (req, res) => {
+  try {
+    const result = await notificationService.getAllNotification();
 
-        result.EC === 0
-            ? res.success(result.data, result.EM)
-            : res.error(result.EC, result.EM);
-    } catch (error) {
-        return res.InternalError(error.message)
-    }
-}
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 
-const deleteNotification = async(req, res) => {
-    try {
-        const notificationId = req.params.id;
+const deleteNotification = async (req, res) => {
+  try {
+    const currentUser = req.user;
+    const notificationId = req.params.id;
 
-        const result = await notificationService.deleteNotification(notificationId);
+    const result = await notificationService.deleteNotification(notificationId, currentUser);
 
-        result.EC === 0
-            ? res.success(result.data, result.EM)
-            : res.error(result.EC, result.EM);
-    } catch (error) {
-        return res.InternalError(error.message)
-    }
-}
+    result.EC === 0
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+};
 module.exports = {
-    createNotification,
-    readNotification,
-    getNotification,
-    getAllNotification,
-    deleteNotification
-}
+  createNotificationForAll,
+  readNotification,
+  getNotification,
+  getAllNotification,
+  deleteNotification,
+  getUserNotifications,
+};
