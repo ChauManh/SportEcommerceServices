@@ -1,5 +1,6 @@
-const Product = require("../models/Product.Model"); // Import model
-const Category = require("../models/Category.Model");
+
+const Product = require("../models/Product.model"); // Import model
+const Category = require("../models/Category.model");
 const { createNotificationForAll } = require("../services/Notification.service")
 // Hàm tạo sản phẩm mới
 const createProduct = async (newProduct) => {

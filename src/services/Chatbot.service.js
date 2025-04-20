@@ -2,7 +2,7 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config();
 const ChatHistory = require('../models/ChatHistory.model');
-const Category = require('../models/Category.Model');
+const Category = require('../models/Category.model');
 
 const chatWithBotService = async (message, user, history = []) => {
   try {

@@ -1,6 +1,6 @@
 const Feedback = require('../models/Feedback.model');
-const Order = require('../models/Order.Model');
-const Product = require('../models/Product.Model');
+const Order = require('../models/Order.model');
+const Product = require('../models/Product.model');
 
 const createFeedback = async(newFeedback) =>{
     try {

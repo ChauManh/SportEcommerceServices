@@ -1,4 +1,4 @@
-const Order = require("../models/Order.Model");
+const Order = require("../models/Order.model");
 const payOS = require("../config/PayOS");
 require("dotenv").config();
 
