@@ -1,4 +1,4 @@
-const Category = require('../models/Category.Model')
+const Category = require('../models/Category.model')
 
 const createCategory = async(categoryData) =>{
     try {

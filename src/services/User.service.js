@@ -1,4 +1,4 @@
-const Discount = require("../models/Discount.Model");
+const Discount = require("../models/Discount.model");
 const User = require("../models/User.model");
 const bcrypt = require("bcrypt");
 const getUserService = async (userId) => {

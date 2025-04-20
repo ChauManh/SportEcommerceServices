@@ -1,5 +1,5 @@
-const Discount = require('../models/Discount.Model');
-const Product = require('../models/Product.Model');
+const Discount = require('../models/Discount.model');
+const Product = require('../models/Product.model');
 const User = require('../models/User.model');
 
 const createDiscount = async (newDiscount) => {

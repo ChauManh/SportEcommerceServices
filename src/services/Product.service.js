@@ -1,5 +1,5 @@
-const Product = require("../models/Product.Model"); // Import model
-const Category = require("../models/Category.Model");
+const Product = require("../models/Product.model"); // Import model
+const Category = require("../models/Category.model");
 // Hàm tạo sản phẩm mới
 const createProduct = async (newProduct) => {
   const {

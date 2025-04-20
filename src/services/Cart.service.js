@@ -1,6 +1,6 @@
 const Cart = require("../models/Cart.model");
 const mongoose = require("mongoose");
-const Product = require("../models/Product.Model");
+const Product = require("../models/Product.model");
 
 const updateCartService = async ({ user_id, product_id, color_name, variant_name, quantity }) => {
   const product = await Product.findOneWithDeleted({ _id: product_id });

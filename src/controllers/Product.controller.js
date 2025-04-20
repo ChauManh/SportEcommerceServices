@@ -1,5 +1,5 @@
 const productService = require("../services/Product.service");
-const Product = require("../models/Product.Model");
+const Product = require("../models/Product.model");
 const {
   uploadImgProduct,
   processUploadedFiles,

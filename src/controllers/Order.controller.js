@@ -1,4 +1,4 @@
-const { rawListeners } = require("../models/Product.Model");
+const { rawListeners } = require("../models/Product.model");
 const orderService = require("../services/Order.service");
 
 const createOrder = async (req, res) => {
