@@ -632,14 +632,20 @@ const updateStatus = async (
   }
 };
 
-const getDetailOrder = async (orderId) => {
+const getDetailOrder = async (orderId, user) => {
   try {
     const order = await Order.findById(orderId).populate("products.product_id");
-
     if (!order) {
-      return { EC: 1, EM: "Order doesn't exist", data: null };
+      return { EC: 1, EM: "Đơn hàng không tồn tại", data: null };
     }
-
+    if (order.user_id) {
+      if (!order.user_id === user.userId || !user.role === "admin") {
+        return {
+          EC: 2,
+          EM: "Bạn không có quyền truy cập đơn hàng này",
+        };
+      }
+    }
     return {
       EC: 0,
       EM: "Get detail order successfully",
