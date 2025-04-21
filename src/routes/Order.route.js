@@ -92,7 +92,11 @@ router.get("/get-all", verifyToken, identifyAdmin, orderController.getAllOrder);
  *       500:
  *         description: Lỗi máy chủ
  */
-router.get("/get-detail/:id", verifyToken, orderController.getDetailOrder);
+router.get(
+  "/get-detail/:id",
+  optionalVerifyToken,
+  orderController.getDetailOrder
+);
 /**
  * @swagger
  * /order/get-by-user:

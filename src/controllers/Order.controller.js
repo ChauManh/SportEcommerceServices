@@ -88,26 +88,12 @@ const updateStatus = async (req, res) => {
 const getDetailOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { userId } = req.user;
+    const user = req?.user;
+    const response = await orderService.getDetailOrder(orderId, user);
 
-    if (!orderId) {
-      return res.error(400, "OrderId is required");
-    }
-
-    const response = await orderService.getDetailOrder(orderId);
-
-    if (response.EC !== 0) {
-      return res.error(response.EC, response.EM);
-    }
-
-    const order = response.data;
-
-    // Kiểm tra quyền truy cập: chỉ chủ đơn hàng hoặc admin mới được xem
-    if (order.user_id.toString() !== userId && req.user.role !== "admin") {
-      return res.error(403, "You are not allowed to view this order");
-    }
-
-    return res.success(order, "Get order detail successfully");
+    response.EC === 0
+    ? res.success(response.data, response.EM)
+    : res.error(response.EC, response.EM);
   } catch (error) {
     return res.InternalError(error.message);
   }
