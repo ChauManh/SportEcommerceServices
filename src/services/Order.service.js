@@ -17,6 +17,18 @@ const createOrder = async (newOrder, user_id) => {
       order_note,
       discount_ids,
     } = newOrder;
+    if(!shipping_address){
+      return{
+        EC: 2,
+        EM: "Địa chỉ là bắt buộc"
+      }
+    }
+    if(!order_payment_method){
+      return{
+        EC: 3, 
+        EM: "Phương thức thanh toán là bắt buộc"
+      }
+    }
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return { EC: 1, EM: "Products array is required" };
