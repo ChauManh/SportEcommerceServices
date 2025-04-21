@@ -64,6 +64,7 @@ const createProduct = async (newProduct) => {
     return {
       EC: 2,
       EM: error.message,
+      data: []
     };
   }
 };
@@ -76,6 +77,7 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 1,
         EM: "Product not found",
+        data: []
       };
     }
 
@@ -128,12 +130,14 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 2,
         EM: "Failed to update product",
+        data: []
       };
     }
   } catch (error) {
     return {
       EC: 3,
       EM: error.message,
+      data: []
     };
   }
 };
@@ -147,6 +151,7 @@ const getDetailsProduct = async (id) => {
       return {
         EC: 1,
         EM: "The product is not defined",
+        data: []
       };
     }
 
@@ -159,6 +164,7 @@ const getDetailsProduct = async (id) => {
     return {
       EC: 2,
       EM: error.message,
+      data: []
     };
   }
 };
@@ -171,6 +177,7 @@ const deleteProduct = async (id) => {
       return {
         EC: 1,
         EM: "The product does not exist",
+        data: []
       };
     }
 
@@ -179,11 +186,13 @@ const deleteProduct = async (id) => {
     return {
       EC: 0,
       EM: "Product deleted successfully",
+      data: []
     };
   } catch (error) {
     return {
       EC: 2,
       EM: error.message,
+      data: []
     };
   }
 };
@@ -317,6 +326,7 @@ const getAllProduct = async (filters) => {
     return {
       EC: 1,
       EM: "Lỗi khi lấy danh sách sản phẩm",
+      data: [],
       error: error.message,
     };
   }
