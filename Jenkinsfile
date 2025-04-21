@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') // ID trong Jenkins
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     IMAGE_NAME = 'rain494/my_backend_image'
   }
 
@@ -15,34 +15,27 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        script {
-          docker.build("${IMAGE_NAME}:latest")
-        }
+        sh "docker build -t ${IMAGE_NAME}:latest ."
       }
     }
 
     stage('Login to DockerHub') {
       steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-            echo "Logged in to DockerHub"
-          }
-        }
+        sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
       }
     }
 
     stage('Push Docker Image') {
       steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-            docker.image("${IMAGE_NAME}:latest").push()
-          }
-        }
+        sh "docker push ${IMAGE_NAME}:latest"
       }
     }
   }
 
   post {
+    always {
+      sh "docker logout"
+    }
     success {
       echo '🚀 CI/CD backend thành công!'
     }
