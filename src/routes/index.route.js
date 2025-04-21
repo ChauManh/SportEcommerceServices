@@ -25,7 +25,7 @@ function router(app) {
   app.use("/chat", chatbotRouter);
   app.use("/notification", notificationRouter);
   app.get("/", (req, res) => {
-    res.send("Hello WTM Sport Ecommerce Service!DAV ! an nhong ha se o");
+    res.send("Hello WTM Sport Ecommerce Service!DAV ! an nhong ha se o ôi! ");
   });
 }
 
