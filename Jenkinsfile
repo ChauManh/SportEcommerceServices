@@ -15,9 +15,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        script {
-          docker.build("${IMAGE_NAME}:latest")
-        }
+        sh "docker build -t ${IMAGE_NAME}:latest ."
       }
     }
 
@@ -41,6 +39,9 @@ pipeline {
   }
 
   post {
+    always {
+      sh "docker logout"
+    }
     success {
       echo '🚀 CI/CD backend thành công!'
     }
