@@ -46,6 +46,7 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Chờ xác nhận",
     },
+    is_require_refund: { type: Boolean, default: false },
     order_payment_method: {
       type: String,
       enum: ["Credit_card", "Paypal", "Cod", "Apple_pay", "Momo"],
