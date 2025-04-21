@@ -25,18 +25,14 @@ const discountSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
-
     applicable_categories: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
       },
     ],
-
     min_order_value: { type: Number, default: 0 },
-
     description: { type: String, default: "" },
-
     status: {
       type: String,
       enum: ["active", "expired", "upcoming"],
