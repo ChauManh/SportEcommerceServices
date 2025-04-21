@@ -22,35 +22,24 @@ pipeline {
     }
 
     stage('Login to DockerHub') {
-        steps {
-            script {
-            try {
-                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                echo "✅ Logged in to DockerHub"
-                }
-            } catch (err) {
-                echo "❌ Failed to login to DockerHub: ${err.getMessage()}"
-                error("Stopping pipeline due to login failure.")
-            }
-            }
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+            echo "Logged in to DockerHub"
+          }
         }
+      }
     }
 
     stage('Push Docker Image') {
-        steps {
-            script {
-            try {
-                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                docker.image("${IMAGE_NAME}:latest").push()
-                echo "✅ Successfully pushed Docker image: ${IMAGE_NAME}:latest"
-                }
-            } catch (err) {
-                echo "❌ Failed to push Docker image: ${err.getMessage()}"
-                error("Stopping pipeline due to push failure.")
-            }
-            }
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+            docker.image("${IMAGE_NAME}:latest").push()
+          }
         }
-    }   
+      }
+    }
   }
 
   post {
