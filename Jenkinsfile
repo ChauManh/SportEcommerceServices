@@ -15,13 +15,19 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${IMAGE_NAME}:latest ."
+        script {
+          sh "docker build -t ${IMAGE_NAME}:latest ."
+        }
       }
     }
 
     stage('Login to DockerHub') {
       steps {
-        sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+        script {
+          withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+          }
+        }
       }
     }
 
@@ -30,17 +36,23 @@ pipeline {
         sh "docker push ${IMAGE_NAME}:latest"
       }
     }
+
+    stage('Cleanup Local Image') {
+      steps {
+        sh "docker rmi ${IMAGE_NAME}:latest || true"
+      }
+    }
   }
 
   post {
     always {
-      sh "docker logout"
+      sh 'docker logout'
     }
     success {
-      echo '🚀 CI/CD backend thành công!'
+      echo '✅ CI/CD backend thành công!'
     }
     failure {
-      echo '❌ Có lỗi xảy ra!'
+      echo '❌ Có lỗi xảy ra trong pipeline!'
     }
   }
 }
