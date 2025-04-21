@@ -24,7 +24,7 @@ pipeline {
     stage('Login to DockerHub') {
       steps {
         script {
-          docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
             echo "Logged in to DockerHub"
           }
         }
@@ -34,7 +34,7 @@ pipeline {
     stage('Push Docker Image') {
       steps {
         script {
-          docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
             docker.image("${IMAGE_NAME}:latest").push()
           }
         }
