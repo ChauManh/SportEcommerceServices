@@ -39,16 +39,21 @@ pipeline {
       }
     }
 
-    stage('Deploy to Backend EC2') {
+    stage('Cleanup Local Images') {
       steps {
-        script {
-          sshagent(['ec2-ssh-backend']) {
-            sh '''
-              ssh -o StrictHostKeyChecking=no ubuntu@${BACKEND_EC2_IP} "cd ${BACKEND_DIR} && docker-compose pull && docker-compose down && docker-compose up -d"
-            '''
-          }
-        }
+        sh "docker rmi ${IMAGE_NAME}:latest || true"
+        sh "docker image prune -f"
       }
+    }
+
+    stage('Deploy to Backend EC2') { 
+      steps { 
+        script { 
+          sshagent(['ec2-ssh-backend']) { 
+            sh "ssh -o StrictHostKeyChecking=no ubuntu@${BACKEND_EC2_IP} 'cd ${BACKEND_DIR} && docker-compose pull && docker-compose down && docker-compose up -d'"
+          } 
+        } 
+      } 
     }
 
   }
