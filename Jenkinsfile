@@ -3,7 +3,9 @@ pipeline {
 
   environment {
     IMAGE_NAME = 'rain494/my_backend_image'
-    DOCKERHUB_USERNAME = 'rain494' // Thay bằng DockerHub username của bạn nếu khác
+    DOCKERHUB_USERNAME = 'rain494' 
+    BACKEND_EC2_IP = '18.139.209.236'
+    BACKEND_DIR = '/home/ubuntu/doan1/SportEcommerceServices'
   }
 
   stages {
@@ -36,6 +38,19 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy to Backend EC2') {
+      steps {
+        script {
+          sshagent(['ec2-ssh-backend']) {
+            sh '''
+              ssh -o StrictHostKeyChecking=no ubuntu@${BACKEND_EC2_IP} "cd ${BACKEND_DIR} && docker-compose pull && docker-compose down && docker-compose up -d"
+            '''
+          }
+        }
+      }
+    }
+
   }
 
   post {
