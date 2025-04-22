@@ -5,7 +5,7 @@ pipeline {
     IMAGE_NAME = 'rain494/my_backend_image'
     DOCKERHUB_USERNAME = 'rain494' 
     BACKEND_EC2_IP = '18.139.209.236'
-    BACKEND_DIR = '/home/ubuntu/doan1/SportEcommerceServices'
+    BACKEND_DIR = '/home/ubuntu/doan1'
   }
 
   stages {
@@ -15,6 +15,12 @@ pipeline {
       }
     }
 
+    stage('Cleanup Before Build') {
+      steps {
+        sh "docker system prune -af || true"
+      }
+    }
+    
     stage('Build Docker Image') {
       steps {
         sh "docker build -t ${IMAGE_NAME}:latest ."
@@ -39,16 +45,21 @@ pipeline {
       }
     }
 
-    stage('Deploy to Backend EC2') {
+    stage('Cleanup Local Images') {
       steps {
-        script {
-          sshagent(['ec2-ssh-backend']) {
-            sh '''
-              ssh -o StrictHostKeyChecking=no ubuntu@${BACKEND_EC2_IP} "cd ${BACKEND_DIR} && docker-compose pull && docker-compose down && docker-compose up -d"
-            '''
-          }
-        }
+        sh "docker rmi ${IMAGE_NAME}:latest || true"
+        sh "docker image prune -f"
       }
+    }
+
+    stage('Deploy to Backend EC2') { 
+      steps { 
+        script { 
+          sshagent(['ec2-ssh-backend']) { 
+            sh "ssh -o StrictHostKeyChecking=no ubuntu@${BACKEND_EC2_IP} 'cd ${BACKEND_DIR} && docker-compose pull && docker-compose down && docker-compose up -d'"
+          } 
+        } 
+      } 
     }
 
   }
