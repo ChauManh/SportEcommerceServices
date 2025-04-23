@@ -5,7 +5,7 @@ pipeline {
     IMAGE_NAME = 'rain494/my_backend_image'
     DOCKERHUB_USERNAME = 'rain494' 
     BACKEND_EC2_IP = '18.139.209.236'
-    BACKEND_DIR = '/home/ubuntu/doan1/SportEcommerceServices'
+    BACKEND_DIR = '/home/ubuntu/doan1'
   }
 
   stages {
@@ -15,6 +15,12 @@ pipeline {
       }
     }
 
+    stage('Cleanup Before Build') {
+      steps {
+        sh "docker system prune -af || true"
+      }
+    }
+    
     stage('Build Docker Image') {
       steps {
         sh "docker build -t ${IMAGE_NAME}:latest ."

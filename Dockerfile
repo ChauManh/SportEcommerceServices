@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -7,13 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application code
-COPY . .
+COPY . ./
 
 # Stage 2: Run
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -24,4 +24,7 @@ COPY --from=build /app ./
 EXPOSE 5000
 
 # Start the application
-CMD ["node", "server.js"]
+CMD ["npm", "run" , "start"]
+
+
+
