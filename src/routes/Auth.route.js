@@ -49,7 +49,7 @@ const AuthController = require("../controllers/Auth.controller");
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post("/sign_in", AuthController.createUser);
+router.post("/sign_up", AuthController.createUser);
 /**
  * @swagger
  * /auth/login:
@@ -100,6 +100,7 @@ router.post("/sign_in", AuthController.createUser);
  *         description: Lỗi máy chủ
  */
 router.post("/login", AuthController.loginUser);
+router.post("/signup_with_google", AuthController.SignUpWithGoogle);
 /**
  * @swagger
  * /auth/send_otp:
@@ -236,6 +237,5 @@ router.post("/verify_otp", AuthController.verifyOtp);
  */
 router.patch("/reset_password", AuthController.resetPassword);
 router.post("/refresh_token", AuthController.refreshToken);
-
 
 module.exports = router;

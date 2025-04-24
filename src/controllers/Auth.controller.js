@@ -6,6 +6,7 @@ const {
   resetPasswordService,
   loginWithGoogleService,
   refreshTokenService,
+  SignUpWithGoogleService,
 } = require("../services/Auth.service");
 
 const authController = {
@@ -37,13 +38,24 @@ const authController = {
     }
   },
 
+  async SignUpWithGoogle(req, res) {
+    const { email, user_name, uid } = req.body;
+    try {
+      const result = await SignUpWithGoogleService(email, user_name, uid);
+      return result.EC === 0
+        ? res.success(result.result, result.EM)
+        : res.error(result.EC, result.EM, 400);
+    } catch (error) {
+      return res.InternalError(error.message);
+    }
+  },
+
   async loginUserWithGoogle(req, res) {
-    const {email, user_name, uid } = req.body;
-    console.log(email, user_name, uid);
+    const { email, user_name, uid } = req.body;
     try {
       const result = await loginWithGoogleService(email, user_name, uid);
       return result.EC === 0
-       ? res.success(result.result, result.EM)
+        ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
       return res.InternalError(error.message);

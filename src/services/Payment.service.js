@@ -23,7 +23,6 @@ const createPaymentService = async (
     returnUrl: `${DOMAIN}/orders/order-details/${orderId}`,
     cancelUrl: `${DOMAIN}/checkout`,
   };
-
   const result = await payOS.createPaymentLink(body);
   if (!result) {
     return {
@@ -31,6 +30,15 @@ const createPaymentService = async (
       EM: "Tạo thông tin thanh toán không thành công",
     };
   } else {
+    const order = await Order.findOne({ order_code: orderCode });
+    if (!order) {
+      return {
+        EC: 1,
+        EM: "Không tìm thấy đơn hàng để cập nhật link thanh toán",
+      };
+    }
+    order.checkoutUrl = result.checkoutUrl;
+    await order.save();
     return {
       EC: 0,
       EM: "Tạo thông tin thanh toán thành công",
@@ -107,7 +115,7 @@ const deletePaymentService = async (orderCode) => {
 
 const checkPaymentIsCancelService = async (orderCode) => {
   const result = await payOS.getPaymentLinkInformation(orderCode);
-  if (!result) return false; 
+  if (!result) return false;
   if (result.status === "CANCELLED") return true;
 };
 
@@ -116,5 +124,5 @@ module.exports = {
   handleWebhookService,
   getInfoOfPaymentService,
   deletePaymentService,
-  checkPaymentIsCancelService
+  checkPaymentIsCancelService,
 };
