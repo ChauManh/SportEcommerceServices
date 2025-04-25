@@ -92,7 +92,7 @@ const loginWithGoogleService = async (email, user_name, uidToPassword) => {
     if (!isMatchPassword) {
       return {
         EC: 3,
-        EM: "Invalid password",
+        EM: "Mật khẩu không chính xác",
       };
     }
   }
@@ -101,7 +101,44 @@ const loginWithGoogleService = async (email, user_name, uidToPassword) => {
 
   return {
     EC: 0,
-    EM: "Logged in successfully",
+    EM: "Đăng nhập thành công",
+    result: {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        user_name: user.user_name,
+        email: user.email,
+        role: user.role,
+      },
+    },
+  };
+};
+
+const SignUpWithGoogleService = async (email, user_name, uidToPassword) => {
+  const user = await User.findOne({
+    $or: [{ user_name: user_name }, { email: email }],
+  });
+  if (!user) {
+    const hashedPassword = await bcrypt.hash(uidToPassword, 10);
+    const newUser = new User({
+      user_name,
+      email,
+      password: hashedPassword,
+    });
+    await newUser.save();
+  } else {
+    return {
+      EC: 0,
+      EM: "Tài khoản Google này đã được sử dụng",
+      result: null,
+    };
+  }
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
+  return {
+    EC: 0,
+    EM: "Đăng ký thành công",
     result: {
       accessToken,
       refreshToken,
@@ -227,5 +264,6 @@ module.exports = {
   resetPasswordService,
   verifyOTPService,
   loginWithGoogleService,
+  SignUpWithGoogleService,
   refreshTokenService,
 };

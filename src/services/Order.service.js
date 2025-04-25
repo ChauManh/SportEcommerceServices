@@ -424,7 +424,8 @@ const updateStatus = async (
   orderId,
   status,
   currentUserId,
-  currentUserRole
+  currentUserRole,
+  options = { bypassPermission: false }
 ) => {
   try {
     const order = await Order.findById(orderId);
@@ -447,6 +448,7 @@ const updateStatus = async (
 
     // Kiểm tra quyền cập nhật trạng thái
     const canUpdateOrderStatus = ({ currentStatus, newStatus, isOwner }) => {
+      if (options.bypassPermission) return true;
       const disallowedTargets = ["Yêu cầu hoàn", "Hoàn hàng", "Hủy hàng"];
 
       if (isAdmin) {
@@ -516,7 +518,6 @@ const updateStatus = async (
     }
 
     if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
-      console.log("Updating stock for order:", orderId);
       const products = order.products;
 
       const updateStockPromises = products.map(async (product) => {
@@ -561,8 +562,20 @@ const updateStatus = async (
       runValidators: true,
     });
 
-    console.log(updateOrder);
-
+    if (
+      currentStatus === "Chờ xác nhận" &&
+      status === "Hủy hàng" &&
+      options.bypassPermission
+    ) {
+      await createNotificationForUser(order.user_id, {
+        notify_type: "Tình trạng đơn hàng",
+        notify_title: `Đơn hàng #${order._id} đã bị hủy`,
+        notify_desc:
+          "Đơn hàng của bạn đã bị hủy do quá thời gian thanh toán, vui lòng đặt lại đơn hàng nếu cần.",
+        order_id: order._id,
+        img: "https://img.freepik.com/premium-vector/payment-canceled-illustration_8499-3034.jpg", // Thay thế bằng link ảnh phù hợp
+      });
+    }
     if (
       isAdmin &&
       order.order_status === "Yêu cầu hoàn" &&
@@ -708,6 +721,89 @@ const handleCancelPaymentService = async (
 //   // }
 // };
 
+const getRevenue = async (year) => {
+  const startDate = new Date(`${year}-01-01`);
+  const endDate = new Date(`${parseInt(year) + 1}-01-01`);
+
+  try {
+    const result = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lt: endDate },
+        },
+      },
+      {
+        $facet: {
+          byMonth: [
+            {
+              $group: {
+                _id: {
+                  month: { $month: "$createdAt" },
+                  status: "$order_status",
+                  payment: "$is_paid",
+                },
+                total: { $sum: "$order_total_final" },
+              },
+            },  
+          ],
+          // byCategory: [
+          //   { $unwind: "$" },
+          //   {
+          //     $group: {
+          //       _id: "$items.category",
+          //       revenue: { $sum: "$items.total_price" },
+          //     },
+          //   },
+          //   { $sort: { revenue: -1 } }
+          // ],
+        },
+      },
+    ]);
+
+    const { byMonth, byCategory } = result[0];
+
+    // Doanh thu theo tháng
+    const fullMonthly = Array.from({ length: 12 }, (_, i) => {
+      const month = i + 1;
+      const filtered = byMonth.filter(b => b._id.month === month);
+      const completedRevenue = filtered
+        .filter(f => f._id.status === "Hoàn thành")
+        .reduce((acc, curr) => acc + curr.total, 0);
+      const cancelledRevenue = filtered
+        .filter(f => f._id.status === "Hủy hàng")
+        .reduce((acc, curr) => acc + curr.total, 0);
+      const paidRevenue = filtered
+        .filter(f => f._id.payment === true)
+        .reduce((acc, curr) => acc + curr.total, 0);
+
+      return {
+        month,
+        completedRevenue,
+        cancelledRevenue,
+        paidRevenue,
+      };
+    });
+
+    return {
+      EC: 0,
+      EM: "Lấy thống kê thành công",
+      data: {
+        revenueByMonth: fullMonthly,
+        // revenueByCategory: byCategory.map(c => ({
+        //   category: c._id,
+        //   revenue: c.revenue,
+        // })),
+      },
+    };
+  } catch (error) {
+    return {
+      EC: -99,
+      EM: error.message,
+    };
+  }
+};
+
+
 module.exports = {
   createOrder,
   getAllOrder,
@@ -716,5 +812,6 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPaymentService,
+  getRevenue
   // deleteOrderService,
 };
