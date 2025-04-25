@@ -132,6 +132,20 @@ const handleCancelPayment = async (req, res) => {
 //   }
 // }
 
+const getRevenue = async(req, res) =>{
+  try {
+    const year = parseInt(req.query.year);
+
+    const result = await orderService.getRevenue(year);
+
+    result.EC === 0
+      ?res.success(result.data, result.EM)
+      :res.error(result.EC, result.EM)
+    
+  } catch (error) {
+    return res.InternalError(error.message);
+  }
+}
 module.exports = {
   createOrder,
   getAllOrder,
@@ -140,5 +154,6 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPayment,
+  getRevenue
   // deleteOrder
 };

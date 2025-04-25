@@ -721,6 +721,89 @@ const handleCancelPaymentService = async (
 //   // }
 // };
 
+const getRevenue = async (year) => {
+  const startDate = new Date(`${year}-01-01`);
+  const endDate = new Date(`${parseInt(year) + 1}-01-01`);
+
+  try {
+    const result = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lt: endDate },
+        },
+      },
+      {
+        $facet: {
+          byMonth: [
+            {
+              $group: {
+                _id: {
+                  month: { $month: "$createdAt" },
+                  status: "$order_status",
+                  payment: "$is_paid",
+                },
+                total: { $sum: "$order_total_final" },
+              },
+            },  
+          ],
+          // byCategory: [
+          //   { $unwind: "$" },
+          //   {
+          //     $group: {
+          //       _id: "$items.category",
+          //       revenue: { $sum: "$items.total_price" },
+          //     },
+          //   },
+          //   { $sort: { revenue: -1 } }
+          // ],
+        },
+      },
+    ]);
+
+    const { byMonth, byCategory } = result[0];
+
+    // Doanh thu theo tháng
+    const fullMonthly = Array.from({ length: 12 }, (_, i) => {
+      const month = i + 1;
+      const filtered = byMonth.filter(b => b._id.month === month);
+      const completedRevenue = filtered
+        .filter(f => f._id.status === "Hoàn thành")
+        .reduce((acc, curr) => acc + curr.total, 0);
+      const cancelledRevenue = filtered
+        .filter(f => f._id.status === "Hủy hàng")
+        .reduce((acc, curr) => acc + curr.total, 0);
+      const paidRevenue = filtered
+        .filter(f => f._id.payment === true)
+        .reduce((acc, curr) => acc + curr.total, 0);
+
+      return {
+        month,
+        completedRevenue,
+        cancelledRevenue,
+        paidRevenue,
+      };
+    });
+
+    return {
+      EC: 0,
+      EM: "Lấy thống kê thành công",
+      data: {
+        revenueByMonth: fullMonthly,
+        // revenueByCategory: byCategory.map(c => ({
+        //   category: c._id,
+        //   revenue: c.revenue,
+        // })),
+      },
+    };
+  } catch (error) {
+    return {
+      EC: -99,
+      EM: error.message,
+    };
+  }
+};
+
+
 module.exports = {
   createOrder,
   getAllOrder,
@@ -729,5 +812,6 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPaymentService,
+  getRevenue
   // deleteOrderService,
 };

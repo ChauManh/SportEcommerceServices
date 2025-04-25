@@ -174,4 +174,6 @@ router.patch(
   orderController.handleCancelPayment
 );
 // router.delete(":orderCode", verifyToken, identifyAdmin, orderController.deleteOrder);
+
+router.get("/get-revenue", orderController.getRevenue);
 module.exports = router;
