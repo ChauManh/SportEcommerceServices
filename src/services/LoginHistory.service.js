@@ -52,7 +52,7 @@ const getLoginHistoryService = async () => {
   };
 };
 
-const getActivitiesByLoginHistoryIdService = async (id) => {
+const getLoginHistoryByIdService = async (id) => {
   const loginHistory = await LoginHistory.findById(id);
   if (!loginHistory) {
     return {
@@ -63,8 +63,8 @@ const getActivitiesByLoginHistoryIdService = async (id) => {
   }
   return {
     EC: 0,
-    EM: "Lấy danh sách activities thành công",
-    result: loginHistory.activities,
+    EM: "Lấy chi tiết login History thành công",
+    result: loginHistory,
   };
 };
 
@@ -72,5 +72,5 @@ module.exports = {
   logLoginHistory,
   logActivityHistory,
   getLoginHistoryService,
-  getActivitiesByLoginHistoryIdService,
+  getLoginHistoryByIdService,
 };

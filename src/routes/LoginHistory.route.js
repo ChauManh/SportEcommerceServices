@@ -13,7 +13,7 @@ router.get(
   "/:id",
   verifyToken,
   identifyAdmin,
-  LoginHistoryController.getActivitiesByLoginHistoryId
+  LoginHistoryController.getLoginHistoryById
 );
 
 module.exports = router;

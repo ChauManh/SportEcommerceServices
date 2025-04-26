@@ -1,6 +1,6 @@
 const {
   getLoginHistoryService,
-  getActivitiesByLoginHistoryIdService,
+  getLoginHistoryByIdService,
 } = require("../services/LoginHistory.service");
 
 const loginHistoryController = {
@@ -15,10 +15,10 @@ const loginHistoryController = {
     }
   },
 
-  async getActivitiesByLoginHistoryId(req, res) {
+  async getLoginHistoryById(req, res) {
     try {
       const id = req.params.id;
-      const result = await getActivitiesByLoginHistoryIdService(id);
+      const result = await getLoginHistoryByIdService(id);
       return result.EC === 0
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM);
