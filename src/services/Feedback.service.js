@@ -92,7 +92,7 @@ const getAllFeedback = async(productId) =>{
             return { EC: 1, EM: "Product không tồn tại", data: null };
         }
 
-        const list_feedback = await Feedback.find({product_id: productId}) .populate('user_id', 'user_name avt_img');;
+        const list_feedback = await Feedback.find({product_id: productId}).populate('user_id', 'user_name avt_img');;
         return { EC: 0, EM: "Get feedback thành công", data: list_feedback};
     } catch (error) {
         throw error

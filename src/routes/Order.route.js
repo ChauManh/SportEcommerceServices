@@ -175,5 +175,5 @@ router.patch(
 );
 // router.delete(":orderCode", verifyToken, identifyAdmin, orderController.deleteOrder);
 
-router.get("/get-revenue", orderController.getRevenue);
+router.get("/get-revenue", verifyToken, identifyAdmin, orderController.getRevenue);
 module.exports = router;
