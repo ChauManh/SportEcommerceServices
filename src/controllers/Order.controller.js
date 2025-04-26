@@ -66,7 +66,7 @@ const updateStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
     const statusOrder = req.body.status;
-    const { userId, role } = req.user;
+    const { userId, role, login_history_id } = req.user;
     if (!orderId || !statusOrder) {
       return res.error(400, "OrderId and status are required");
     }
@@ -75,7 +75,8 @@ const updateStatus = async (req, res) => {
       orderId,
       statusOrder,
       userId,
-      role
+      role,
+      login_history_id
     );
     response.EC === 0
       ? res.success(response.data, response.EM)
@@ -92,8 +93,8 @@ const getDetailOrder = async (req, res) => {
     const response = await orderService.getDetailOrder(orderId, user);
 
     response.EC === 0
-    ? res.success(response.data, response.EM)
-    : res.error(response.EC, response.EM);
+      ? res.success(response.data, response.EM)
+      : res.error(response.EC, response.EM);
   } catch (error) {
     return res.InternalError(error.message);
   }
@@ -104,7 +105,11 @@ const handleCancelPayment = async (req, res) => {
     const orderCode = req.params.orderCode;
     const { userId, role } = req.user;
 
-    const response = await orderService.handleCancelPaymentService(orderCode, userId, role);
+    const response = await orderService.handleCancelPaymentService(
+      orderCode,
+      userId,
+      role
+    );
     console.log("response", response);
     response.EC === 0
       ? res.success(response.data, response.EM)
@@ -132,20 +137,19 @@ const handleCancelPayment = async (req, res) => {
 //   }
 // }
 
-const getRevenue = async(req, res) =>{
+const getRevenue = async (req, res) => {
   try {
     const year = parseInt(req.query.year);
 
     const result = await orderService.getRevenue(year);
 
     result.EC === 0
-      ?res.success(result.data, result.EM)
-      :res.error(result.EC, result.EM)
-    
+      ? res.success(result.data, result.EM)
+      : res.error(result.EC, result.EM);
   } catch (error) {
     return res.InternalError(error.message);
   }
-}
+};
 module.exports = {
   createOrder,
   getAllOrder,
@@ -154,6 +158,6 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPayment,
-  getRevenue
+  getRevenue,
   // deleteOrder
 };

@@ -8,6 +8,7 @@ const generateOTP = require("../utils/GenerateOTP");
 const redis = require("../config/Redis");
 const sendEmail = require("../config/Nodemailer");
 const bcrypt = require("bcrypt");
+const { logLoginHistory } = require("./LoginHistory.service");
 
 const createUserService = async ({ user_name, email, password }) => {
   // Check exists
@@ -26,6 +27,7 @@ const createUserService = async ({ user_name, email, password }) => {
     user_name,
     email,
     password: hashedPassword,
+    full_name: user_name,
   });
 
   await newUser.save();
@@ -35,15 +37,15 @@ const createUserService = async ({ user_name, email, password }) => {
   };
 };
 
-const loginService = async (user_name, password) => {
+const loginService = async (user_name, password, ip, user_agent) => {
   const user = await User.findOne({
-    $or: [{ user_name: user_name }, { email: user_name }],
+    $or: [{ user_name: user_name }],
   });
 
   if (!user) {
     return {
-      EC: 2,
-      EM: "User not found",
+      EC: 1,
+      EM: "Không tìm thấy người dùng",
     };
   }
 
@@ -51,12 +53,30 @@ const loginService = async (user_name, password) => {
   if (!isMatchPassword) {
     return {
       EC: 3,
-      EM: "Invalid password",
+      EM: "Mật khẩu không chính xác",
     };
   }
 
-  const accessToken = createAccessToken(user);
-  const refreshToken = createRefreshToken(user);
+  let login_history_id = null;
+  if (user.role === "admin") {
+    const loginHistory = await logLoginHistory({
+      user_id: user._id,
+      role: user.role,
+      ip,
+      user_agent,
+    });
+    if (loginHistory.EC === 0) {
+      login_history_id = loginHistory.result._id;
+    } else {
+      return {
+        EC: 2,
+        EM: "Lỗi khi lưu phiên đăng nhập",
+      };
+    }
+  }
+
+  const accessToken = createAccessToken(user, login_history_id);
+  const refreshToken = createRefreshToken(user, login_history_id);
 
   return {
     EC: 0,
@@ -74,19 +94,16 @@ const loginService = async (user_name, password) => {
   };
 };
 
-const loginWithGoogleService = async (email, user_name, uidToPassword) => {
+const loginWithGoogleService = async (email, uidToPassword) => {
   const user = await User.findOne({
-    $or: [{ user_name: user_name }, { email: email }],
+    $or: [{ email: email }],
   });
 
   if (!user) {
-    const hashedPassword = await bcrypt.hash(uidToPassword, 10);
-    const newUser = new User({
-      user_name,
-      email,
-      password: hashedPassword,
-    });
-    await newUser.save();
+    return {
+      EC: 1,
+      EM: "Tài khoản Google chưa được đăng ký",
+    };
   } else {
     const isMatchPassword = await bcrypt.compare(uidToPassword, user.password);
     if (!isMatchPassword) {
@@ -117,7 +134,7 @@ const loginWithGoogleService = async (email, user_name, uidToPassword) => {
 
 const SignUpWithGoogleService = async (email, user_name, uidToPassword) => {
   const user = await User.findOne({
-    $or: [{ user_name: user_name }, { email: email }],
+    $or: [{ email: email }],
   });
   if (!user) {
     const hashedPassword = await bcrypt.hash(uidToPassword, 10);
@@ -125,31 +142,32 @@ const SignUpWithGoogleService = async (email, user_name, uidToPassword) => {
       user_name,
       email,
       password: hashedPassword,
+      full_name: user_name,
     });
     await newUser.save();
-  } else {
+    const accessToken = createAccessToken(newUser);
+    const refreshToken = createRefreshToken(newUser);
     return {
       EC: 0,
+      EM: "Đăng ký thành công",
+      result: {
+        accessToken,
+        refreshToken,
+        user: {
+          id: newUser._id,
+          user_name: newUser.user_name,
+          email: newUser.email,
+          role: newUser.role,
+        },
+      },
+    };
+  } else {
+    return {
+      EC: 1,
       EM: "Tài khoản Google này đã được sử dụng",
       result: null,
     };
   }
-  const accessToken = createAccessToken(user);
-  const refreshToken = createRefreshToken(user);
-  return {
-    EC: 0,
-    EM: "Đăng ký thành công",
-    result: {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user._id,
-        user_name: user.user_name,
-        email: user.email,
-        role: user.role,
-      },
-    },
-  };
 };
 
 const sentOTPService = async (email) => {

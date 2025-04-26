@@ -8,6 +8,7 @@ const {
   createPaymentService,
   checkPaymentIsCancelService,
 } = require("./Payment.service");
+const { logActivityHistory } = require("./LoginHistory.service");
 
 const createOrder = async (newOrder, user_id) => {
   try {
@@ -425,223 +426,214 @@ const updateStatus = async (
   status,
   currentUserId,
   currentUserRole,
+  login_history_id,
   options = { bypassPermission: false }
 ) => {
-  try {
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return { EC: 1, EM: "Order doesn't exist" };
-    }
-    const isOwner = order.user_id.toString() === currentUserId;
-    const isAdmin = currentUserRole === "admin";
-    const currentStatus = order.order_status;
-
-    const validStatuses = [
-      "Chờ xác nhận",
-      "Đang chuẩn bị hàng",
-      "Đang giao",
-      "Hoàn thành",
-      "Hủy hàng",
-      "Yêu cầu hoàn",
-      "Hoàn hàng",
-    ];
-
-    // Kiểm tra quyền cập nhật trạng thái
-    const canUpdateOrderStatus = ({ currentStatus, newStatus, isOwner }) => {
-      if (options.bypassPermission) return true;
-      const disallowedTargets = ["Yêu cầu hoàn", "Hoàn hàng", "Hủy hàng"];
-
-      if (isAdmin) {
-        if (currentStatus === "Hoàn thành") return false;
-        if (["Hủy hàng", "Hoàn hàng"].includes(currentStatus)) return false;
-
-        if (
-          ["Chờ xác nhận", "Đang chuẩn bị hàng", "Đang giao"].includes(
-            currentStatus
-          )
-        ) {
-          return !disallowedTargets.includes(newStatus);
-        }
-
-        if (
-          currentStatus === "Yêu cầu hoàn" &&
-          ["Hoàn hàng", "Hoàn thành"].includes(newStatus)
-        ) {
-          return true;
-        }
-
-        return false;
-      }
-
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return { EC: 1, EM: "Order doesn't exist" };
+  }
+  const isOwner = order.user_id.toString() === currentUserId;
+  const isAdmin = currentUserRole === "admin";
+  const currentStatus = order.order_status;
+  const validStatuses = [
+    "Chờ xác nhận",
+    "Đang chuẩn bị hàng",
+    "Đang giao",
+    "Hoàn thành",
+    "Hủy hàng",
+    "Yêu cầu hoàn",
+    "Hoàn hàng",
+  ];
+  // Kiểm tra quyền cập nhật trạng thái
+  const canUpdateOrderStatus = ({ currentStatus, newStatus, isOwner }) => {
+    if (options.bypassPermission) return true;
+    const disallowedTargets = ["Yêu cầu hoàn", "Hoàn hàng", "Hủy hàng"];
+    if (isAdmin) {
+      if (currentStatus === "Hoàn thành") return false;
+      if (["Hủy hàng", "Hoàn hàng"].includes(currentStatus)) return false;
       if (
-        isOwner &&
-        currentStatus === "Chờ xác nhận" &&
-        newStatus === "Hủy hàng"
+        ["Chờ xác nhận", "Đang chuẩn bị hàng", "Đang giao"].includes(
+          currentStatus
+        )
       ) {
-        return true;
+        return !disallowedTargets.includes(newStatus);
       }
-
       if (
-        isOwner &&
-        currentStatus === "Hoàn thành" &&
-        newStatus === "Yêu cầu hoàn"
-      ) {
-        return true;
-      }
-
-      if (
-        isOwner &&
         currentStatus === "Yêu cầu hoàn" &&
-        newStatus === "Hoàn thành"
+        ["Hoàn hàng", "Hoàn thành"].includes(newStatus)
       ) {
         return true;
       }
-
       return false;
-    };
-
+    }
     if (
-      !canUpdateOrderStatus({
-        currentStatus,
-        newStatus: status,
-        isOwner,
-      })
-    ) {
-      return {
-        EC: 403,
-        EM: "Không thể cập nhật, hãy kiểm tra lại trạng thái",
-      };
-    }
-
-    if (!validStatuses.includes(status)) {
-      return { EC: 2, EM: "Invalid order status" };
-    }
-
-    if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
-      const products = order.products;
-
-      const updateStockPromises = products.map(async (product) => {
-        const productInfo = await Product.findById(product.product_id);
-        if (!productInfo) return null;
-
-        const color = productInfo.colors.find(
-          (c) => c.color_name === product.color
-        );
-
-        const variantIndex = color.variants.findIndex(
-          (v) => v.variant_size === product.variant
-        );
-
-        if (variantIndex === -1) return null;
-
-        color.variants[variantIndex].variant_countInStock += product.quantity;
-
-        productInfo.product_countInStock += product.quantity;
-
-        return productInfo.save();
-      });
-
-      await Promise.all(updateStockPromises);
-    }
-
-    const updateFields = {
-      order_status: status,
-    };
-
-    if (isAdmin && status === "Hoàn thành") {
-      updateFields.is_paid = true;
-      updateFields.received_date = new Date();
-    }
-
-    if (isOwner && status === "Yêu cầu hoàn") {
-      updateFields.is_require_refund = true;
-    }
-
-    const updateOrder = await Order.findByIdAndUpdate(orderId, updateFields, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (
+      isOwner &&
       currentStatus === "Chờ xác nhận" &&
-      status === "Hủy hàng" &&
-      options.bypassPermission
+      newStatus === "Hủy hàng"
     ) {
-      await createNotificationForUser(order.user_id, {
-        notify_type: "Tình trạng đơn hàng",
-        notify_title: `Đơn hàng #${order._id} đã bị hủy`,
-        notify_desc:
-          "Đơn hàng của bạn đã bị hủy do quá thời gian thanh toán, vui lòng đặt lại đơn hàng nếu cần.",
-        order_id: order._id,
-        img: "https://img.freepik.com/premium-vector/payment-canceled-illustration_8499-3034.jpg", // Thay thế bằng link ảnh phù hợp
-      });
+      return true;
     }
     if (
-      isAdmin &&
-      order.order_status === "Yêu cầu hoàn" &&
-      status === "Hoàn thành"
+      isOwner &&
+      currentStatus === "Hoàn thành" &&
+      newStatus === "Yêu cầu hoàn"
     ) {
-      await createNotificationForUser(updateOrder.user_id, {
-        notify_type: "Tình trạng đơn hàng",
-        notify_title: `Đơn hàng #${updateOrder._id} đã được cập nhật.`,
-        notify_desc:
-          "Rất tiếc, yêu cầu hoàn hàng của bạn không được chấp nhận.",
-        order_id: updateOrder._id,
-        img: "https://vietcalib.vn/wp-content/uploads/2023/02/Icon-doi-tra.png",
-      });
-    } else if (isAdmin && updateOrder) {
-      let descMap = {
-        "Đang chuẩn bị hàng": "Đơn hàng của bạn đang được chuẩn bị.",
-        "Đang giao": "Đơn hàng đang được giao đến bạn.",
-        "Hoàn thành":
-          "Đơn hàng đã được giao, cảm ơn bạn đã mua hàng tại WTM Sport!",
-        "Hoàn hàng": "Đơn hàng đã được hoàn trả thành công.",
+      return true;
+    }
+    if (
+      isOwner &&
+      currentStatus === "Yêu cầu hoàn" &&
+      newStatus === "Hoàn thành"
+    ) {
+      return true;
+    }
+    return false;
+  };
+  if (
+    !canUpdateOrderStatus({
+      currentStatus,
+      newStatus: status,
+      isOwner,
+    })
+  ) {
+    return {
+      EC: 403,
+      EM: "Không thể cập nhật, hãy kiểm tra lại trạng thái",
+    };
+  }
+  if (!validStatuses.includes(status)) {
+    return { EC: 2, EM: "Invalid order status" };
+  }
+  const updateFields = {
+    order_status: status,
+  };
+  if (isAdmin && status === "Hoàn thành") {
+    updateFields.is_paid = true;
+    updateFields.received_date = new Date();
+  }
+  if (isOwner && status === "Yêu cầu hoàn") {
+    updateFields.is_require_refund = true;
+  }
+  const updateOrder = await Order.findByIdAndUpdate(orderId, updateFields, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updateOrder) {
+    return {
+      EC: 3,
+      EM: "Cập nhật đơn hàng không thành công",
+    };
+  } else {
+    if (["Hủy hàng", "Hoàn hàng"].includes(status)) {
+      try {
+        const products = order.products;
+        const updateStockPromises = products.map(async (product) => {
+          const productInfo = await Product.findById(product.product_id);
+          if (!productInfo) return null;
+          const color = productInfo.colors.find(
+            (c) => c.color_name === product.color
+          );
+          const variantIndex = color.variants.findIndex(
+            (v) => v.variant_size === product.variant
+          );
+          if (variantIndex === -1) return null;
+          color.variants[variantIndex].variant_countInStock += product.quantity;
+          productInfo.product_countInStock += product.quantity;
+          return productInfo.save();
+        });
+        await Promise.all(updateStockPromises);
+      } catch (err) {
+        console.log(err);
+        return {
+          EC: 4,
+          EM: "Lỗi khi hoàn hàng về kho",
+        };
+      }
+    }
+    const sendOrderStatusNotification = async () => {
+      const role = options.bypassPermission
+        ? "system"
+        : isAdmin
+        ? "admin"
+        : "owner";
+
+      const descMap = {
+        admin: {
+          "Đang chuẩn bị hàng": "Đơn hàng của bạn đang được chuẩn bị.",
+          "Đang giao": "Đơn hàng đang được giao đến bạn.",
+          "Hoàn thành":
+            order.order_status === "Yêu cầu hoàn"
+              ? "Rất tiếc, yêu cầu hoàn hàng của bạn không được chấp nhận."
+              : "Đơn hàng đã được giao, cảm ơn bạn đã mua hàng tại WTM Sport!",
+          "Hoàn hàng": "Đơn hàng đã được hoàn trả thành công.",
+        },
+        owner: {
+          "Yêu cầu hoàn":
+            "Yêu cầu hoàn hàng của bạn đã được tiếp nhận, vui lòng chờ để được liên hệ làm việc.",
+          "Hủy hàng": "Đơn hàng của bạn đã được hủy, xin lỗi quý khách.",
+        },
+        system: {
+          "Hủy hàng":
+            "Đơn hàng của bạn đã bị hủy do quá thời gian thanh toán, vui lòng đặt lại đơn hàng nếu cần.",
+        },
       };
-      let statusToImageMap = {
-        "Đang chuẩn bị hàng":
-          "https://media.istockphoto.com/id/1372074867/vi/vec-to/chu%E1%BA%A9n-b%E1%BB%8B-s%C6%A1-b%E1%BB%99.jpg?s=612x612&w=is&k=20&c=0HPTYxRwr6WfbsHEv7HVTFcs42Pi2JdV-egxKs1knpg=",
-        "Đang giao":
-          "https://dungculambanh.com.vn/wp-content/uploads/freight-icon-png-11.png",
-        "Hoàn thành":
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfz3upZJUzgki4bn27faJf6gPIIo7Yo5HxZg&s",
-        "Hoàn hàng":
-          "https://beewatch.vn/wp-content/uploads/2021/07/Icon-Doi-Tra-Hang.jpg",
+
+      const imageMap = {
+        admin: {
+          "Đang chuẩn bị hàng":
+            "https://media.istockphoto.com/id/1372074867/vi/vec-to/chu%E1%BA%A9n-b%E1%BB%8B-s%C6%A1-b%E1%BB%99.jpg",
+          "Đang giao":
+            "https://dungculambanh.com.vn/wp-content/uploads/freight-icon-png-11.png",
+          "Hoàn thành":
+            order.order_status === "Yêu cầu hoàn"
+              ? "https://vietcalib.vn/wp-content/uploads/2023/02/Icon-doi-tra.png"
+              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfz3upZJUzgki4bn27faJf6gPIIo7Yo5HxZg&s",
+          "Hoàn hàng":
+            "https://beewatch.vn/wp-content/uploads/2021/07/Icon-Doi-Tra-Hang.jpg",
+        },
+        owner: {
+          "Yêu cầu hoàn":
+            "https://icon-library.com/images/cancelled-icon/cancelled-icon-4.jpg",
+          "Hủy hàng":
+            "https://png.pngtree.com/png-clipart/20240513/original/pngtree-help-desk-icon-reception-info-professional-photo-png-image_15081159.png",
+        },
+        system: {
+          "Hủy hàng":
+            "https://img.freepik.com/premium-vector/payment-canceled-illustration_8499-3034.jpg",
+        },
       };
-      let desc = descMap[status];
-      let img = statusToImageMap[status];
-      await createNotificationForUser(updateOrder.user_id, {
-        notify_type: "Tình trạng đơn hàng",
-        notify_title: `Đơn hàng #${updateOrder._id} đã được cập nhật.`,
-        notify_desc: desc,
-        order_id: updateOrder._id,
-        img, // thêm ảnh vào
-      });
-    } else if (isOwner && status === "Yêu cầu hoàn") {
-      await createNotificationForUser(updateOrder.user_id, {
-        notify_type: "Tình trạng đơn hàng",
-        notify_title: `Đơn hàng #${updateOrder._id} đã được cập nhật.`,
-        notify_desc:
-          "Yêu cầu hoàn hàng của bạn đã được tiếp nhận, vui lòng chờ để được liên hệ làm việc.",
-        order_id: updateOrder._id,
-        img: "https://icon-library.com/images/cancelled-icon/cancelled-icon-4.jpg", // thêm ảnh vào
-      });
-    } else if (isOwner && status === "Hủy hàng") {
-      await createNotificationForUser(updateOrder.user_id, {
-        notify_type: "Tình trạng đơn hàng",
-        notify_title: `Đơn hàng #${updateOrder._id} đã được cập nhật.`,
-        notify_desc: "Đơn hàng của bạn đã được hủy, xin lỗi quý khách.",
-        order_id: updateOrder._id,
-        img: "https://png.pngtree.com/png-clipart/20240513/original/pngtree-help-desk-icon-reception-info-professional-photo-png-image_15081159.png", // thêm ảnh vào
+
+      const notify_desc = descMap[role]?.[status];
+      const img = imageMap[role]?.[status];
+
+      if (notify_desc && img) {
+        await createNotificationForUser(updateOrder.user_id, {
+          notify_type: "Tình trạng đơn hàng",
+          notify_title: `Đơn hàng #${updateOrder._id} đã được cập nhật.`,
+          notify_desc,
+          order_id: updateOrder._id,
+          img,
+        });
+      }
+    };
+    await sendOrderStatusNotification();
+    if (isAdmin && login_history_id) {
+      await logActivityHistory({
+        login_history_id,
+        activity: {
+          action: "Cập nhật trạng thái đơn hàng",
+          order_id: updateOrder._id,
+          prev_status: currentStatus,
+          new_status: status,
+        },
       });
     }
-
     return {
       EC: 0,
       EM: "Cập nhật trạng thái đơn hàng thành công",
       data: updateOrder,
     };
-  } catch (error) {
-    return { EC: 99, EM: error.message };
   }
 };
 
@@ -744,7 +736,7 @@ const getRevenue = async (year) => {
                 },
                 total: { $sum: "$order_total_final" },
               },
-            },  
+            },
           ],
           // byCategory: [
           //   { $unwind: "$" },
@@ -765,15 +757,15 @@ const getRevenue = async (year) => {
     // Doanh thu theo tháng
     const fullMonthly = Array.from({ length: 12 }, (_, i) => {
       const month = i + 1;
-      const filtered = byMonth.filter(b => b._id.month === month);
+      const filtered = byMonth.filter((b) => b._id.month === month);
       const completedRevenue = filtered
-        .filter(f => f._id.status === "Hoàn thành")
+        .filter((f) => f._id.status === "Hoàn thành")
         .reduce((acc, curr) => acc + curr.total, 0);
       const cancelledRevenue = filtered
-        .filter(f => f._id.status === "Hủy hàng")
+        .filter((f) => f._id.status === "Hủy hàng")
         .reduce((acc, curr) => acc + curr.total, 0);
       const paidRevenue = filtered
-        .filter(f => f._id.payment === true)
+        .filter((f) => f._id.payment === true)
         .reduce((acc, curr) => acc + curr.total, 0);
 
       return {
@@ -803,7 +795,6 @@ const getRevenue = async (year) => {
   }
 };
 
-
 module.exports = {
   createOrder,
   getAllOrder,
@@ -812,6 +803,6 @@ module.exports = {
   updateStatus,
   getDetailOrder,
   handleCancelPaymentService,
-  getRevenue
+  getRevenue,
   // deleteOrderService,
 };

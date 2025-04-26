@@ -28,8 +28,10 @@ const authController = {
 
   async loginUser(req, res) {
     const { user_name, password } = req.body;
+    const ip = req.ip;
+    const user_agent = req.headers["user-agent"] || "unknown";
     try {
-      const result = await loginService(user_name, password);
+      const result = await loginService(user_name, password, ip, user_agent);
       return result.EC === 0
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
@@ -51,9 +53,9 @@ const authController = {
   },
 
   async loginUserWithGoogle(req, res) {
-    const { email, user_name, uid } = req.body;
+    const { email, uid } = req.body;
     try {
-      const result = await loginWithGoogleService(email, user_name, uid);
+      const result = await loginWithGoogleService(email, uid);
       return result.EC === 0
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
