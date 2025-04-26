@@ -6,7 +6,7 @@ const createStore = async(newStore) =>{
         await store.save();
         return{
             EC: 0,
-            EM: "Tao thong tin cua hang thanh cong",
+            EM: "Tạo thông tin cửa hàng thành công",
             data: store
         }
     } catch (error) {
@@ -23,7 +23,7 @@ const updateStore = async(updateData, storeId) =>{
         if(!store){
             return({
                 EC: 2,
-                EM: "Cua hang k ton tai",
+                EM: "Cửa hàng không tồn tại",
             })
         }
 
@@ -35,7 +35,7 @@ const updateStore = async(updateData, storeId) =>{
 
         return({
             EC: 0,
-            EM: "Cap nhat thong tin cua hang thanh cong",
+            EM: "Cập nhật thông tin cửa hàng thành công",
             data: updateStore
         })
     } catch (error) {
@@ -53,13 +53,13 @@ const getDetailStore = async(storeId) =>{
         if(!store){
             return({
                 EC: 2,
-                EM: "Cua hang k ton tai"
+                EM: "Cửa hàng không tồn tại"
             })
         }
 
         return({
             EC: 0,
-            EM: "Lay thong tin cua hang thanh cong",
+            EM: "Lấy thông tin cửa hàng thành công",
             data: store
         })
     } catch (error) {

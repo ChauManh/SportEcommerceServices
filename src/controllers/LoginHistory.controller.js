@@ -11,7 +11,7 @@ const loginHistoryController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -23,7 +23,7 @@ const loginHistoryController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 };

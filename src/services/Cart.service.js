@@ -158,7 +158,7 @@ const decreaseProductQuantity = async (user_id, product_id, color_name, variant_
 
   return {
     EC: 0,
-    EM: "Product quantity decreased successfully",
+    EM: "Số lượng sản phẩm giảm thành công",
     cart,
   };
 };

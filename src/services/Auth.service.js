@@ -177,7 +177,7 @@ const sentOTPService = async (email) => {
   if (!existingUser) {
     return {
       EC: 2,
-      EM: "User not found",
+      EM: "Không tìm thấy người dùng",
     };
   }
   const otp = generateOTP();
@@ -188,7 +188,7 @@ const sentOTPService = async (email) => {
   await sendEmail(email, otp);
   return {
     EC: 0,
-    EM: "OTP sent successfully",
+    EM: "Gửi OTP thành công",
   };
 };
 
@@ -199,7 +199,7 @@ const verifyOTPService = async (email, otp) => {
   if (!storedOTP) {
     return {
       EC: 2,
-      EM: "OTP expired or not found",
+      EM: "OTP hết hạn hoặc không tìm thấy",
     };
   }
 
@@ -207,7 +207,7 @@ const verifyOTPService = async (email, otp) => {
   if (storedOTP !== otp) {
     return {
       EC: 3,
-      EM: "Invalid OTP",
+      EM: "OTP không hợp lệ",
     };
   }
 
@@ -219,7 +219,7 @@ const verifyOTPService = async (email, otp) => {
 
   return {
     EC: 0,
-    EM: "OTP verified successfully",
+    EM: "Xác thực OTP thành công",
   };
 };
 
@@ -230,7 +230,7 @@ const resetPasswordService = async (email, newPassword) => {
   if (!isVerified) {
     return {
       EC: 2,
-      EM: "OTP verification required before resetting password",
+      EM: "Xác thực OTP là bắt buộc trước khi đặt lại mật khẩu",
     };
   }
 
@@ -245,7 +245,7 @@ const resetPasswordService = async (email, newPassword) => {
 
   return {
     EC: 0,
-    EM: "Password reset successfully",
+    EM: "Đặt lại mật khẩu thành công",
   };
 };
 
@@ -253,7 +253,7 @@ const refreshTokenService = async (refreshToken) => {
   if (!refreshToken) {
     return {
       EC: 1,
-      EM: "Refresh token is required",
+      EM: "Refresh token là bắt buộc",
     };
   }
   const user = verifyRefreshToken(refreshToken);

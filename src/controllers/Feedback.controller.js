@@ -15,7 +15,7 @@ const createFeedback = async (req, res) => {
       const { product_id, variant_id, order_id, content, rating, color, variant } = req.body;
 
       if (!product_id || !order_id || !content || !rating || !color || !variant) {
-        return res.error(3, "Information is required");
+        return res.error(3, "Các thông tin là bắt buộc");
       }
 
       // const files = req.files || [];
@@ -49,7 +49,7 @@ const createFeedback = async (req, res) => {
         : res.error(result.EC, result.EM);
     });
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -94,7 +94,7 @@ const updateFeedback = async (req, res) => {
         : res.error(result.EC, result.EM);
     });
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -107,7 +107,7 @@ const deleteFeedback = async (req, res) => {
       ? res.success(null, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -120,7 +120,7 @@ const getAllFeedback = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 

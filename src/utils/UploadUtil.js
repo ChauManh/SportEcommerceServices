@@ -35,7 +35,7 @@ const mapProductImages = (productData, filesMap) => {
     !filesMap["product_img"] ||
     filesMap["product_img"].length === 0
   ) {
-    throw new Error("Main product image is required");
+    throw new Error("Ảnh chính sản phẩm là bắt buộc");
   }
 
   productData.product_img = filesMap["product_img"]
@@ -59,7 +59,7 @@ const updateProductImages = (filesMap, productData, existingProduct) => {
     !filesMap["product_img"] ||
     filesMap["product_img"].length === 0
   ) {
-    throw new Error("Main product image is required");
+    throw new Error("Ảnh chính sản phẩm là bắt buộc");
   }
   productData.product_img = filesMap["product_img"]
   ? filesMap["product_img"][0]
@@ -106,7 +106,7 @@ const uploadAvtUser = async (req, res) => {
     await uploadFiles(req, res); // Xử lý upload file
 
     if (!req.files || req.files.length === 0) {
-      return { success: false, message: "No avatar uploaded", avatar: null };
+      return { success: false, message: "Không có ảnh đại diện tải lên", avatar: null };
     }
 
     const avatarFile = req.files.find((file) => file.fieldname === "avatar");

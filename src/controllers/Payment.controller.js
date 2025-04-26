@@ -13,7 +13,7 @@ const paymentController = {
         : res.error(response.EC, response.EM, 403);
     } catch (error) {
       console.log("Internal error", error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -26,7 +26,7 @@ const paymentController = {
         : res.error(response.EC, response.EM);
     } catch (error) {
       console.log("Internal error", error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -39,7 +39,7 @@ const paymentController = {
         : res.error(response.EC, response.EM);
     } catch (error) {
       console.log("Internal error", error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   }
 };

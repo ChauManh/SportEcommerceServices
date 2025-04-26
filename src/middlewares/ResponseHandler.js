@@ -7,7 +7,7 @@ const responseHandler = (req, res, next) => {
     return res.status(status).json({ EC: errorCode, EM: message });
   };
 
-  res.InternalError = (message = "Internal Error") => {
+  res.InternalError = (message = "Lỗi hệ thống !!!") => {
     return res.status(500).json({ EC: -1, EM: message });
   };
 

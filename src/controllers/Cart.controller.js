@@ -23,7 +23,7 @@ const cartController = {
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -36,7 +36,7 @@ const cartController = {
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -56,7 +56,7 @@ const cartController = {
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -69,7 +69,7 @@ const cartController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM, 400);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -88,7 +88,7 @@ const cartController = {
         ? res.success(result.cart, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 };

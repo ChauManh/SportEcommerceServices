@@ -45,7 +45,7 @@ const createFeedback = async(newFeedback) =>{
 
         return {
             EC: 0,
-            EM: "Create feedback successfully",
+            EM: "Đánh giá thành công",
             data: feedback
           };
     } catch (error) {
@@ -62,10 +62,10 @@ const updateFeedback = async (feedbackId, updateData) => {
         );
 
         if (!updatedFeedback) {
-            return { EC: 2, EM: "Feedback không tồn tại", data: null };
+            return { EC: 2, EM: "Đánh giá không tồn tại", data: null };
         }
 
-        return { EC: 0, EM: "Cập nhật feedback thành công", data: updatedFeedback };
+        return { EC: 0, EM: "Cập nhật đánh giá thành công", data: updatedFeedback };
     } catch (error) {
         throw error;
     }
@@ -76,10 +76,10 @@ const deleteFeedback = async(feedbackId) =>{
     try {
         const existFeedback = await Feedback.findById(feedbackId);
         if (!existFeedback) {
-            return { EC: 1, EM: "Feedback không tồn tại", data: null };
+            return { EC: 1, EM: "Đánh giá không tồn tại", data: null };
         }
         await Feedback.findByIdAndDelete(feedbackId);
-        return { EC: 0, EM: "Xóa feedback thành công"};
+        return { EC: 0, EM: "Xóa đánh giá thành công"};
     } catch (error) {
         throw error;
     }
@@ -89,11 +89,11 @@ const getAllFeedback = async(productId) =>{
     try {
         const existingProduct = await Product.findById(productId);
         if (!existingProduct) {
-            return { EC: 1, EM: "Product không tồn tại", data: null };
+            return { EC: 1, EM: "Sản phẩm không tồn tại", data: null };
         }
 
         const list_feedback = await Feedback.find({product_id: productId}).populate('user_id', 'user_name avt_img');;
-        return { EC: 0, EM: "Get feedback thành công", data: list_feedback};
+        return { EC: 0, EM: "Lấy thông tin đánh giá thành công", data: list_feedback};
     } catch (error) {
         throw error
     }

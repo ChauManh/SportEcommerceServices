@@ -22,7 +22,7 @@ const authController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -36,7 +36,7 @@ const authController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -48,7 +48,7 @@ const authController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 400);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -60,7 +60,7 @@ const authController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -72,7 +72,7 @@ const authController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.error(-1, error.message, 500);
+      return res.InternalError();
     }
   },
 
@@ -84,7 +84,7 @@ const authController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -96,7 +96,7 @@ const authController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -108,7 +108,7 @@ const authController = {
         ? res.success(result.result, result.EM)
         : res.error(result.EC, result.EM, 401);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 };

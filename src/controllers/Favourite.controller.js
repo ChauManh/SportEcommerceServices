@@ -17,7 +17,7 @@ const favouriteController = {
         ? res.success(result.favourite, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -29,7 +29,7 @@ const favouriteController = {
         ? res.success(result.favourites, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -41,7 +41,7 @@ const favouriteController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 };

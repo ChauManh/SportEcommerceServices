@@ -5,17 +5,17 @@ const getUserService = async (userId) => {
   try {
     const user = await User.findById(userId).select("-password");
     if (!user) {
-      return { EC: 1, EM: "User not found" };
+      return { EC: 1, EM: "Không tìm thấy người dùng" };
     }
     return {
       EC: 0,
-      EM: "Get user successfully",
+      EM: "Lấy thông tin người dùng thành công",
       user,
     };
   } catch (error) {
     return {
-      EC: 1,
-      EM: "Error getting user",
+      EC: -99,
+      EM: "Lỗi hệ thống",
     };
   }
 };
@@ -27,13 +27,13 @@ const getAllUsersService = async () => {
     );
     return {
       EC: 0,
-      EM: "Get all users successfully",
+      EM: "Lấy tất cả người dùng thành công",
       users,
     };
   } catch (error) {
     return {
       EC: 1,
-      EM: "Error getting users",
+      EM: "Lỗi hệ thống",
     };
   }
 };
@@ -43,14 +43,14 @@ const changePasswordService = async (email, oldPassword, newPassword) => {
 
   const isMatch = await bcrypt.compare(oldPassword, user.password);
   if (!isMatch) {
-    return { EC: 2, EM: "Incorrect old password" };
+    return { EC: 2, EM: "Mật khẩu cũ không chính xác" };
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   user.password = hashedPassword;
   await user.save();
 
-  return { EC: 0, EM: "Password changed successfully" };
+  return { EC: 0, EM: "Đổi mật khẩu thành công" };
 };
 
 const updateUserService = async (userId, dataUpdate) => {
@@ -61,7 +61,7 @@ const updateUserService = async (userId, dataUpdate) => {
     Object.assign(user, dataUpdate);
     await user.save();
 
-    return { EC: 0, EM: "Update User Information Successfully!", user };
+    return { EC: 0, EM: "Thay đổi thông tin thành công!", user };
   } catch (error) {
     return { EC: 2, EM: error.message };
   }
@@ -81,7 +81,7 @@ const addAddressService = async (userId, addressData) => {
 
     return {
       EC: 0,
-      EM: "Add Address Successfully!",
+      EM: "Thêm địa chỉ thành công",
       addresses: user.addresses,
     };
   } catch (error) {
@@ -94,7 +94,7 @@ const updateAddressService = async (userId, index, updateData) => {
     const user = await User.findById(userId);
 
     if (index < 0 || index >= user.addresses.length) {
-      return { EC: 2, EM: "Address not found" };
+      return { EC: 2, EM: "Không tìm thấy địa chỉ" };
     }
 
     // Cập nhật thông tin địa chỉ
@@ -108,7 +108,7 @@ const updateAddressService = async (userId, index, updateData) => {
     await user.save();
     return {
       EC: 0,
-      EM: "Updated address successfully",
+      EM: "Cập nhật địa chỉ thành công",
       addresses: user.addresses,
     };
   } catch (error) {
@@ -119,17 +119,17 @@ const updateAddressService = async (userId, index, updateData) => {
 const saveDiscount = async(userId, discountId)=>{
   try {
     const user = await User.findById(userId);
-    if (!user) return { EC: 1, EM: "User not found" };
+    if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
 
     const discount = await Discount.findById(discountId);
-    if (!discount) return { EC: 2, EM: "Discount not found" };
+    if (!discount) return { EC: 2, EM: "Mã giảm giá không tồn tại" };
 
     const alreadySaved = user.discounts.some(d => d.equals(discount._id));
-    if (alreadySaved) return { EC: 0, EM: "Discount already saved"};
+    if (alreadySaved) return { EC: 0, EM: "Mã giảm giá đã được lưu"};
 
     user.discounts.push(discount._id);
     await user.save();
-    return { EC: 0, EM: "Save discount successfully", data: user.discounts };
+    return { EC: 0, EM: "Lưu mã giảm giá thành công", data: user.discounts };
   } catch (error) {
     return { EC: 3, EM: error.message };
   }
@@ -138,11 +138,11 @@ const saveDiscount = async(userId, discountId)=>{
 const getDiscountUser = async(userId) =>{
   try {
     const user = await User.findById(userId);
-    if (!user) return { EC: 1, EM: "User not found" };
+    if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
 
     const discounts = await Discount.find({_id : {$in: user.discounts}})
 
-    return {EC: 0, EM: "Get discounts successfully", data: discounts}
+    return {EC: 0, EM: "Lấy mã giảm giá thành công", data: discounts}
   } catch (error) {
     return { EC: 3, EM: error.message };
   }
@@ -153,7 +153,7 @@ const deleteAddressService = async (userId, index) => {
     const user = await User.findById(userId);
 
     if (index < 0 || index >= user.addresses.length) {
-      return { EC: 2, EM: "Address not found" };
+      return { EC: 2, EM: "Địa chỉ không tồn tại" };
     }
 
     if (user.addresses[index].is_default) {
@@ -167,7 +167,7 @@ const deleteAddressService = async (userId, index) => {
   
     await user.save();
 
-    return { EC: 0, EM: "Deleted address successfully" };
+    return { EC: 0, EM: "Xóa địa chỉ thành công" };
   } catch (error) {
     return { EC: 3, EM: error.message };
   }

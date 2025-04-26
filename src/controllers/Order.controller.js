@@ -11,7 +11,7 @@ const createOrder = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -28,7 +28,7 @@ const getAllOrder = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -45,7 +45,7 @@ const getOrderByUser = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -58,7 +58,7 @@ const previewOrder = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -82,7 +82,7 @@ const updateStatus = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -96,7 +96,7 @@ const getDetailOrder = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -115,7 +115,7 @@ const handleCancelPayment = async (req, res) => {
       ? res.success(response.data, response.EM)
       : res.error(response.EC, response.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -133,7 +133,7 @@ const handleCancelPayment = async (req, res) => {
 //       ? res.success(response.data, response.EM)
 //       : res.error(response.EC, response.EM);
 //   } catch (error) {
-//     return res.InternalError(error.message);
+//     return res.InternalError();
 //   }
 // }
 
@@ -147,7 +147,7 @@ const getRevenue = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 module.exports = {

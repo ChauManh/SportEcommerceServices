@@ -22,7 +22,7 @@ const userController = {
         ? res.success(result.user, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -34,7 +34,7 @@ const userController = {
         ? res.success(result.users, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -52,7 +52,7 @@ const userController = {
         ? res.success(null, result.EM)
         : res.error(result.EC, result.EM);
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -80,7 +80,7 @@ const userController = {
         : res.error(updateResult.EC, updateResult.EM);
     } catch (error) {
       console.error("Error updating user:", error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -99,7 +99,7 @@ const userController = {
         ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
         : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -118,7 +118,7 @@ const userController = {
         ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
         : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -135,7 +135,7 @@ const userController = {
         ? res.success({ EC: 0, EM: result.EM })
         : res.error({ EC: result.EC, EM: result.EM });
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -151,7 +151,7 @@ const userController = {
         : res.error(result.EC, result.EM)
       
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -165,7 +165,7 @@ const userController = {
         ? res.success(result.data, result.EM)
         : res.error(result.EC, result.EM)
     } catch (error) {
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -180,7 +180,7 @@ const userController = {
         : res.error({ EC: response.EC, EM: response.EM });
     } catch (error) {
       console.error(error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -195,7 +195,7 @@ const userController = {
       return res.success(response.messages, "Lấy lịch sử chat thành công.");
     } catch (error) {
       console.error(error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   },
 
@@ -210,7 +210,7 @@ const userController = {
       return res.success(null, "Xóa đoạn chat thành công.");
     } catch (error) {
       console.error(error);
-      return res.InternalError(error.message);
+      return res.InternalError();
     }
   }
 };

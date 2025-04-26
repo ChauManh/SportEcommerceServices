@@ -12,7 +12,7 @@ const createStore = async (req, res) => {
       const { store_address, store_phone, store_email } = req.body;
 
       if (!store_address || !store_phone || !store_email) {
-        return res.error(3, "Information is required");
+        return res.error(3, "Thông tin là bắt buộc");
       }
 
       const { images } = processFiles(req.files);
@@ -30,7 +30,7 @@ const createStore = async (req, res) => {
         : res.error(result.EC, result.EM);
     });
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -69,7 +69,7 @@ const updateStore = async (req, res) => {
         : res.error(result.EC, result.EM);
     });
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -82,7 +82,7 @@ const getDetailStore = async (req, res) => {
       ? res.success(result.EM, result.data)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError("Loi he thong");
+    return res.InternalError();
   }
 };
 module.exports = {

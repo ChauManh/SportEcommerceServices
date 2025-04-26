@@ -8,7 +8,7 @@ const createDiscount = async(req, res) =>{
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.InternalError(error.message);
+        return res.InternalError();
     }
 }
 
@@ -25,7 +25,7 @@ const getDetailDiscount = async(req, res) =>{
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -36,7 +36,7 @@ const getAllDiscount = async(req, res) =>{
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -54,7 +54,7 @@ const updateDiscount = async(req, res) =>{
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -71,7 +71,7 @@ const deleteDiscount = async(req, res) =>{
             ? res.success(null, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -85,8 +85,7 @@ const getForOrder = async(req, res) =>{
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM);
     } catch (error) {
-        console.log(error.message)
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 module.exports = {

@@ -11,7 +11,7 @@ const createNotificationForAll = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -25,7 +25,7 @@ const readNotification = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -38,7 +38,7 @@ const getNotification = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -50,7 +50,7 @@ const getUserNotifications = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -62,7 +62,7 @@ const getAllNotification = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -77,7 +77,7 @@ const deleteNotification = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 module.exports = {

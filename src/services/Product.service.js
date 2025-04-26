@@ -56,7 +56,7 @@ const createProduct = async (newProduct) => {
     if (newProductInstance) {
       return {
         EC: 0,
-        EM: "Create new product successfully",
+        EM: "Tạo sản phẩm mới thành công",
         data: newProductInstance,
       };
     }
@@ -76,7 +76,7 @@ const updateProduct = async (productId, updatedProduct) => {
     if (!existingProduct) {
       return {
         EC: 1,
-        EM: "Product not found",
+        EM: "Không tìm thấy sản phẩm",
         data: []
       };
     }
@@ -123,13 +123,13 @@ const updateProduct = async (productId, updatedProduct) => {
     if (updatedProductInstance) {
       return {
         EC: 0,
-        EM: "Product updated successfully",
+        EM: "Cập nhật sản phẩm thành công",
         data: updatedProductInstance,
       };
     } else {
       return {
         EC: 2,
-        EM: "Failed to update product",
+        EM: "Cập nhật sản phẩm thất bại",
         data: []
       };
     }
@@ -150,14 +150,14 @@ const getDetailsProduct = async (id) => {
     if (!product) {
       return {
         EC: 1,
-        EM: "The product is not defined",
+        EM: "Không tìm thấy sản phẩm",
         data: []
       };
     }
 
     return {
       EC: 0,
-      EM: "Get product details successfully",
+      EM: "Lấy chi tiết sản phẩm thành công",
       data: product,
     };
   } catch (error) {
@@ -176,7 +176,7 @@ const deleteProduct = async (id) => {
     if (!product) {
       return {
         EC: 1,
-        EM: "The product does not exist",
+        EM: "Không tìm thấy sản phẩm",
         data: []
       };
     }
@@ -185,7 +185,7 @@ const deleteProduct = async (id) => {
 
     return {
       EC: 0,
-      EM: "Product deleted successfully",
+      EM: "Xóa sản phẩm thành công",
       data: []
     };
   } catch (error) {

@@ -7,7 +7,7 @@ const createCategory = async(categoryData) =>{
         if(existingCategory){
             return {
                 EC: 1,
-                EM: "Category already exists"
+                EM: "Danh mục đã tồn tại"
             }
         }
 
@@ -15,7 +15,7 @@ const createCategory = async(categoryData) =>{
         await newCategory.save()
         return{
             EC: 0,
-            EM: "Create new category successfully",
+            EM: "Tạo danh mục mới thành công",
             data: newCategory
         }
     } catch (error) {
@@ -29,13 +29,13 @@ const getDetailCategory = async(categoryId) =>{
         if(!existingCategory){
             return {
                 EC: 2,
-                EM: "Category doesn't exist"
+                EM: "Danh mục không tồn tại"
             }
         }
 
         return{
             EC: 0,
-            EM: "Get detail category successfully",
+            EM: "Lấy chi tiết danh mục thành công",
             data: existingCategory
         }
     } catch (error) {
@@ -49,7 +49,7 @@ const getAllCategory = async() =>{
 
         return{
             EC: 0,
-            EM: "Get detail category successfully",
+            EM: "Lấy tất cả danh mục thành công",
             data: listCategory
         }
     } catch (error) {
@@ -64,13 +64,13 @@ const getSubCategory = async(categoryId) =>{
         if(!existingCategory){
             return {
                 EC: 2,
-                EM: "Category doesn't exist"
+                EM: "Danh mục không tồn tại"
             }
         }
         const listSubCategory = await Category.find({category_parent_id: categoryId})
         return{
             EC: 0,
-            EM: "Get sub category successfully",
+            EM: "Lấy danh mục con thành công",
             data: listSubCategory
         }
     } catch (error) {
@@ -84,7 +84,7 @@ const updateCategory = async(categoryId, updateData) =>{
         if(!existingCategory){
             return {
                 EC: 2,
-                EM: "Category doesn't exist"
+                EM: "Danh mục không tồn tại"
             }
         }
         const updateCategory = await Category.findByIdAndUpdate(
@@ -94,7 +94,7 @@ const updateCategory = async(categoryId, updateData) =>{
         )
         return{
             EC: 0,
-            EM: "Update category successfully",
+            EM: "Cập nhật danh mục thành công",
             data: updateCategory
         }
     } catch (error) {
@@ -108,7 +108,7 @@ const deleteCategory = async(categoryId) =>{
         if(!existingCategory){
             return {
                 EC: 2,
-                EM: "Category doesn't exist"
+                EM: "Danh mục không tồn tại"
             }
         }
         
@@ -116,7 +116,7 @@ const deleteCategory = async(categoryId) =>{
 
         return{
             EC: 0,
-            EM: "Delete sub category successfully",
+            EM: "Xóa danh mục thành công",
         }
     } catch (error) {
         throw new Error(error.message)

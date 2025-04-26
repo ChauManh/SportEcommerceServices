@@ -41,7 +41,6 @@ const createProduct = async (req, res) => {
   try {
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
     if (!uploadResult.success) {
-      //return res.status(400).json({ message: "Upload error", error: uploadResult.error });
       return res.error(1, uploadResult.error);
     }
 
@@ -53,7 +52,7 @@ const createProduct = async (req, res) => {
         : [];
 
     if (!Array.isArray(productData.colors)) {
-      return res.error(1, "Invalid colors format. Expected an array.");
+      return res.error(1, "Định dạng màu không hợp lệ");
     }
 
     const filesMap = processUploadedFiles(req);
@@ -72,18 +71,13 @@ const createProduct = async (req, res) => {
       : res.error(result.EC, result.EM);
   } catch (error) {
     console.error("Error creating product:", error);
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-
-    const existingProduct = await Product.findById(productId);
-    if (!existingProduct) {
-      return res.error(1, "Product doesn't exist");
-    }
 
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
     if (!uploadResult.success) {
@@ -96,10 +90,10 @@ const updateProduct = async (req, res) => {
       try {
         productData.colors = JSON.parse(req.body.colors);
         if (!Array.isArray(productData.colors)) {
-          return res.error(1, "Invalid variants format. Expected an array.");
+          return res.error(1, "Định dạng màu không hợp lệ");
         }
       } catch (error) {
-        return res.error(1, "Invalid JSON format for variants");
+        return res.error(1, "Định dạng JSON không hợp lệ cho các biến thể");
       }
     } else {
       productData.colors = existingProduct.colors || [];
@@ -118,7 +112,7 @@ const updateProduct = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
     z;
   }
 };
@@ -133,7 +127,7 @@ const deleteProduct = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -145,7 +139,7 @@ const getDetailsProduct = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 
@@ -180,7 +174,7 @@ const getAllProduct = async (req, res) => {
       ? res.success(result.data, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    return res.InternalError(error.message);
+    return res.InternalError();
   }
 };
 

@@ -39,7 +39,7 @@ const readNotification = async (notificationId) => {
     if (!notification) {
       return {
         EC: 1,
-        EM: "Thong bao k ton tai",
+        EM: "Thông báo không tồn tại",
       };
     }
 
@@ -51,7 +51,7 @@ const readNotification = async (notificationId) => {
 
     return {
       EC: 0,
-      EM: "Doc thong bao thanh cong",
+      EM: "Đọc thông báo thành công",
     };
   } catch (error) {
     return {
@@ -68,12 +68,12 @@ const getNotification = async (notificationId) => {
     if (!notification) {
       return {
         EC: 1,
-        EM: "Thong bao k ton tai",
+        EM: "Thông báo không tồn tại",
       };
     }
     return {
       EC: 0,
-      EM: "Lay thong bao thanh cong",
+      EM: "Lấy thông tin thông báo thành công",
       data: notification,
     };
   } catch (error) {
@@ -115,7 +115,7 @@ const getAllNotification = async () => {
     const notification = await Notification.find({});
     return {
       EC: 0,
-      EM: "Lay tat ca thong bao thanh cong",
+      EM: "Lấy tất cả thông tin thông báo thành công",
       data: notification,
     };
   } catch (error) {

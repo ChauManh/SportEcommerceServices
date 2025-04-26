@@ -196,7 +196,7 @@ const createOrder = async (newOrder, user_id) => {
 
     return {
       EC: 0,
-      EM: "Order created successfully",
+      EM: "Đơn hàng được tạo thành công",
       data: {
         ...savedOrder.toObject(),
         resultPayOS,
@@ -244,12 +244,12 @@ const getAllOrder = async (orderStatus) => {
 const getOrderByUser = async (userId, orderStatus) => {
   try {
     if (!userId) {
-      return { EC: 1, EM: "User ID is required" };
+      return { EC: 1, EM: "Mã khách hàng là bắt buộc" };
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return { EC: 2, EM: "User doesn't exist" };
+      return { EC: 2, EM: "Người dùng không tồn tại" };
     }
 
     let filter = { user_id: userId };
@@ -296,7 +296,7 @@ const previewOrder = async (newOrder, userId) => {
     } = newOrder;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
-      return { EC: 1, EM: "Products array is required" };
+      return { EC: 1, EM: "Danh sách sản phẩm là bắt buộc" };
     }
 
     let delivery_fee = 50000;
@@ -306,24 +306,24 @@ const previewOrder = async (newOrder, userId) => {
       products.map(async (item) => {
         const product = await Product.findById(item.product_id);
         if (!product)
-          return { EC: 2, EM: `Product not found: ${item.product_id}` };
+          return { EC: 2, EM: `Không tìm thấy sản phẩm: ${item.product_id}` };
 
         const color = product.colors.find(
           (c) => c._id.toString() === item.color
         );
         if (!color) {
-          return { EC: 3, EM: `Color not found: ${item.color_id}` };
+          return { EC: 3, EM: `Không tìm thấy màu: ${item.color_id}` };
         }
 
         const variant = color.variants.find(
           (v) => v._id.toString() === item.variant
         );
         if (!variant) {
-          return { EC: 4, EM: `Variant not found: ${item.variant_id}` };
+          return { EC: 4, EM: `Không tìm thấy mẫu: ${item.variant_id}` };
         }
 
         if (variant.variant_countInStock < item.quantity) {
-          return { EC: 5, EM: `Product ${item.product_id} is out of stock` };
+          return { EC: 5, EM: `Sản phẩm ${item.product_id} đã hết hàng` };
         }
 
         return {
@@ -413,7 +413,7 @@ const previewOrder = async (newOrder, userId) => {
 
     return {
       EC: 0,
-      EM: "Get preview order successfully",
+      EM: "Xem trước đơn hàng thành công",
       data: previewOrder,
     };
   } catch (error) {
@@ -431,7 +431,7 @@ const updateStatus = async (
 ) => {
   const order = await Order.findById(orderId);
   if (!order) {
-    return { EC: 1, EM: "Order doesn't exist" };
+    return { EC: 1, EM: "Đơn hàng không tồn tại" };
   }
   const isOwner = order.user_id.toString() === currentUserId;
   const isAdmin = currentUserRole === "admin";
@@ -653,7 +653,7 @@ const getDetailOrder = async (orderId, user) => {
     }
     return {
       EC: 0,
-      EM: "Get detail order successfully",
+      EM: "Xem chi tiết đơn hàng thành công",
       data: order,
     };
   } catch (error) {
@@ -667,14 +667,14 @@ const handleCancelPaymentService = async (
   currentUserRole
 ) => {
   if (!orderCode) {
-    return { EC: 1, EM: "Order code is required" };
+    return { EC: 1, EM: "Mã đơn hàng là bắt buộc" };
   }
   if (!checkPaymentIsCancelService(orderCode)) {
-    return { EC: 2, EM: "Invalid Information" };
+    return { EC: 2, EM: "Thông tìn là bắt buộc" };
   } else {
     const order = await Order.findOne({ order_code: orderCode });
     if (!order) {
-      return { EC: 3, EM: "Order doesn't exist" };
+      return { EC: 3, EM: "Đơn hàng không tồn tại" };
     }
     if (order.order_payment_method === "Paypal" && order.is_paid === false) {
       const result = await updateStatus(
@@ -684,7 +684,7 @@ const handleCancelPaymentService = async (
         currentUserRole
       );
       if (result.EC === 0) {
-        return { EC: 0, EM: "Order cancelled successfully", data: result.data };
+        return { EC: 0, EM: "Hủy đơn hàng thành công", data: result.data };
       } else {
         return { EC: 4, EM: result.EM };
       }

@@ -47,7 +47,7 @@ const chatWithBotService = async (message, user, history = []) => {
       chat.updatedAt = new Date();
       await chat.save();
 
-      return { EC: 0, EM: "Reply success", data: reply };
+      return { EC: 0, EM: "Trả lời thành công", data: reply };
     } else {
       messages = [
         {
@@ -76,7 +76,7 @@ const chatWithBotService = async (message, user, history = []) => {
       );
 
       const reply = response.data.choices[0].message.content;
-      return { EC: 0, EM: "Reply success", data: reply };
+      return { EC: 0, EM: "Trả lời thành công", data: reply };
     }
   } catch (error) {
     console.error("Chatbot error:", error.message);
@@ -116,7 +116,7 @@ const SearchProductService = async (message) => {
         );
         const filters = response.data.choices[0].message.content;
         console.log(filters);
-        return { EC: 0, EM: "Reply success", data: filters };
+        return { EC: 0, EM: "Trả lời thành công", data: filters };
 
     } catch (error) {
       return { EC: 2, EM: error.message, data: null};

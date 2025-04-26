@@ -9,7 +9,7 @@ const createCategory = async(req, res)=> {
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -25,7 +25,7 @@ const getDetailCategory = async(req, res)=> {
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -39,7 +39,7 @@ const getAllCategory = async(req, res)=> {
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -55,7 +55,7 @@ const getSubCategory = async(req, res)=> {
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -71,7 +71,7 @@ const updateCategory = async(req, res)=> {
             ? res.success(result.data, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 
@@ -87,7 +87,7 @@ const deleteCategory = async(req, res)=> {
             ? res.success(null, result.EM)
             : res.error(result.EC, result.EM)
     } catch (error) {
-        return res.InternalError(error.message)
+        return res.InternalError()
     }
 }
 

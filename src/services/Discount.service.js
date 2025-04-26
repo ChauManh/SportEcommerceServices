@@ -11,7 +11,7 @@ const createDiscount = async (newDiscount) => {
       discount_code: newDiscount.discount_code,
     });
     if (existingDiscount) {
-      return { EC: 1, EM: "Discount already exists", data: null };
+      return { EC: 1, EM: "Mã giảm giá này đã tồn tại", data: null };
     }
     const discountData = new Discount(newDiscount);
     await discountData.save();
@@ -35,7 +35,7 @@ const createDiscount = async (newDiscount) => {
     });
     return {
       EC: 0,
-      EM: "Create new discount successfully",
+      EM: "Tạo mã giảm giá mới thành công",
       data: discountData,
     };
   } catch (error) {
@@ -48,12 +48,12 @@ const getDetailDiscount = async (discountId) => {
     const existingDiscount = await Discount.findById(discountId);
 
     if (!existingDiscount) {
-      return { EC: 2, EM: "Discount doesn't exits" };
+      return { EC: 2, EM: "Mã giảm giá không tồn tại" };
     }
 
     return {
       EC: 0,
-      EM: "Get discount successfully",
+      EM: "Lấy thông tin mã giảm giá thành công",
       data: existingDiscount,
     };
   } catch (error) {
@@ -67,7 +67,7 @@ const getAllDiscount = async () => {
 
     return {
       EC: 0,
-      EM: "Get all discount successfully",
+      EM: "Lấy tất cả mã giảm giá thành công",
       data: listDiscount,
     };
   } catch (error) {
@@ -80,7 +80,7 @@ const updateDiscount = async (discountId, updateData) => {
     const existingDiscount = await Discount.findById(discountId);
 
     if (!existingDiscount) {
-      return { EC: 2, EM: "Discount doesn't exits" };
+      return { EC: 2, EM: "Mã giảm giá này không tồn tại" };
     }
 
     const updatedDiscount = await Discount.findByIdAndUpdate(
@@ -91,7 +91,7 @@ const updateDiscount = async (discountId, updateData) => {
 
     return {
       EC: 0,
-      EM: "Update discount successfully",
+      EM: "Cập nhật mã giảm giá thành công",
       data: updatedDiscount,
     };
   } catch (error) {
@@ -104,13 +104,13 @@ const deleteDiscount = async (discountId) => {
     const existingDiscount = await Discount.findById(discountId);
 
     if (!existingDiscount) {
-      return { EC: 2, EM: "Discount doesn't exits" };
+      return { EC: 2, EM: "Mã giảm giá này không tồn tại" };
     }
 
     await existingDiscount.delete();
     return {
       EC: 0,
-      EM: "Delete discount successfully",
+      EM: "Xóa mã giảm giá thành công",
     };
   } catch (error) {
     throw new Error(error.message);
@@ -120,13 +120,13 @@ const deleteDiscount = async (discountId) => {
 const getForOrder = async (userId, productIds) => {
   try {
     const user = await User.findById(userId);
-    if (!user) return { EC: 2, EM: "User not found" };
+    if (!user) return { EC: 2, EM: "Không tìm thấy người dùng" };
 
     const products = await Product.find({ _id: { $in: productIds } }).populate(
       "product_category"
     );
 
-    if (products.length === 0) return { EC: 3, EM: "Product not found" };
+    if (products.length === 0) return { EC: 3, EM: "Không tìm thấy sản phẩm" };
     const now = new Date();
     const discounts = await Discount.find({
       _id: { $in: user.discounts },
@@ -135,7 +135,7 @@ const getForOrder = async (userId, productIds) => {
       discount_end_day: { $gte: now },
     });
     if (discounts.length === 0)
-      return { EC: 0, EM: "Discount not found", discounts: [] };
+      return { EC: 0, EM: "Không tìm thấy mã giảm giá", discounts: [] };
 
     const applicableDiscounts = discounts.filter((discount) => {
       const appliesToProduct = products.every((product) =>
@@ -153,7 +153,7 @@ const getForOrder = async (userId, productIds) => {
 
     return {
       EC: 0,
-      EM: "Get discount successfully",
+      EM: "Lấy mã giảm giá thành công",
       data: applicableDiscounts,
     };
   } catch (error) {
