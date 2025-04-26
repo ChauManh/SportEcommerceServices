@@ -1,10 +1,11 @@
 const Feedback = require('../models/Feedback.model');
 const Order = require('../models/Order.model');
 const Product = require('../models/Product.model');
+const checkFeedbackAndModerate = require('../utils/OpenAIModeration');
 
 const createFeedback = async(newFeedback) =>{
     try {
-        const { order_id, product_id, user_id, variant, color } = newFeedback;
+        const { order_id, product_id, user_id, variant, color, content } = newFeedback;
 
         const existingFeedback = await Feedback.findOne({ order_id, product_id, user_id, variant, color });
 
@@ -15,6 +16,15 @@ const createFeedback = async(newFeedback) =>{
                 data: null
             };
         }
+
+        const moderationFeedback = await checkFeedbackAndModerate(content);
+        if (moderationFeedback.isFlagged){
+            return({
+                EC: 3,
+                EM: "Feedback chứa nội dung k phù hợp"
+            })
+        }
+        
         const feedback = new Feedback(newFeedback);
         await feedback.save();
         
