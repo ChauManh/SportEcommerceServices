@@ -21,11 +21,7 @@ app.use(express.static(path.join(__dirname, "public"))); // Static files
 app.use(express.urlencoded({ extended: true })); // Xử lý form
 app.use(express.json()); // Xử lý dữ liệu JSON trong request body.
 
-app.use(cors({
-  origin: 'https://www.wtmsport.id.vn', 
-  methods: '*',
-  allowedHeaders: ['Authorization', 'Content-Type']
-}));
+app.use(cors()); // CORS (cho phép truy cập từ các domain khác nhau)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // api documentation
 
 app.use(responseHandler); // Thêm middleware chuẩn hóa response
