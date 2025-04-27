@@ -7,7 +7,6 @@ dotenv.config();
 const ChatbotController = {
     async chatWithBot(req, res) {
         const { message, history } = req.body;
-        console.log("history: ", history);
         const result = await ChatbotService.chatWithBotService(message, req.user, history);
         result.EC === 0
             ? res.success(result.data, result.EM)
@@ -16,7 +15,6 @@ const ChatbotController = {
 
     async SearchProduct(req, res){
         const { message } = req.query;
-        console.log("Message: ", message);
         const result = await ChatbotService.SearchProductService(message);
         console.log(req.user);
         if (req.user && result.EC === 0) {

@@ -27,7 +27,7 @@ const { verifyToken } = require("../middlewares/AuthMiddleWare");
  *             properties:
  *               productId:
  *                 type: string
- *                 example: "65abcf789123de456f789abc"
+ *                 example: "67f4c14f8448b36def8b29cd"
  *     responses:
  *       201:
  *         description: Cập nhật danh sách yêu thích thành công
@@ -49,7 +49,7 @@ router.patch("/", verifyToken, FavoriteController.updateFavourite);
  *       200:
  *         description: Lấy danh sách yêu thích thành công
  *       401:
- *         description: Không có quyền truy cập (token không hợp lệ)
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -66,7 +66,7 @@ router.get("/", verifyToken, FavoriteController.getFavourite);
  *       200:
  *         description: Xóa danh sách sản phẩm yêu thích thành công
  *       401:
- *         description: Không có quyền truy cập (token không hợp lệ)
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */

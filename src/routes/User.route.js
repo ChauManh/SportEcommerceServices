@@ -10,20 +10,95 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *   description: Quản lý người dùng (Admin)
  */
 
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Lấy thông tin người dùng
+ *     description: Lấy thông tin người dùng dựa trên ID người dùng trong token. Token phải được gửi trong header Authorization.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
+ *     responses:
+ *       200:
+ *         description: Lấy thông tin người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Lấy thông tin người dùng thành công"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "609c72ef1b7e8d63f0572c7d"
+ *                     username:
+ *                       type: string
+ *                       example: "test"
+ *                     email:
+ *                       type: string
+ *                       example: "test@gmail.com"
+ *                     name:
+ *                       type: string
+ *                       example: "test"
+ *       400:
+ *         description: Không tìm thấy người dùng
+ *       401:
+ *         description: Token không xác thực
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.get("/", verifyToken, UserController.getUser);
 /**
  * @swagger
  * /get_all_user:
  *   get:
- *     summary: Lấy danh sách người dùng (chỉ dành cho Admin)
- *     tags: [User]
+ *     summary: Lấy tất cả người dùng
+ *     description: Lấy danh sách tất cả người dùng trong hệ thống (không bao gồm admin).
+ *     tags:
+ *       - User
  *     security:
- *       - bearerAuth: []
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
  *     responses:
  *       200:
  *         description: Lấy danh sách người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Lấy tất cả người dùng thành công"
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "609c72ef1b7e8d63f0572c7d"
+ *                       username:
+ *                         type: string
+ *                         example: "user1"
+ *                       email:
+ *                         type: string
+ *                         example: "user1@example.com"
+ *       401:
+ *         description: Token không xác thực
  *       403:
- *         description: Không có quyền truy cập
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -76,13 +151,11 @@ router.get(
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Password changed successfully"
+ *                   example: "Đổi mật khẩu thành công"
  *       400:
- *         description: Thiếu thông tin đầu vào hoặc không hợp lệ
+ *         description: Mật khẩu cũ không chính xác
  *       401:
- *         description: Mật khẩu cũ không đúng
- *       404:
- *         description: Không tìm thấy người dùng
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -130,7 +203,7 @@ router.patch("/change_password", verifyToken, UserController.changePassword);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "Cập nhật thông tin thành công!"
+ *                   example: "Thay đổi thông tin thành công!"
  *                 user:
  *                   type: object
  *                   properties:
@@ -152,32 +225,10 @@ router.patch("/change_password", verifyToken, UserController.changePassword);
  *                     address:
  *                       type: string
  *                       example: "123 Đường ABC, Quận 1, TP.HCM"
- *       400:
- *         description: Lỗi yêu cầu không hợp lệ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 EC:
- *                   type: integer
- *                   example: 1
- *                 EM:
- *                   type: string
- *                   example: "Thiếu thông tin cần thiết!"
+ *       401:
+ *         description: Token không xác thực
  *       500:
- *         description: Lỗi máy chủ nội bộ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 EC:
- *                   type: integer
- *                   example: -1
- *                 EM:
- *                   type: string
- *                   example: "Internal server error"
+ *         description: Lỗi máy chủ
  */
 router.put("/", verifyToken, UserController.updateUser);
 /**
@@ -212,7 +263,9 @@ router.put("/", verifyToken, UserController.updateUser);
  *       200:
  *         description: Cập nhật địa chỉ thành công
  *       400:
- *         description: Lỗi dữ liệu đầu vào
+ *         description: Không tìm thấy địa chỉ
+ *       401:
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -262,45 +315,52 @@ router.patch("/address/:index", verifyToken, UserController.updateAddress);
  *     responses:
  *       200:
  *         description: Thêm địa chỉ thành công
- *       400:
- *         description: Lỗi dữ liệu đầu vào
+ *       401:
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
 router.post("/address", verifyToken, UserController.addAddress);
-
-router.delete("/address/:index", verifyToken, UserController.deleteAddress);
-
 /**
  * @swagger
- * /user/save-discount:
- *   patch:
- *     summary: Lưu mã giảm giá cho người dùng
- *     description: Thêm một mã giảm giá vào danh sách mã giảm giá đã lưu của người dùng.
+ * /user/address/{index}:
+ *   delete:
+ *     summary: Xóa địa chỉ người dùng
+ *     description: Xóa một địa chỉ người dùng tại vị trí chỉ định trong mảng địa chỉ. Nếu địa chỉ xóa là mặc định, một địa chỉ mới sẽ được chọn làm mặc định.
  *     tags:
  *       - User
  *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               discount:
- *                 type: string
- *                 example: "660afcabcdef9876"
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
+ *     parameters:
+ *       - in: path
+ *         name: index
+ *         required: true
+ *         description: Vị trí của địa chỉ trong mảng địa chỉ người dùng
+ *         schema:
+ *           type: integer
+ *           example: 0
  *     responses:
  *       200:
- *         description: Lưu mã giảm giá thành công
+ *         description: Xóa địa chỉ thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Xóa địa chỉ thành công"
  *       400:
- *         description: Lỗi đầu vào hoặc mã giảm giá đã tồn tại
+ *         description: Địa chỉ không tồn tại
  *       401:
- *         description: Unauthorized
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
+router.delete("/address/:index", verifyToken, UserController.deleteAddress);
 router.patch("/save-discount", verifyToken, UserController.saveDiscount);
 
 /**
@@ -326,30 +386,141 @@ router.patch("/save-discount", verifyToken, UserController.saveDiscount);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: Get discounts successfully
+ *                   example: Lấy mã giảm giá thành công
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Discount'
  *       401:
- *         description: Unauthorized
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
 router.get("/get-discount", verifyToken, UserController.getDiscountUser);
-
+/**
+ * @swagger
+ * /user/delete-search-history/{index}:
+ *   delete:
+ *     summary: Xóa lịch sử tìm kiếm của người dùng
+ *     description: Xóa một mục trong lịch sử tìm kiếm của người dùng tại vị trí chỉ định trong mảng lịch sử tìm kiếm.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
+ *     parameters:
+ *       - in: path
+ *         name: index
+ *         required: true
+ *         description: Vị trí của mục trong lịch sử tìm kiếm của người dùng
+ *         schema:
+ *           type: integer
+ *           example: 0
+ *     responses:
+ *       200:
+ *         description: Xóa lịch sử tìm kiếm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Xóa tìm kiếm thành công."
+ *       400:
+ *         description: Dữ liệu yêu cầu không hợp lệ
+ *       401:
+ *         description: Token không xác thực
+ *       403:
+ *         description: Token admin không xác thực
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.delete(
   "/delete-search-history/:index",
   verifyToken,
   UserController.deleteSearchHistory
 );
-
-router.get(
-  "/get-chat-history",
-  verifyToken,
-  UserController.getChatHistory
-);
-
+/**
+ * @swagger
+ * /user/get-chat-history:
+ *   get:
+ *     summary: Lấy lịch sử chat của người dùng
+ *     description: Lấy toàn bộ lịch sử chat của người dùng dựa trên userId trong token. Token phải được gửi trong header Authorization.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
+ *     responses:
+ *       200:
+ *         description: Lấy lịch sử chat thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Lấy lịch sử chat thành công."
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       sender:
+ *                         type: string
+ *                         example: "user"
+ *                       content:
+ *                         type: string
+ *                         example: "Hello, how are you?"
+ *                       timestamp:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-04-27T12:00:00Z"
+ *       400:
+ *         description: Không có đoạn chat của user này.
+ *       401:
+ *         description: Token không xác thực
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.get("/get-chat-history", verifyToken, UserController.getChatHistory);
+/**
+ * @swagger
+ * /user/delete-chat-history:
+ *   delete:
+ *     summary: Xóa lịch sử chat của người dùng
+ *     description: Xóa toàn bộ lịch sử chat của người dùng dựa trên userId trong token. Token phải được gửi trong header Authorization.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []  # Yêu cầu bearer token trong header
+ *     responses:
+ *       200:
+ *         description: Xóa lịch sử chat thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Xóa đoạn chat thành công."
+ *       400:
+ *         description: Không có đoạn chat của user này
+ *       401:
+ *         description: Token không xác thực
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.delete(
   "/delete-chat-history",
   verifyToken,

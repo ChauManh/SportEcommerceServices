@@ -47,7 +47,7 @@ const getLoginHistoryService = async () => {
   const result = await LoginHistory.find().sort({ createdAt: -1 });
   return {
     EC: 0,
-    EM: "Lấy danh sách login history thành công",
+    EM: "Lấy danh sách lịch sử đăng nhập thành công",
     result,
   };
 };
@@ -57,13 +57,13 @@ const getLoginHistoryByIdService = async (id) => {
   if (!loginHistory) {
     return {
       EC: -1,
-      EM: "Login history not found",
+      EM: "Lịch sử đăng nhập không tồn tại",
       result: null,
     };
   }
   return {
     EC: 0,
-    EM: "Lấy chi tiết login History thành công",
+    EM: "Lấy chi tiết lịch sử đăng nhập thành công",
     result: loginHistory,
   };
 };

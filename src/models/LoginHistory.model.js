@@ -50,7 +50,9 @@ const loginHistorySchema = new mongoose.Schema(
     },
     activities: [activitySchema], // Lưu mảng activities để theo dõi hành động trong phiên đăng nhập
   },
-  { timestamps: true }
+  { timestamps: true,
+    collection: "LoginHistory"
+   }
 );
 
 const LoginHistory = mongoose.model("LoginHistory", loginHistorySchema);

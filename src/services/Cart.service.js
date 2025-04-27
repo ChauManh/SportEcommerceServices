@@ -68,32 +68,32 @@ const getCartService = async (user_id) => {
   // );
   let cart = await Cart.findOne({ user_id }).populate("products.product_id").populate("user_id");
   if (!cart) {
-    return { EC: 0, EM: "Cart is empty" };
+    return { EC: 0, EM: "Giỏ hàng trống" };
   }
   await cart.save();
-  return { EC: 0, EM: "Cart fetched successfully", cart };
+  return { EC: 0, EM: "Lấy giỏ hàng thành công", cart };
 };
 
 // Xóa sản phẩm khỏi giỏ hàng
 const removeFromCartService = async ({ user_id, product_id, color_name, variant_name }) => {
   const product = await Product.findOneWithDeleted({ _id: product_id });
   if (!product) {
-    return { EC: 1, EM: "Sản phẩm không tồn tại", cart: null };
+    return { EC: 2, EM: "Sản phẩm không tồn tại", cart: null };
   }
 
   const color = product.colors.find((c) => c.color_name === color_name);
   if (!color) {
-    return { EC: 1, EM: "Màu sắc không tồn tại trong sản phẩm", cart: null };
+    return { EC: 2, EM: "Màu sắc không tồn tại trong sản phẩm", cart: null };
   }
   
   const variant = color.variants.find((v) => v.variant_size === variant_name);
   if (!variant) {
-    return { EC: 1, EM: "Size không tồn tại trong màu đã chọn", cart: null };
+    return { EC: 2, EM: "Size không tồn tại trong màu đã chọn", cart: null };
   }
 
   let cart = await Cart.findOne({ user_id });
   if (!cart) {
-    return { EC: 2, EM: "Cart not found" };
+    return { EC: 1, EM: "Không tìm thấy giỏ hàng" };
   }
 
   // Lọc và xóa sản phẩm khỏi giỏ hàng
@@ -107,7 +107,7 @@ const removeFromCartService = async ({ user_id, product_id, color_name, variant_
   // Lưu lại giỏ hàng đã được cập nhật
   await cart.save();
 
-  return { EC: 0, EM: "Product removed from cart", cart };
+  return { EC: 0, EM: "Xóa sản phẩm khỏi giỏ hàng thành công", cart };
 };
 
 
@@ -115,10 +115,10 @@ const removeFromCartService = async ({ user_id, product_id, color_name, variant_
 const clearCartService = async (user_id) => {
   let cart = await Cart.findOne({ user_id });
   if (!cart) {
-    return { EC: 2, EM: "Cart not found" };
+    return { EC: 2, EM: "Không tìm thấy giỏ hàng" };
   } else {
     await Cart.deleteOne({ user_id });
-    return { EC: 0, EM: "Cart cleared successfully" };
+    return { EC: 0, EM: "Xóa toàn bộ giỏ hàng thành công" };
   }
 };
 
@@ -158,7 +158,7 @@ const decreaseProductQuantity = async (user_id, product_id, color_name, variant_
 
   return {
     EC: 0,
-    EM: "Số lượng sản phẩm giảm thành công",
+    EM: "Giảm số lượng sản phẩm thành công",
     cart,
   };
 };

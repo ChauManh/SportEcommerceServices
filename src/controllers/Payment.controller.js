@@ -10,7 +10,7 @@ const paymentController = {
       const response = await handleWebhookService(data, signature);
       response.EC === 0
         ? res.success(data, response.EM)
-        : res.error(response.EC, response.EM, 403);
+        : res.error(response.EC, response.EM, response?.status);
     } catch (error) {
       console.log("Internal error", error);
       return res.InternalError();

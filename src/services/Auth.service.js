@@ -18,7 +18,7 @@ const createUserService = async ({ user_name, email, password }) => {
   if (existingUser) {
     return {
       EC: 2,
-      EM: "User already exists",
+      EM: "Người dùng đã tồn tại",
     };
   }
 
@@ -33,7 +33,7 @@ const createUserService = async ({ user_name, email, password }) => {
   await newUser.save();
   return {
     EC: 0,
-    EM: "User created successfully",
+    EM: "Đăng ký thành công",
   };
 };
 
@@ -199,7 +199,7 @@ const verifyOTPService = async (email, otp) => {
   if (!storedOTP) {
     return {
       EC: 2,
-      EM: "OTP hết hạn hoặc không tìm thấy",
+      EM: "OTP không hợp lệ",
     };
   }
 
@@ -257,7 +257,6 @@ const refreshTokenService = async (refreshToken) => {
     };
   }
   const user = verifyRefreshToken(refreshToken);
-  console.log(user);
   if (!user) {
     return {
       EC: 2,

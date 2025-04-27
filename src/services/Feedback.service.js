@@ -32,7 +32,7 @@ const createFeedback = async(newFeedback) =>{
         const totalRating = allFeedbacks.reduce((sum, fb) => sum + fb.rating, 0);
         const avgRating = totalRating / allFeedbacks.length;
     
-        const order = await Order.findByIdAndUpdate(
+        await Order.findByIdAndUpdate(
             order_id,
             {
                 $set: {is_feedback: true}

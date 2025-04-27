@@ -1,7 +1,8 @@
-
 const Product = require("../models/Product.model"); // Import model
 const Category = require("../models/Category.model");
-const { createNotificationForAll } = require("../services/Notification.service")
+const {
+  createNotificationForAll,
+} = require("../services/Notification.service");
 // Hàm tạo sản phẩm mới
 const createProduct = async (newProduct) => {
   const {
@@ -64,7 +65,7 @@ const createProduct = async (newProduct) => {
     return {
       EC: 2,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
@@ -77,7 +78,7 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 1,
         EM: "Không tìm thấy sản phẩm",
-        data: []
+        data: [],
       };
     }
 
@@ -105,7 +106,6 @@ const updateProduct = async (productId, updatedProduct) => {
           return sum + (countInStock || 0);
         }, 0)
       );
-      console.log("countInStockOfEachColor", countInStockOfEachColor);
       updateData.product_countInStock = countInStockOfEachColor.reduce(
         (sum, count) => {
           return sum + count;
@@ -130,43 +130,35 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 2,
         EM: "Cập nhật sản phẩm thất bại",
-        data: []
+        data: [],
       };
     }
   } catch (error) {
     return {
       EC: 3,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
 
 const getDetailsProduct = async (id) => {
-  try {
-    const product = await Product.findById(id).populate("product_category");
-    // .populate("product_category", "category_title category_parent_id category_level");
+  const product = await Product.findById(id).populate("product_category");
+  // .populate("product_category", "category_title category_parent_id category_level");
 
-    if (!product) {
-      return {
-        EC: 1,
-        EM: "Không tìm thấy sản phẩm",
-        data: []
-      };
-    }
-
+  if (!product) {
     return {
-      EC: 0,
-      EM: "Lấy chi tiết sản phẩm thành công",
-      data: product,
-    };
-  } catch (error) {
-    return {
-      EC: 2,
-      EM: error.message,
-      data: []
+      EC: 1,
+      EM: "Không tìm thấy sản phẩm",
+      data: [],
     };
   }
+
+  return {
+    EC: 0,
+    EM: "Lấy chi tiết sản phẩm thành công",
+    data: product,
+  };
 };
 
 const deleteProduct = async (id) => {
@@ -177,7 +169,7 @@ const deleteProduct = async (id) => {
       return {
         EC: 1,
         EM: "Không tìm thấy sản phẩm",
-        data: []
+        data: [],
       };
     }
 
@@ -186,32 +178,40 @@ const deleteProduct = async (id) => {
     return {
       EC: 0,
       EM: "Xóa sản phẩm thành công",
-      data: []
+      data: [],
     };
   } catch (error) {
     return {
       EC: 2,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
 
 const getAllProduct = async (filters) => {
-  console.log("filters", filters);
   try {
     let query = {};
-    const genderFilter = filters.category_gender?.length > 0 ? filters.category_gender : [];
+    const genderFilter =
+      filters.category_gender?.length > 0 ? filters.category_gender : [];
 
     let categoryIds = [];
 
-    if (genderFilter.length !== 3 && !filters.category?.length && !filters.category_sub?.length) {
-      const categories = await Category.find({ category_gender: { $in: genderFilter } });
+    if (
+      genderFilter.length !== 3 &&
+      !filters.category?.length &&
+      !filters.category_sub?.length
+    ) {
+      const categories = await Category.find({
+        category_gender: { $in: genderFilter },
+      });
       categoryIds.push(...categories.map((cat) => cat._id));
     }
 
     if (filters.category) {
-      const categoryArray = Array.isArray(filters.category) ? filters.category : [filters.category];
+      const categoryArray = Array.isArray(filters.category)
+        ? filters.category
+        : [filters.category];
 
       for (const categoryType of categoryArray) {
         const matchedCategories = await Category.find({
@@ -231,7 +231,9 @@ const getAllProduct = async (filters) => {
     }
 
     if (filters.category_sub) {
-      const subArray = Array.isArray(filters.category_sub) ? filters.category_sub : [filters.category_sub];
+      const subArray = Array.isArray(filters.category_sub)
+        ? filters.category_sub
+        : [filters.category_sub];
 
       for (const categoryType of subArray) {
         const matchedSubCategories = await Category.find({
@@ -251,17 +253,23 @@ const getAllProduct = async (filters) => {
     }
 
     if (categoryIds.length > 0) {
-      query.product_category = { $in: [...new Set(categoryIds.map((id) => id.toString()))] };
+      query.product_category = {
+        $in: [...new Set(categoryIds.map((id) => id.toString()))],
+      };
     }
 
     if (filters.price_min || filters.price_max) {
       query.product_price = {};
-      if (filters.price_min) query.product_price.$gte = Number(filters.price_min);
-      if (filters.price_max) query.product_price.$lte = Number(filters.price_max);
+      if (filters.price_min)
+        query.product_price.$gte = Number(filters.price_min);
+      if (filters.price_max)
+        query.product_price.$lte = Number(filters.price_max);
     }
 
     if (filters.product_color) {
-      const colorArray = Array.isArray(filters.product_color) ? filters.product_color : [filters.product_color];
+      const colorArray = Array.isArray(filters.product_color)
+        ? filters.product_color
+        : [filters.product_color];
       if (colorArray.length > 0) {
         query["colors.color_name"] = { $in: colorArray };
       }
@@ -271,7 +279,6 @@ const getAllProduct = async (filters) => {
       query.product_brand = { $in: filters.product_brand };
     }
 
-    console.log("query", query);
     const products = await Product.find(query).populate("product_category");
     const totalProducts = await Product.countDocuments(query);
 
