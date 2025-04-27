@@ -1,8 +1,7 @@
 
-const Product = require("../models/Product.model"); // Import model
+const Product = require("../models/Product.model");
 const Category = require("../models/Category.model");
-const { createNotificationForAll } = require("../services/Notification.service")
-// Hàm tạo sản phẩm mới
+
 const createProduct = async (newProduct) => {
   const {
     product_title,
@@ -105,7 +104,6 @@ const updateProduct = async (productId, updatedProduct) => {
           return sum + (countInStock || 0);
         }, 0)
       );
-      console.log("countInStockOfEachColor", countInStockOfEachColor);
       updateData.product_countInStock = countInStockOfEachColor.reduce(
         (sum, count) => {
           return sum + count;
@@ -145,7 +143,6 @@ const updateProduct = async (productId, updatedProduct) => {
 const getDetailsProduct = async (id) => {
   try {
     const product = await Product.findById(id).populate("product_category");
-    // .populate("product_category", "category_title category_parent_id category_level");
 
     if (!product) {
       return {
@@ -198,7 +195,7 @@ const deleteProduct = async (id) => {
 };
 
 const getAllProduct = async (filters) => {
-  console.log("filters", filters);
+  console.log(filters);
   try {
     let query = {};
     const genderFilter = filters.category_gender?.length > 0 ? filters.category_gender : [];
@@ -210,42 +207,44 @@ const getAllProduct = async (filters) => {
       categoryIds.push(...categories.map((cat) => cat._id));
     }
 
-    if (filters.category) {
-      const categoryArray = Array.isArray(filters.category) ? filters.category : [filters.category];
+    const categoryArray = Array.isArray(filters.category) ? filters.category : [filters.category];
+    const subArray = Array.isArray(filters.category_sub) ? filters.category_sub : [filters.category_sub];
 
-      for (const categoryType of categoryArray) {
-        const matchedCategories = await Category.find({
-          category_type: categoryType,
-          category_gender: { $in: genderFilter },
-        });
+    let subCategoryParentIds = [];
 
-        for (const parent of matchedCategories) {
+    if (filters.category_sub) {
+      const subCategories = await Category.find({
+        category_type: { $in: subArray },
+        category_gender: { $in: genderFilter },
+      });
+
+      subCategoryParentIds = subCategories.map((subCat) => ({
+        parentId: subCat.category_parent_id,
+        subId: subCat._id,
+      }));
+    }
+
+    for (const categoryType of categoryArray) {
+      const matchedCategories = await Category.find({
+        category_type: categoryType,
+        category_gender: { $in: genderFilter },
+      });
+
+      for (const parent of matchedCategories) {
+        const relatedSubs = subCategoryParentIds.filter((item) =>
+          item.parentId.toString() === parent._id.toString()
+        );
+
+        if (relatedSubs.length > 0) {
+          categoryIds.push(...relatedSubs.map((item) => item.subId));
+        } else {
           categoryIds.push(parent._id);
+
           const subCats = await Category.find({
             category_parent_id: parent._id,
             category_gender: { $in: genderFilter },
           });
           categoryIds.push(...subCats.map((cat) => cat._id));
-        }
-      }
-    }
-
-    if (filters.category_sub) {
-      const subArray = Array.isArray(filters.category_sub) ? filters.category_sub : [filters.category_sub];
-
-      for (const categoryType of subArray) {
-        const matchedSubCategories = await Category.find({
-          category_type: categoryType,
-          category_gender: { $in: genderFilter },
-        });
-
-        for (const category of matchedSubCategories) {
-          categoryIds.push(category._id);
-          const subSubCats = await Category.find({
-            category_parent_id: category._id,
-            category_gender: { $in: genderFilter },
-          });
-          categoryIds.push(...subSubCats.map((cat) => cat._id));
         }
       }
     }
@@ -270,8 +269,7 @@ const getAllProduct = async (filters) => {
     if (filters.product_brand?.length > 0) {
       query.product_brand = { $in: filters.product_brand };
     }
-
-    console.log("query", query);
+    console.log(query);
     const products = await Product.find(query).populate("product_category");
     const totalProducts = await Product.countDocuments(query);
 
