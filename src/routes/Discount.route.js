@@ -52,9 +52,11 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *                 description: Phần trăm giảm giá
  *     responses:
  *       200:
- *         description: Tạo mã giảm giá thành công
+ *         description: Tạo mã giảm giá mới thành công
  *       400:
- *         description: Lỗi dữ liệu đầu vào
+ *         description: Mã giảm giá này đã tồn tại
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -81,9 +83,9 @@ router.post(
  *         description: ID của mã giảm giá
  *     responses:
  *       200:
- *         description: Lấy thông tin thành công
- *       404:
- *         description: Không tìm thấy mã giảm giá
+ *         description: Lấy thông tin mã giảm giá thành công
+ *       400:
+ *         description: Mã giảm giá không tồn tại
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -98,7 +100,7 @@ router.get("/get-detail/:discountId", discountController.getDetailDiscount);
  *       - Discount
  *     responses:
  *       200:
- *         description: Trả về danh sách mã giảm giá
+ *         description: Lấy tất cả mã giảm giá thành công
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -146,11 +148,11 @@ router.get("/get-all", discountController.getAllDiscount);
  *                 type: number
  *     responses:
  *       200:
- *         description: Cập nhật thành công
+ *         description: Cập nhật mã giảm giá thành công
  *       400:
- *         description: Lỗi dữ liệu đầu vào
- *       404:
- *         description: Không tìm thấy mã giảm giá
+ *         description: Mã giảm giá này không tồn tại
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -177,9 +179,11 @@ router.patch(
  *         description: ID của mã giảm giá cần xóa
  *     responses:
  *       200:
- *         description: Xóa mềm thành công
+ *         description: Xóa mã giảm giá thành công
  *       404:
- *         description: Không tìm thấy mã giảm giá
+ *         description: Mã giảm giá này không tồn tại
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -225,13 +229,13 @@ router.delete(
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: Get discount successfully
+ *                   example: Lấy mã giảm giá thành công
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Discount'
  *       401:
- *         description: Unauthorized – cần token hợp lệ
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */

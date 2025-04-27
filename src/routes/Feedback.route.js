@@ -53,9 +53,11 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *                 description: Video đính kèm
  *     responses:
  *       200:
- *         description: Feedback đã được tạo thành công
+ *         description: Đánh giá thành công
  *       400:
- *         description: Thiếu thông tin bắt buộc hoặc lỗi dữ liệu
+ *         description: Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi! || Feedback chứa nội dung k phù hợp
+ *       401:
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -105,11 +107,11 @@ router.post("/create", verifyToken, feedbackController.createFeedback);
  *                 description: Video cập nhật
  *     responses:
  *       200:
- *         description: Feedback đã được cập nhật thành công
+ *         description: Cập nhật đánh giá thành công
  *       400:
- *         description: Lỗi đầu vào
- *       404:
- *         description: Không tìm thấy feedback
+ *         description: Đánh giá không tồn tại
+ *       401:
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -131,9 +133,11 @@ router.patch("/update/:id", verifyToken, identifyAdmin, feedbackController.updat
  *         description: ID của feedback cần xóa
  *     responses:
  *       200:
- *         description: Feedback đã được xóa thành công
- *       404:
- *         description: Không tìm thấy feedback
+ *         description: Xóa đánh giá thành công
+ *       400:
+ *         description: Đánh giá không tồn tại
+ *       401:
+ *         description: Token không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -167,7 +171,7 @@ router.delete("/delete/:id", verifyToken, identifyAdmin, feedbackController.dele
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "Get feedback successfully"
+ *                   example: "Lấy thông tin đánh giá thành công"
  *                 data:
  *                   type: array
  *                   items:
@@ -199,7 +203,7 @@ router.delete("/delete/:id", verifyToken, identifyAdmin, feedbackController.dele
  *                               type: string
  *                             example: ["https://example.com/video.mp4"]
  *       400:
- *         description: Không tìm thấy sản phẩm hoặc lỗi đầu vào
+ *         description: Sản phẩm không tồn tại
  *       500:
  *         description: Lỗi máy chủ
  */

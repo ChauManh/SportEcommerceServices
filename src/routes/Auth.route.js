@@ -3,7 +3,7 @@ const router = express.Router();
 const AuthController = require("../controllers/Auth.controller");
 /**
  * @swagger
- * /auth/sign_in:
+ * /auth/sign_up:
  *   post:
  *     summary: Đăng ký tài khoản mới
  *     description: API cho phép người dùng đăng ký tài khoản mới với user_name, email và password.
@@ -22,14 +22,14 @@ const AuthController = require("../controllers/Auth.controller");
  *             properties:
  *               user_name:
  *                 type: string
- *                 example: johndoe
+ *                 example: test
  *               email:
  *                 type: string
- *                 example: johndoe@example.com
+ *                 example: test@gmail.com
  *               password:
  *                 type: string
  *                 format: password
- *                 example: "mypassword123"
+ *                 example: "test123"
  *     responses:
  *       200:
  *         description: Đăng ký thành công
@@ -44,6 +44,9 @@ const AuthController = require("../controllers/Auth.controller");
  *                 EM:
  *                   type: string
  *                   example: "User created successfully"
+ *                 result:
+ *                   type: object
+ *                   example: "null"
  *       400:
  *         description: Lỗi dữ liệu đầu vào hoặc tài khoản đã tồn tại
  *       500:
@@ -55,7 +58,7 @@ router.post("/sign_up", AuthController.createUser);
  * /auth/login:
  *   post:
  *     summary: Đăng nhập vào hệ thống
- *     description: API cho phép người dùng đăng nhập bằng user_name hoặc email và password.
+ *     description: API cho phép người dùng đăng nhập bằng user_name và password.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -70,16 +73,16 @@ router.post("/sign_up", AuthController.createUser);
  *             properties:
  *               user_name:
  *                 type: string
- *                 description: Tên người dùng hoặc email
- *                 example: johndoe@example.com
+ *                 description: Tên người dùng
+ *                 example: test
  *               password:
  *                 type: string
  *                 format: password
  *                 description: Mật khẩu của tài khoản
- *                 example: "mypassword123"
+ *                 example: "test123"
  *     responses:
  *       200:
- *         description: Đăng nhập thành công, trả về token xác thực
+ *         description: Đăng nhập thành công, trả về token xác thực và thông tin người dùng
  *         content:
  *           application/json:
  *             schema:
@@ -90,10 +93,31 @@ router.post("/sign_up", AuthController.createUser);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "Logged in successfully"
- *                 accessToken:
- *                   type: string
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+ *                   example: "Đăng nhập thành công"
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+ *                     refreshToken:
+ *                       type: string
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           example: "680d76a1ea0060829fed291a"
+ *                         user_name:
+ *                           type: string
+ *                           example: "test"
+ *                         email:
+ *                           type: string
+ *                           example: "test@gmail.com"
+ *                         role:
+ *                           type: string
+ *                           example: "user"
  *       400:
  *         description: Sai thông tin đăng nhập (username hoặc password không đúng)
  *       500:
@@ -101,6 +125,7 @@ router.post("/sign_up", AuthController.createUser);
  */
 router.post("/login", AuthController.loginUser);
 router.post("/signup_with_google", AuthController.SignUpWithGoogle);
+router.post("/login_with_google", AuthController.loginUserWithGoogle);
 /**
  * @swagger
  * /auth/send_otp:
@@ -121,7 +146,7 @@ router.post("/signup_with_google", AuthController.SignUpWithGoogle);
  *               email:
  *                 type: string
  *                 description: Email của người dùng
- *                 example: chaumanh1108@gmail.com
+ *                 example: test@gmail.com
  *     responses:
  *       200:
  *         description: OTP đã được gửi thành công
@@ -135,13 +160,15 @@ router.post("/signup_with_google", AuthController.SignUpWithGoogle);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "OTP sent successfully"
+ *                   example: "Gửi OTP thành công"
+ *                 result:
+ *                   type: object
+ *                   example: null
  *       400:
  *         description: Email không tồn tại hoặc lỗi đầu vào
  *       500:
  *         description: Lỗi máy chủ
  */
-router.post("/login_with_google", AuthController.loginUserWithGoogle);
 router.post("/send_otp", AuthController.sendOTP);
 /**
  * @swagger
@@ -164,7 +191,7 @@ router.post("/send_otp", AuthController.sendOTP);
  *               email:
  *                 type: string
  *                 description: Email của người dùng
- *                 example: johndoe@example.com
+ *                 example: test@gmail.com
  *               otp:
  *                 type: string
  *                 description: Mã OTP đã được gửi đến email
@@ -182,9 +209,12 @@ router.post("/send_otp", AuthController.sendOTP);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "OTP verified successfully"
+ *                   example: "Xác thực OTP thành công"
+ *                 result:
+ *                   type: object
+ *                   example: null
  *       400:
- *         description: Mã OTP không hợp lệ hoặc đã hết hạn
+ *         description: OTP không hợp lệ
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -210,12 +240,12 @@ router.post("/verify_otp", AuthController.verifyOtp);
  *               email:
  *                 type: string
  *                 description: Email của người dùng
- *                 example: johndoe@example.com
+ *                 example: test@gmail.com
  *               newPassword:
  *                 type: string
  *                 format: password
  *                 description: Mật khẩu mới của tài khoản
- *                 example: "newpassword123"
+ *                 example: "newtest123"
  *     responses:
  *       200:
  *         description: Đặt lại mật khẩu thành công
@@ -229,13 +259,62 @@ router.post("/verify_otp", AuthController.verifyOtp);
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: "Password reset successfully"
+ *                   example: "Đặt lại mật khẩu thành công"
+ *                 result:
+ *                   type: object
+ *                   example: null
  *       400:
- *         description: OTP chưa được xác thực hoặc dữ liệu đầu vào không hợp lệ
+ *         description: Xác thực OTP là bắt buộc trước khi đặt lại mật khẩu
  *       500:
  *         description: Lỗi máy chủ
  */
 router.patch("/reset_password", AuthController.resetPassword);
+/**
+ * @swagger
+ * /auth/refresh_token:
+ *   post:
+ *     summary: Làm mới accessToken
+ *     description: API cho phép người dùng làm mới accessToken với refreshToken.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token hợp lệ
+ *                 example: "refreshToken"
+ *     responses:
+ *       200:
+ *         description: Làm mới token thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Làm mới token thành công"
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: newAccessToken
+ *       400:
+ *         description: Refresh token là bắt buộc || Lỗi xác thực refresh token
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.post("/refresh_token", AuthController.refreshToken);
 
 module.exports = router;

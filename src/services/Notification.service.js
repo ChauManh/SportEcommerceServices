@@ -43,7 +43,7 @@ const readNotification = async (notificationId) => {
       };
     }
 
-    const updateNotification = await Notification.findByIdAndUpdate(
+    await Notification.findByIdAndUpdate(
       notificationId,
       { $set: { isRead: true } },
       { new: true, runValidators: true }

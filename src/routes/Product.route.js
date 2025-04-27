@@ -61,7 +61,7 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *               product_percent_discount:
  *                 type: number
  *                 example: 10
- *               variants:
+ *               colors:
  *                 type: array
  *                 items:
  *                   type: object
@@ -83,9 +83,58 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *                       example: 5
  *     responses:
  *       200:
- *         description: Tạo sản phẩm thành công
+ *         description: Tạo sản phẩm mới thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Tạo sản phẩm mới thành công"
+ *                 result:
+ *                   type: object
+ *                   description: Thông tin sản phẩm đã tạo
+ *                   properties:
+ *                     product_title:
+ *                       type: string
+ *                       example: Áo thể thao nam Nike
+ *                     product_category:
+ *                       type: string
+ *                       example: 6618a27ce6b6a8e82bc8b0c3
+ *                     product_img:
+ *                       type: string
+ *                       example: /uploads/products/image1.jpg
+ *                     product_description:
+ *                       type: string
+ *                       example: Áo thể thao chất liệu thoáng mát, co giãn tốt.
+ *                     product_display:
+ *                       type: boolean
+ *                       example: true
+ *                     product_famous:
+ *                       type: boolean
+ *                       example: false
+ *                     product_price:
+ *                       type: number
+ *                       example: 499000
+ *                     product_countInStock:
+ *                       type: number
+ *                       example: 20
+ *                     product_rate:
+ *                       type: number
+ *                       example: 4.5
+ *                     product_percent_discount:
+ *                       type: number
+ *                       example: 10
  *       400:
  *         description: Sản phẩm đã tồn tại hoặc dữ liệu không hợp lệ
+ *       401:
+ *         description: Token không xác thực
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -145,32 +194,75 @@ router.post(
  *                 type: number
  *               product_percent_discount:
  *                 type: number
- *               variants:
+ *               colors:
  *                 type: array
  *                 items:
  *                   type: object
  *                   properties:
  *                     variant_color:
  *                       type: string
+ *                       example: Đỏ
  *                     variant_size:
  *                       type: string
+ *                       example: M
  *                     variant_price:
  *                       type: number
+ *                       example: 499000
  *                     variant_countInStock:
  *                       type: number
+ *                       example: 15
  *                     variant_percent_discount:
  *                       type: number
+ *                       example: 10
  *     responses:
  *       200:
  *         description: Cập nhật sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 EC:
+ *                   type: integer
+ *                   example: 0
+ *                 EM:
+ *                   type: string
+ *                   example: "Cập nhật sản phẩm thành công"
+ *                 result:
+ *                   type: object
+ *                   description: Thông tin sản phẩm đã cập nhật
+ *                   properties:
+ *                     product_title:
+ *                       type: string
+ *                       example: Áo bóng đá Real Madrid 2024
+ *                     product_category:
+ *                       type: string
+ *                     product_img:
+ *                       type: string
+ *                     product_description:
+ *                       type: string
+ *                     product_display:
+ *                       type: boolean
+ *                     product_famous:
+ *                       type: boolean
+ *                     product_price:
+ *                       type: number
+ *                       example: 499000
+ *                     product_countInStock:
+ *                       type: number
+ *                       example: 20
+ *                     product_rate:
+ *                       type: number
+ *                       example: 4.8
+ *                     product_percent_discount:
+ *                       type: number
+ *                       example: 15
  *       400:
  *         description: Dữ liệu không hợp lệ
  *       401:
- *         description: Không xác thực
+ *         description: Token Không xác thực
  *       403:
- *         description: Không có quyền admin
- *       404:
- *         description: Không tìm thấy sản phẩm
+ *         description: Token admin Không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -199,52 +291,21 @@ router.patch(
  *     responses:
  *       200:
  *         description: Xóa sản phẩm thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "SUCCESS"
- *                 message:
- *                   type: string
- *                   example: "Product deleted successfully"
  *       400:
- *         description: Thiếu productId hoặc lỗi request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "The productId is required"
+ *         description: Dữ liệu không hợp lệ
+ *       401:
+ *         description: Token Không xác thực
+ *       403:
+ *         description: Token admin Không xác thực
  *       500:
  *         description: Lỗi máy chủ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
  */
-
 router.delete(
   "/delete/:id",
   verifyToken,
   identifyAdmin,
   ProductController.deleteProduct
 );
-
 /**
  * @swagger
  * /product/get_details/{id}:
@@ -264,48 +325,12 @@ router.delete(
  *     responses:
  *       200:
  *         description: Trả về thông tin chi tiết của sản phẩm
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "SUCCESS"
- *                 data:
- *                   type: object
- *                   example:
- *                     _id: "65fd13d4a7e8a234c4a5b123"
- *                     product_title: "Áo thể thao Nike"
- *                     product_price: 500000
- *                     product_countInStock: 20
- *                     product_description: "Áo thể thao chính hãng Nike với chất liệu cao cấp"
  *       400:
- *         description: Thiếu productId hoặc lỗi request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "The productId is required"
+ *         description: Lỗi request
+ *       404:
+ *         description: Sản phẩm không tồn tại
  *       500:
  *         description: Lỗi máy chủ
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ERROR"
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
  */
 router.get("/get-details/:id", ProductController.getDetailsProduct);
 
@@ -326,15 +351,14 @@ router.get("/get-details/:id", ProductController.getDetailsProduct);
  *               type: object
  *               properties:
  *                 EC:
- *                   type: integer
+ *                   type: number
  *                   example: 0
  *                 EM:
  *                   type: string
- *                   example: Get all products successfully
- *                 data:
+ *                   example: Lấy danh sách sản phẩm thành công
+ *                 result:
  *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
+ *                   example: []            
  *       500:
  *         description: Lỗi máy chủ
  */

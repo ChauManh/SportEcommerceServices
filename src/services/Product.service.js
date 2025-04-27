@@ -63,7 +63,7 @@ const createProduct = async (newProduct) => {
     return {
       EC: 2,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
@@ -76,7 +76,7 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 1,
         EM: "Không tìm thấy sản phẩm",
-        data: []
+        data: [],
       };
     }
 
@@ -128,14 +128,14 @@ const updateProduct = async (productId, updatedProduct) => {
       return {
         EC: 2,
         EM: "Cập nhật sản phẩm thất bại",
-        data: []
+        data: [],
       };
     }
   } catch (error) {
     return {
       EC: 3,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
@@ -144,26 +144,19 @@ const getDetailsProduct = async (id) => {
   try {
     const product = await Product.findById(id).populate("product_category");
 
-    if (!product) {
-      return {
-        EC: 1,
-        EM: "Không tìm thấy sản phẩm",
-        data: []
-      };
-    }
-
+  if (!product) {
     return {
-      EC: 0,
-      EM: "Lấy chi tiết sản phẩm thành công",
-      data: product,
-    };
-  } catch (error) {
-    return {
-      EC: 2,
-      EM: error.message,
-      data: []
+      EC: 1,
+      EM: "Không tìm thấy sản phẩm",
+      data: [],
     };
   }
+
+  return {
+    EC: 0,
+    EM: "Lấy chi tiết sản phẩm thành công",
+    data: product,
+  };
 };
 
 const deleteProduct = async (id) => {
@@ -174,7 +167,7 @@ const deleteProduct = async (id) => {
       return {
         EC: 1,
         EM: "Không tìm thấy sản phẩm",
-        data: []
+        data: [],
       };
     }
 
@@ -183,27 +176,33 @@ const deleteProduct = async (id) => {
     return {
       EC: 0,
       EM: "Xóa sản phẩm thành công",
-      data: []
+      data: [],
     };
   } catch (error) {
     return {
       EC: 2,
       EM: error.message,
-      data: []
+      data: [],
     };
   }
 };
 
 const getAllProduct = async (filters) => {
-  console.log(filters);
   try {
     let query = {};
-    const genderFilter = filters.category_gender?.length > 0 ? filters.category_gender : [];
+    const genderFilter =
+      filters.category_gender?.length > 0 ? filters.category_gender : [];
 
     let categoryIds = [];
 
-    if (genderFilter.length !== 3 && !filters.category?.length && !filters.category_sub?.length) {
-      const categories = await Category.find({ category_gender: { $in: genderFilter } });
+    if (
+      genderFilter.length !== 3 &&
+      !filters.category?.length &&
+      !filters.category_sub?.length
+    ) {
+      const categories = await Category.find({
+        category_gender: { $in: genderFilter },
+      });
       categoryIds.push(...categories.map((cat) => cat._id));
     }
 
@@ -250,17 +249,23 @@ const getAllProduct = async (filters) => {
     }
 
     if (categoryIds.length > 0) {
-      query.product_category = { $in: [...new Set(categoryIds.map((id) => id.toString()))] };
+      query.product_category = {
+        $in: [...new Set(categoryIds.map((id) => id.toString()))],
+      };
     }
 
     if (filters.price_min || filters.price_max) {
       query.product_price = {};
-      if (filters.price_min) query.product_price.$gte = Number(filters.price_min);
-      if (filters.price_max) query.product_price.$lte = Number(filters.price_max);
+      if (filters.price_min)
+        query.product_price.$gte = Number(filters.price_min);
+      if (filters.price_max)
+        query.product_price.$lte = Number(filters.price_max);
     }
 
     if (filters.product_color) {
-      const colorArray = Array.isArray(filters.product_color) ? filters.product_color : [filters.product_color];
+      const colorArray = Array.isArray(filters.product_color)
+        ? filters.product_color
+        : [filters.product_color];
       if (colorArray.length > 0) {
         query["colors.color_name"] = { $in: colorArray };
       }
@@ -269,7 +274,7 @@ const getAllProduct = async (filters) => {
     if (filters.product_brand?.length > 0) {
       query.product_brand = { $in: filters.product_brand };
     }
-    console.log(query);
+
     const products = await Product.find(query).populate("product_category");
     const totalProducts = await Product.countDocuments(query);
 

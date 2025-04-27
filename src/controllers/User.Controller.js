@@ -62,7 +62,7 @@ const userController = {
       const uploadResult = await uploadAvtUser(req, res);
 
       const { userId } = req.user;
-      let dataUpdate  = req.body;
+      let dataUpdate = req.body;
       // // Gửi form data nên là string, convert qua JSON
       if (typeof dataUpdate === "string") {
         dataUpdate = JSON.parse(dataUpdate);
@@ -108,10 +108,6 @@ const userController = {
       const { userId } = req.user;
       const index = parseInt(req.params.index);
       const updateData = req.body;
-      console.log("abc", req);
-      // if (isNaN(index)) {
-      //   return res.status(400).json({ EC: 1, EM: "Index không hợp lệ!" });
-      // }
 
       const result = await updateAddressService(userId, index, updateData);
       return result.EC === 0
@@ -126,9 +122,6 @@ const userController = {
     try {
       const { userId } = req.user;
       const index = parseInt(req.params.index);
-      // if (isNaN(index)) {
-      //   return res.status(400).json({ EC: 1, EM: "Index không hợp lệ!" });
-      // }
 
       const result = await deleteAddressService(userId, index);
       return result.EC === 0
@@ -139,31 +132,30 @@ const userController = {
     }
   },
 
-  async saveDiscount (req, res){
+  async saveDiscount(req, res) {
     try {
-      const { userId} = req.user;
-      const {discount} = req.body;
-  
-      const result = await saveDiscount(userId, discount)
+      const { userId } = req.user;
+      const { discount } = req.body;
+
+      const result = await saveDiscount(userId, discount);
 
       return result.EC === 0
         ? res.success(result.data, result.EM)
-        : res.error(result.EC, result.EM)
-      
+        : res.error(result.EC, result.EM);
     } catch (error) {
       return res.InternalError();
     }
   },
 
-  async getDiscountUser (req, res){
+  async getDiscountUser(req, res) {
     try {
-      const { userId} = req.user;
+      const { userId } = req.user;
 
-      const result = await getDiscountUser(userId)
+      const result = await getDiscountUser(userId);
 
       return result.EC === 0
         ? res.success(result.data, result.EM)
-        : res.error(result.EC, result.EM)
+        : res.error(result.EC, result.EM);
     } catch (error) {
       return res.InternalError();
     }
@@ -173,7 +165,7 @@ const userController = {
     try {
       const userId = req.user.userId;
       const index = req.params.index;
-  
+
       const response = await deleteSearchHistoryService(userId, index);
       return response.EC === 0
         ? res.success({ EC: 0, EM: response.EM })
@@ -187,12 +179,12 @@ const userController = {
   async getChatHistory(req, res) {
     try {
       const userId = req.user.userId;
-  
+
       const response = await ChatHistory.findOne({ userId });
       if (!response) {
-        return res.error(1, "Không có đoạn chat của user này.");
+        return res.error(1, "Không có đoạn chat của user này");
       }
-      return res.success(response.messages, "Lấy lịch sử chat thành công.");
+      return res.success(response.messages, "Lấy lịch sử chat thành công");
     } catch (error) {
       console.error(error);
       return res.InternalError();
@@ -202,20 +194,17 @@ const userController = {
   async deleteChatHistory(req, res) {
     try {
       const userId = req.user.userId;
-  
+
       const response = await ChatHistory.findOneAndDelete({ userId });
       if (!response) {
-        return res.error(1, "Không có đoạn chat của user này.");
+        return res.error(1, "Không có đoạn chat của user này");
       }
-      return res.success(null, "Xóa đoạn chat thành công.");
+      return res.success(null, "Xóa đoạn chat thành công");
     } catch (error) {
       console.error(error);
       return res.InternalError();
     }
-  }
+  },
 };
-
-
-
 
 module.exports = userController;

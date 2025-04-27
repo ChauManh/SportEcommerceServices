@@ -2,40 +2,24 @@ const Discount = require("../models/Discount.model");
 const User = require("../models/User.model");
 const bcrypt = require("bcrypt");
 const getUserService = async (userId) => {
-  try {
-    const user = await User.findById(userId).select("-password");
-    if (!user) {
-      return { EC: 1, EM: "Không tìm thấy người dùng" };
-    }
-    return {
-      EC: 0,
-      EM: "Lấy thông tin người dùng thành công",
-      user,
-    };
-  } catch (error) {
-    return {
-      EC: -99,
-      EM: "Lỗi hệ thống",
-    };
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    return { EC: 1, EM: "Không tìm thấy người dùng" };
   }
+  return {
+    EC: 0,
+    EM: "Lấy thông tin người dùng thành công",
+    user,
+  };
 };
 
 const getAllUsersService = async () => {
-  try {
-    const users = await User.find({ role: { $ne: "admin" } }).select(
-      "-password"
-    );
-    return {
-      EC: 0,
-      EM: "Lấy tất cả người dùng thành công",
-      users,
-    };
-  } catch (error) {
-    return {
-      EC: 1,
-      EM: "Lỗi hệ thống",
-    };
-  }
+  const users = await User.find({ role: { $ne: "admin" } }).select("-password");
+  return {
+    EC: 0,
+    EM: "Lấy tất cả người dùng thành công",
+    users,
+  };
 };
 
 const changePasswordService = async (email, oldPassword, newPassword) => {
@@ -116,7 +100,7 @@ const updateAddressService = async (userId, index, updateData) => {
   }
 };
 
-const saveDiscount = async(userId, discountId)=>{
+const saveDiscount = async (userId, discountId) => {
   try {
     const user = await User.findById(userId);
     if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
@@ -124,8 +108,8 @@ const saveDiscount = async(userId, discountId)=>{
     const discount = await Discount.findById(discountId);
     if (!discount) return { EC: 2, EM: "Mã giảm giá không tồn tại" };
 
-    const alreadySaved = user.discounts.some(d => d.equals(discount._id));
-    if (alreadySaved) return { EC: 0, EM: "Mã giảm giá đã được lưu"};
+    const alreadySaved = user.discounts.some((d) => d.equals(discount._id));
+    if (alreadySaved) return { EC: 0, EM: "Mã giảm giá đã được lưu" };
 
     user.discounts.push(discount._id);
     await user.save();
@@ -133,20 +117,14 @@ const saveDiscount = async(userId, discountId)=>{
   } catch (error) {
     return { EC: 3, EM: error.message };
   }
-}
+};
 
-const getDiscountUser = async(userId) =>{
-  try {
-    const user = await User.findById(userId);
-    if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
+const getDiscountUser = async (userId) => {
+  const user = await User.findById(userId);
+  const discounts = await Discount.find({ _id: { $in: user.discounts } });
 
-    const discounts = await Discount.find({_id : {$in: user.discounts}})
-
-    return {EC: 0, EM: "Lấy mã giảm giá thành công", data: discounts}
-  } catch (error) {
-    return { EC: 3, EM: error.message };
-  }
-}
+  return { EC: 0, EM: "Lấy mã giảm giá thành công", data: discounts };
+};
 
 const deleteAddressService = async (userId, index) => {
   try {
@@ -164,7 +142,7 @@ const deleteAddressService = async (userId, index) => {
       }
     }
     user.addresses.splice(index, 1);
-  
+
     await user.save();
 
     return { EC: 0, EM: "Xóa địa chỉ thành công" };
@@ -174,25 +152,17 @@ const deleteAddressService = async (userId, index) => {
 };
 
 const deleteSearchHistoryService = async (userId, index) => {
-  try {
-    if (!userId) {
-      return { EC: 2, EM: "Bạn cần đăng nhập để xoá lịch sử tìm kiếm." };
-    }
+  const user = await User.findById(userId);
 
-    const user = await User.findById(userId);
-
-    if (index < 0 || index >= user.searchhistory.length) {
-      return { EC: 2, EM: "Chỉ số không phù hợp." };
-    }
-
-    user.searchhistory.splice(index, 1);
-    await user.save();
-
-    return { EC: 0, EM: "Xóa tìm kiếm thành công." };
-  } catch (error) {
-    return { EC: 3, EM: error.message };
+  if (index < 0 || index >= user.searchhistory.length) {
+    return { EC: 2, EM: "Chỉ số không phù hợp." };
   }
-}
+
+  user.searchhistory.splice(index, 1);
+  await user.save();
+
+  return { EC: 0, EM: "Xóa tìm kiếm thành công." };
+};
 
 module.exports = {
   getAllUsersService,

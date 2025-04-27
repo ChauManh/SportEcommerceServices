@@ -11,201 +11,200 @@ const {
 const { logActivityHistory } = require("./LoginHistory.service");
 
 const createOrder = async (newOrder, user_id) => {
-  try {
-    let {
-      shipping_address,
-      products,
-      order_payment_method,
-      order_note,
-      discount_ids,
-    } = newOrder;
-    if (!shipping_address) {
-      return {
-        EC: 2,
-        EM: "Địa chỉ là bắt buộc",
-      };
-    }
-    if (!order_payment_method) {
-      return {
-        EC: 3,
-        EM: "Phương thức thanh toán là bắt buộc",
-      };
-    }
-
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return { EC: 1, EM: "Products array is required" };
-    }
-    let delivery_fee = 50000;
-    let order_total_price = 0;
-    const productMap = new Map();
-
-    for (const item of products) {
-      if (!productMap.has(item.product_id)) {
-        productMap.set(item.product_id, []);
-      }
-      productMap.get(item.product_id).push(item);
-    }
-
-    const orderProducts = [];
-
-    for (const [productId, items] of productMap.entries()) {
-      const product = await Product.findById(productId);
-      if (!product) {
-        return { EC: 2, EM: `Product not found: ${productId}` };
-      }
-
-      let totalQuantity = 0;
-
-      for (const item of items) {
-        const color = product.colors.find(
-          (c) => c.color_name === item.color_name
-        );
-        if (!color) {
-          return { EC: 3, EM: `Color not found: ${item.color_name}` };
-        }
-
-        const variant = color.variants.find(
-          (v) => v.variant_size === item.variant_name
-        );
-        if (!variant) {
-          return { EC: 4, EM: `Variant not found: ${item.variant_name}` };
-        }
-
-        if (variant.variant_countInStock < item.quantity) {
-          return { EC: 5, EM: `Product ${item.product_id} is out of stock` };
-        }
-
-        variant.variant_countInStock -= item.quantity;
-        totalQuantity += item.quantity;
-
-        orderProducts.push({
-          EC: 0,
-          product_id: product._id,
-          product_name: product.product_title,
-          quantity: item.quantity,
-          color: item.color_name,
-          variant: item.variant_name,
-          product_order_type: item.product_order_type || "default",
-          product_price: variant.variant_price * item.quantity,
-          category_id: product.category_id,
-        });
-      }
-
-      product.product_selled += totalQuantity;
-      product.product_countInStock -= totalQuantity;
-      await product.save();
-    }
-
-    if (orderProducts.some((item) => item.EC)) {
-      return orderProducts.find((item) => item.EC);
-    }
-
-    order_total_price = orderProducts.reduce(
-      (total, item) => total + item.product_price,
-      0
-    );
-
-    let discountUsed = [];
-    let totalDiscount = 0;
-    if (discount_ids?.length > 0) {
-      const discounts = await Discount.find({ _id: { $in: discount_ids } });
-
-      for (const discount of discounts) {
-        const now = new Date();
-        if (
-          discount.discount_start_day > now ||
-          discount.discount_end_day < now
-        ) {
-          continue;
-        }
-
-        if (order_total_price < discount.min_order_value) {
-          continue;
-        }
-
-        if (discount.discount_type === "product") {
-          totalDiscount = (discount.discount_number / 100) * order_total_price;
-        } else if (discount.discount_type === "shipping") {
-          delivery_fee -= (delivery_fee * discount.discount_number) / 100;
-          if (delivery_fee < 0) delivery_fee = 0;
-        }
-      }
-
-      await Discount.updateMany(
-        { _id: { $in: discount_ids } },
-        { $inc: { discount_amount: -1 } }
-      );
-    }
-
-    const order_total_final = order_total_price + delivery_fee - totalDiscount;
-
-    const estimatedDeliveryDate = new Date();
-    estimatedDeliveryDate.setDate(
-      estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
-    );
-
-    await User.updateOne(
-      { _id: user_id },
-      { $inc: { user_loyalty: order_total_final * 0.0001 } },
-      {
-        $pull: {
-          discounts: { $in: discountUsed },
-        },
-      }
-    );
-    const orderCode = Math.floor(Math.random() * 900000) + 100000; // Generate a random 6-digit order code
-
-    const newOrderData = new Order({
-      user_id,
-      shipping_address,
-      products: orderProducts,
-      discount_ids,
-      delivery_fee,
-      order_total_price,
-      order_total_discount: totalDiscount,
-      order_total_final,
-      order_payment_method,
-      order_note,
-      order_status: "Chờ xác nhận",
-      estimated_delivery_date: estimatedDeliveryDate,
-      is_feedback: false,
-      order_code: orderCode,
-    });
-
-    const savedOrder = await newOrderData.save();
-    let resultPayOS = null;
-    // tạo QR trước khi update cart
-    if (order_payment_method == "Paypal") {
-      const description = `Thanh toán đơn #${orderCode}`;
-      result = await createPaymentService(
-        orderCode,
-        order_total_final,
-        description,
-        orderProducts,
-        savedOrder._id.toString()
-      );
-      if (result.EC === 0) {
-        resultPayOS = result.result;
-      } else {
-        return result;
-      }
-    }
-    if (user_id) {
-      await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
-    }
-
+  let {
+    shipping_address,
+    products,
+    order_payment_method,
+    order_note,
+    discount_ids,
+  } = newOrder;
+  if (!shipping_address) {
     return {
-      EC: 0,
-      EM: "Đơn hàng được tạo thành công",
-      data: {
-        ...savedOrder.toObject(),
-        resultPayOS,
-      },
-      cart: [],
+      EC: 2,
+      EM: "Địa chỉ là bắt buộc",
     };
-  } catch (error) {
-    return { EC: 5, EM: error.message };
   }
+  if (!order_payment_method) {
+    return {
+      EC: 3,
+      EM: "Phương thức thanh toán là bắt buộc",
+    };
+  }
+
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return { EC: 1, EM: "Yêu cầu phải có sản phẩm" };
+  }
+  let delivery_fee = 50000;
+  let order_total_price = 0;
+  const productMap = new Map();
+
+  for (const item of products) {
+    if (!productMap.has(item.product_id)) {
+      productMap.set(item.product_id, []);
+    }
+    productMap.get(item.product_id).push(item);
+  }
+
+  const orderProducts = [];
+
+  for (const [productId, items] of productMap.entries()) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return { EC: 2, EM: `Không tìm thấy sản phẩm: ${productId}` };
+    }
+
+    let totalQuantity = 0;
+
+    for (const item of items) {
+      const color = product.colors.find(
+        (c) => c.color_name === item.color_name
+      );
+      if (!color) {
+        return { EC: 3, EM: `Không tìm thấy màu sản phẩm: ${item.color_name}` };
+      }
+
+      const variant = color.variants.find(
+        (v) => v.variant_size === item.variant_name
+      );
+      if (!variant) {
+        return {
+          EC: 4,
+          EM: `Không tìm thấy size sản phẩm: ${item.variant_name}`,
+        };
+      }
+
+      if (variant.variant_countInStock < item.quantity) {
+        return { EC: 5, EM: `Sản phẩm ${item.product_id} đã hết hàng` };
+      }
+
+      variant.variant_countInStock -= item.quantity;
+      totalQuantity += item.quantity;
+
+      orderProducts.push({
+        EC: 0,
+        product_id: product._id,
+        product_name: product.product_title,
+        quantity: item.quantity,
+        color: item.color_name,
+        variant: item.variant_name,
+        product_order_type: item.product_order_type || "default",
+        product_price: variant.variant_price * item.quantity,
+        category_id: product.category_id,
+      });
+    }
+
+    product.product_selled += totalQuantity;
+    product.product_countInStock -= totalQuantity;
+    await product.save();
+  }
+
+  if (orderProducts.some((item) => item.EC)) {
+    return orderProducts.find((item) => item.EC);
+  }
+
+  order_total_price = orderProducts.reduce(
+    (total, item) => total + item.product_price,
+    0
+  );
+
+  let discountUsed = [];
+  let totalDiscount = 0;
+  if (discount_ids?.length > 0) {
+    const discounts = await Discount.find({ _id: { $in: discount_ids } });
+
+    for (const discount of discounts) {
+      const now = new Date();
+      if (
+        discount.discount_start_day > now ||
+        discount.discount_end_day < now
+      ) {
+        continue;
+      }
+
+      if (order_total_price < discount.min_order_value) {
+        continue;
+      }
+
+      if (discount.discount_type === "product") {
+        totalDiscount = (discount.discount_number / 100) * order_total_price;
+      } else if (discount.discount_type === "shipping") {
+        delivery_fee -= (delivery_fee * discount.discount_number) / 100;
+        if (delivery_fee < 0) delivery_fee = 0;
+      }
+    }
+
+    await Discount.updateMany(
+      { _id: { $in: discount_ids } },
+      { $inc: { discount_amount: -1 } }
+    );
+  }
+
+  const order_total_final = order_total_price + delivery_fee - totalDiscount;
+
+  const estimatedDeliveryDate = new Date();
+  estimatedDeliveryDate.setDate(
+    estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
+  );
+
+  await User.updateOne(
+    { _id: user_id },
+    { $inc: { user_loyalty: order_total_final * 0.0001 } },
+    {
+      $pull: {
+        discounts: { $in: discountUsed },
+      },
+    }
+  );
+  const orderCode = Math.floor(Math.random() * 900000) + 100000; // Generate a random 6-digit order code
+
+  const newOrderData = new Order({
+    user_id,
+    shipping_address,
+    products: orderProducts,
+    discount_ids,
+    delivery_fee,
+    order_total_price,
+    order_total_discount: totalDiscount,
+    order_total_final,
+    order_payment_method,
+    order_note,
+    order_status: "Chờ xác nhận",
+    estimated_delivery_date: estimatedDeliveryDate,
+    is_feedback: false,
+    order_code: orderCode,
+  });
+
+  const savedOrder = await newOrderData.save();
+  let resultPayOS = null;
+  // tạo QR trước khi update cart
+  if (order_payment_method == "Paypal") {
+    const description = `Thanh toán đơn #${orderCode}`;
+    result = await createPaymentService(
+      orderCode,
+      order_total_final,
+      description,
+      orderProducts,
+      savedOrder._id.toString()
+    );
+    if (result.EC === 0) {
+      resultPayOS = result.result;
+    } else {
+      return result;
+    }
+  }
+  if (user_id) {
+    await Cart.updateOne({ user_id: user_id }, { $set: { products: [] } });
+  }
+
+  return {
+    EC: 0,
+    EM: "Đơn hàng được tạo thành công",
+    data: {
+      ...savedOrder.toObject(),
+      resultPayOS,
+    },
+    cart: [],
+  };
 };
 
 const getAllOrder = async (orderStatus) => {
@@ -284,141 +283,134 @@ const getOrderByUser = async (userId, orderStatus) => {
 };
 
 const previewOrder = async (newOrder, userId) => {
-  try {
-    let {
-      //user_id,
-      shipping_address,
-      products,
-      order_status = "Chờ xác nhận",
-      order_payment_method,
-      order_note,
-      discount_ids,
-    } = newOrder;
+  let {
+    //user_id,
+    shipping_address,
+    products,
+    order_status = "Chờ xác nhận",
+    order_payment_method,
+    order_note,
+    discount_ids,
+  } = newOrder;
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return { EC: 1, EM: "Danh sách sản phẩm là bắt buộc" };
-    }
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return { EC: 1, EM: "Danh sách sản phẩm là bắt buộc" };
+  }
 
-    let delivery_fee = 50000;
-    let order_total_price = 0;
+  let delivery_fee = 50000;
+  let order_total_price = 0;
 
-    const orderProducts = await Promise.all(
-      products.map(async (item) => {
-        const product = await Product.findById(item.product_id);
-        if (!product)
-          return { EC: 2, EM: `Không tìm thấy sản phẩm: ${item.product_id}` };
+  const orderProducts = await Promise.all(
+    products.map(async (item) => {
+      const product = await Product.findById(item.product_id);
+      if (!product)
+        return { EC: 2, EM: `Không tìm thấy sản phẩm: ${item.product_id}` };
 
-        const color = product.colors.find(
-          (c) => c._id.toString() === item.color
-        );
-        if (!color) {
-          return { EC: 3, EM: `Không tìm thấy màu: ${item.color_id}` };
-        }
+      const color = product.colors.find((c) => c._id.toString() === item.color);
+      if (!color) {
+        return { EC: 3, EM: `Không tìm thấy màu: ${item.color_id}` };
+      }
 
-        const variant = color.variants.find(
-          (v) => v._id.toString() === item.variant
-        );
-        if (!variant) {
-          return { EC: 4, EM: `Không tìm thấy mẫu: ${item.variant_id}` };
-        }
+      const variant = color.variants.find(
+        (v) => v._id.toString() === item.variant
+      );
+      if (!variant) {
+        return { EC: 4, EM: `Không tìm thấy mẫu: ${item.variant_id}` };
+      }
 
-        if (variant.variant_countInStock < item.quantity) {
-          return { EC: 5, EM: `Sản phẩm ${item.product_id} đã hết hàng` };
-        }
+      if (variant.variant_countInStock < item.quantity) {
+        return { EC: 5, EM: `Sản phẩm ${item.product_id} đã hết hàng` };
+      }
 
-        return {
-          product_id: product._id,
-          quantity: item.quantity,
-          color: item.color,
-          variant: item.variant,
-          product_order_type: item.product_order_type || "default",
-          product_price: variant.variant_price * item.quantity,
-          category_id: product.category_id,
-        };
-      })
-    );
+      return {
+        product_id: product._id,
+        quantity: item.quantity,
+        color: item.color,
+        variant: item.variant,
+        product_order_type: item.product_order_type || "default",
+        product_price: variant.variant_price * item.quantity,
+        category_id: product.category_id,
+      };
+    })
+  );
 
-    const errorProduct = orderProducts.find((item) => item.EC);
-    if (errorProduct) return errorProduct;
+  const errorProduct = orderProducts.find((item) => item.EC);
+  if (errorProduct) return errorProduct;
 
-    order_total_price = orderProducts.reduce(
-      (total, item) => total + item.product_price,
-      0
-    );
+  order_total_price = orderProducts.reduce(
+    (total, item) => total + item.product_price,
+    0
+  );
 
-    let totalDiscount = 0;
-    if (discount_ids?.length > 0) {
-      const discounts = await Discount.find({ _id: { $in: discount_ids } });
+  let totalDiscount = 0;
+  if (discount_ids?.length > 0) {
+    const discounts = await Discount.find({ _id: { $in: discount_ids } });
 
-      for (const discount of discounts) {
-        const now = new Date();
-        if (
-          discount.discount_start_day > now ||
-          discount.discount_end_day < now
-        ) {
-          continue;
-        }
+    for (const discount of discounts) {
+      const now = new Date();
+      if (
+        discount.discount_start_day > now ||
+        discount.discount_end_day < now
+      ) {
+        continue;
+      }
 
-        if (order_total_price < discount.min_order_value) {
-          continue;
-        }
+      if (order_total_price < discount.min_order_value) {
+        continue;
+      }
 
-        if (discount.discount_type === "product") {
-          let discountableTotal = 0;
-          orderProducts.forEach((item) => {
-            if (
-              discount.applicable_products.some((p) =>
-                p.equals(item.product_id)
-              ) ||
-              discount.applicable_categories.some((c) =>
-                c.equals(item.category_id)
-              )
-            ) {
-              discountableTotal += item.product_price;
-            }
-          });
-
-          if (discountableTotal > 0) {
-            totalDiscount +=
-              (discountableTotal * discount.discount_number) / 100;
+      if (discount.discount_type === "product") {
+        let discountableTotal = 0;
+        orderProducts.forEach((item) => {
+          if (
+            discount.applicable_products.some((p) =>
+              p.equals(item.product_id)
+            ) ||
+            discount.applicable_categories.some((c) =>
+              c.equals(item.category_id)
+            )
+          ) {
+            discountableTotal += item.product_price;
           }
-        } else if (discount.discount_type === "shipping") {
-          delivery_fee -= (delivery_fee * discount.discount_number) / 100;
-          if (delivery_fee < 0) delivery_fee = 0;
+        });
+
+        if (discountableTotal > 0) {
+          totalDiscount += (discountableTotal * discount.discount_number) / 100;
         }
+      } else if (discount.discount_type === "shipping") {
+        delivery_fee -= (delivery_fee * discount.discount_number) / 100;
+        if (delivery_fee < 0) delivery_fee = 0;
       }
     }
-
-    const order_total_final = order_total_price + delivery_fee - totalDiscount;
-
-    const estimatedDeliveryDate = new Date();
-    estimatedDeliveryDate.setDate(
-      estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
-    );
-
-    const previewOrder = {
-      user_id: userId,
-      products: orderProducts,
-      delivery_fee,
-      shipping_address,
-      order_status,
-      order_payment_method,
-      order_note,
-      discount_ids,
-      order_total_price,
-      order_total_final,
-      order_total_discount: totalDiscount,
-      estimated_delivery_date: estimatedDeliveryDate,
-    };
-
-    return {
-      EC: 0,
-      EM: "Xem trước đơn hàng thành công",
-      data: previewOrder,
-    };
-  } catch (error) {
-    return { EC: 99, EM: error.message };
   }
+
+  const order_total_final = order_total_price + delivery_fee - totalDiscount;
+
+  const estimatedDeliveryDate = new Date();
+  estimatedDeliveryDate.setDate(
+    estimatedDeliveryDate.getDate() + Math.floor(Math.random() * 5) + 3
+  );
+
+  const previewOrder = {
+    user_id: userId,
+    products: orderProducts,
+    delivery_fee,
+    shipping_address,
+    order_status,
+    order_payment_method,
+    order_note,
+    discount_ids,
+    order_total_price,
+    order_total_final,
+    order_total_discount: totalDiscount,
+    estimated_delivery_date: estimatedDeliveryDate,
+  };
+
+  return {
+    EC: 0,
+    EM: "Xem trước đơn hàng thành công",
+    data: previewOrder,
+  };
 };
 
 const updateStatus = async (
@@ -716,83 +708,75 @@ const handleCancelPaymentService = async (
 const getRevenue = async (year) => {
   const startDate = new Date(`${year}-01-01`);
   const endDate = new Date(`${parseInt(year) + 1}-01-01`);
-
-  try {
-    const result = await Order.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startDate, $lt: endDate },
-        },
+  const result = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate, $lt: endDate },
       },
-      {
-        $facet: {
-          byMonth: [
-            {
-              $group: {
-                _id: {
-                  month: { $month: "$createdAt" },
-                  status: "$order_status",
-                  payment: "$is_paid",
-                },
-                total: { $sum: "$order_total_final" },
+    },
+    {
+      $facet: {
+        byMonth: [
+          {
+            $group: {
+              _id: {
+                month: { $month: "$createdAt" },
+                status: "$order_status",
+                payment: "$is_paid",
               },
+              total: { $sum: "$order_total_final" },
             },
-          ],
-          // byCategory: [
-          //   { $unwind: "$" },
-          //   {
-          //     $group: {
-          //       _id: "$items.category",
-          //       revenue: { $sum: "$items.total_price" },
-          //     },
-          //   },
-          //   { $sort: { revenue: -1 } }
-          // ],
-        },
+          },
+        ],
+        // byCategory: [
+        //   { $unwind: "$" },
+        //   {
+        //     $group: {
+        //       _id: "$items.category",
+        //       revenue: { $sum: "$items.total_price" },
+        //     },
+        //   },
+        //   { $sort: { revenue: -1 } }
+        // ],
       },
-    ]);
+    },
+  ]);
 
-    const { byMonth, byCategory } = result[0];
+  const { byMonth, byCategory } = result[0];
 
-    // Doanh thu theo tháng
-    const fullMonthly = Array.from({ length: 12 }, (_, i) => {
-      const month = i + 1;
-      const filtered = byMonth.filter((b) => b._id.month === month);
-      const completedRevenue = filtered
-        .filter((f) => f._id.status === "Hoàn thành")
-        .reduce((acc, curr) => acc + curr.total, 0);
-      const cancelledRevenue = filtered
-        .filter((f) => f._id.status === "Hủy hàng")
-        .reduce((acc, curr) => acc + curr.total, 0);
-      const paidRevenue = filtered
-        .filter((f) => f._id.payment === true)
-        .reduce((acc, curr) => acc + curr.total, 0);
-
-      return {
-        month,
-        completedRevenue,
-        cancelledRevenue,
-        paidRevenue,
-      };
-    });
+  // Doanh thu theo tháng
+  const fullMonthly = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const filtered = byMonth.filter((b) => b._id.month === month);
+    const completedRevenue = filtered
+      .filter((f) => f._id.status === "Hoàn thành")
+      .reduce((acc, curr) => acc + curr.total, 0);
+    const cancelledRevenue = filtered
+      .filter((f) => f._id.status === "Hủy hàng")
+      .reduce((acc, curr) => acc + curr.total, 0);
+    const paidRevenue = filtered
+      .filter((f) => f._id.payment === true)
+      .reduce((acc, curr) => acc + curr.total, 0);
 
     return {
-      EC: 0,
-      EM: "Lấy thống kê thành công",
-      data: {
-        revenueByMonth: fullMonthly,
-        // revenueByCategory: byCategory.map(c => ({
-        //   category: c._id,
-        //   revenue: c.revenue,
-        // })),
-      },
+      month,
+      completedRevenue,
+      cancelledRevenue,
+      paidRevenue,
     };
-  } catch (error) {
-    return {
-      EC: -99,
-      EM: error.message,
-    };
-  }
+  });
+
+  return {
+    EC: 0,
+    EM: "Lấy thống kê thành công",
+    data: {
+      revenueByMonth: fullMonthly,
+      // revenueByCategory: byCategory.map(c => ({
+      //   category: c._id,
+      //   revenue: c.revenue,
+      // })),
+    },
+  };
 };
 
 module.exports = {

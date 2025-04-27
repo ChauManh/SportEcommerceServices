@@ -4,7 +4,7 @@ const { updateStatus } = require("../services/Order.service");
 
 // Chạy 0h mỗi ngày
 cron.schedule("0 0 * * *", async () => {
-  console.log("⏰ Đang kiểm tra các đơn chưa thanh toán...");
+  console.log("Đang kiểm tra các đơn chưa thanh toán...");
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
   try {

@@ -36,9 +36,11 @@ const { verifyToken, identifyAdmin } = require("../middlewares/AuthMiddleWare");
  *                 example: 1
  *     responses:
  *       200:
- *         description: Tạo danh mục thành công
+ *         description: Tạo danh mục mới thành công
  *       400:
  *         description: Danh mục đã tồn tại hoặc dữ liệu không hợp lệ
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -65,9 +67,9 @@ router.post(
  *         description: ID của danh mục
  *     responses:
  *       200:
- *         description: Thành công
- *       404:
- *         description: Không tìm thấy danh mục
+ *         description: Lấy chi tiết danh mục thành công
+ *       400:
+ *         description: Danh mục không tồn tại
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -82,7 +84,7 @@ router.get("/get-detail/:id", categoryController.getDetailCategory);
  *       - Category
  *     responses:
  *       200:
- *         description: Lấy danh sách danh mục thành công
+ *         description: Lấy tất cả danh mục thành công
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -105,9 +107,9 @@ router.get("/get-all", categoryController.getAllCategory);
  *         description: ID của danh mục cha
  *     responses:
  *       200:
- *         description: Thành công
- *       404:
- *         description: Không tìm thấy danh mục cha
+ *         description: Lấy danh mục con thành công
+ *       400:
+ *         description: Danh mục không tồn tại
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -147,8 +149,10 @@ router.get("/get-sub/:id", categoryController.getSubCategory);
  *     responses:
  *       200:
  *         description: Cập nhật danh mục thành công
- *       404:
- *         description: Không tìm thấy danh mục
+ *       400:
+ *         description: Danh mục không tồn tại
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */
@@ -178,9 +182,11 @@ router.patch(
  *         description: ID của danh mục cần xoá
  *     responses:
  *       200:
- *         description: Xoá thành công
- *       404:
- *         description: Không tìm thấy danh mục
+ *         description: Xóa danh mục thành công
+ *       400:
+ *         description: Danh mục không tồn tại
+ *       403:
+ *         description: Token admin không xác thực
  *       500:
  *         description: Lỗi máy chủ
  */

@@ -7,7 +7,6 @@ const Category = require('../models/Category.model');
 const chatWithBotService = async (message, user, history = []) => {
   try {
     let messages = [];
-    console.log("user: ", user);
     if (user) {
       let chat = await ChatHistory.findOne({ userId: user.userId });
       if (!chat) {
@@ -79,7 +78,6 @@ const chatWithBotService = async (message, user, history = []) => {
       return { EC: 0, EM: "Trả lời thành công", data: reply };
     }
   } catch (error) {
-    console.error("Chatbot error:", error.message);
     return { EC: 2, EM: error.message };
   }
 };
