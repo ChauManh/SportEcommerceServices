@@ -7,7 +7,6 @@ const route = require("./src/routes/index.route");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./src/config/swagger");
 const responseHandler = require("./src/middlewares/ResponseHandler");
-const { setWebhook } = require("./src/config/PayOS");
 require("./src/chronos/OrderChecker");
 
 require("dotenv").config();
@@ -16,7 +15,6 @@ db.connect();
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Gọi hàm setWebhook khi server khởi chạy
-setWebhook();
 
 // Middleware
 app.use(morgan("combined")); // HTTP Logger (console các thông tin request)
