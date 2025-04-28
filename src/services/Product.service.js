@@ -157,7 +157,7 @@ const getDetailsProduct = async (id) => {
       EM: "Lấy chi tiết sản phẩm thành công",
       data: product,
     };
-  } catch (e){
+  } catch (e) {
     return {
       EC: 2,
       EM: error.message,
@@ -195,6 +195,7 @@ const deleteProduct = async (id) => {
 };
 
 const getAllProduct = async (filters) => {
+  console.log("Filters:", filters);
   try {
     let query = {};
     const genderFilter =
@@ -228,6 +229,19 @@ const getAllProduct = async (filters) => {
         parentId: subCat.category_parent_id,
         subId: subCat._id,
       }));
+    }
+
+    if (!filters.category && filters.category_sub) {
+      for (const subCategory of subArray) {
+        const subCategories = await Category.find({
+          category_type: subCategory,
+          category_gender: { $in: genderFilter },
+        });
+
+        for (const sub of subCategories) {
+          categoryIds.push(sub._id);
+        }
+      }
     }
 
     for (const categoryType of categoryArray) {
@@ -282,6 +296,7 @@ const getAllProduct = async (filters) => {
       query.product_brand = { $in: filters.product_brand };
     }
 
+    console.log("Query:", query);
     const products = await Product.find(query).populate("product_category");
     const totalProducts = await Product.countDocuments(query);
 
