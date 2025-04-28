@@ -144,19 +144,26 @@ const getDetailsProduct = async (id) => {
   try {
     const product = await Product.findById(id).populate("product_category");
 
-  if (!product) {
+    if (!product) {
+      return {
+        EC: 1,
+        EM: "Không tìm thấy sản phẩm",
+        data: [],
+      };
+    }
+
     return {
-      EC: 1,
-      EM: "Không tìm thấy sản phẩm",
+      EC: 0,
+      EM: "Lấy chi tiết sản phẩm thành công",
+      data: product,
+    };
+  } catch (e){
+    return {
+      EC: 2,
+      EM: error.message,
       data: [],
     };
   }
-
-  return {
-    EC: 0,
-    EM: "Lấy chi tiết sản phẩm thành công",
-    data: product,
-  };
 };
 
 const deleteProduct = async (id) => {
