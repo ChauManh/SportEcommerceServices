@@ -1,5 +1,5 @@
 const Order = require("../models/Order.model");
-const payOS = require("../config/PayOS");
+const { payOS } = require("../config/PayOS");
 require("dotenv").config();
 
 const createPaymentService = async (
