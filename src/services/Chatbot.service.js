@@ -113,7 +113,6 @@ const SearchProductService = async (message) => {
             }
         );
         const filters = response.data.choices[0].message.content;
-        console.log(filters);
         return { EC: 0, EM: "Trả lời thành công", data: filters };
 
     } catch (error) {

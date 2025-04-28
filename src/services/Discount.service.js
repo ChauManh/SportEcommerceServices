@@ -157,7 +157,6 @@ const getForOrder = async (userId, productIds) => {
       data: applicableDiscounts,
     };
   } catch (error) {
-    console.log(error.message);
     return { EC: -1, EM: error.message };
   }
 };

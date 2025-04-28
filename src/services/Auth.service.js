@@ -172,7 +172,6 @@ const SignUpWithGoogleService = async (email, user_name, uidToPassword) => {
 
 const sentOTPService = async (email) => {
   // Kiểm tra email đã tồn tại chưa
-  console.log(email);
   const existingUser = await User.findOne({ email });
   if (!existingUser) {
     return {

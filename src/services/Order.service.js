@@ -536,7 +536,6 @@ const updateStatus = async (
         });
         await Promise.all(updateStockPromises);
       } catch (err) {
-        console.log(err);
         return {
           EC: 4,
           EM: "Lỗi khi hoàn hàng về kho",

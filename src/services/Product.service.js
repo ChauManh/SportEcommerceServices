@@ -195,7 +195,6 @@ const deleteProduct = async (id) => {
 };
 
 const getAllProduct = async (filters) => {
-  console.log("Filters:", filters);
   try {
     let query = {};
     const genderFilter =
@@ -296,7 +295,6 @@ const getAllProduct = async (filters) => {
       query.product_brand = { $in: filters.product_brand };
     }
 
-    console.log("Query:", query);
     const products = await Product.find(query).populate("product_category");
     const totalProducts = await Product.countDocuments(query);
 
