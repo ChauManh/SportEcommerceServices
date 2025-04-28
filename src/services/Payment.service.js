@@ -57,6 +57,7 @@ const handleWebhookService = async (data, signature) => {
     };
   } else {
     if (data.code === "00" && data.desc === "success") {
+      console.log("Xác thực đơn hàng thành công", data);
       const order = await Order.findOne({ order_code: data.data.orderCode });
       if (!order) {
         return {
