@@ -58,20 +58,20 @@ const handleWebhookService = async (data, signature) => {
   } else {
     if (data.code === "00" && data.desc === "success") {
       console.log("Xác thực đơn hàng thành công", data);
-      const order = await Order.findOne({ order_code: data.data.orderCode });
-      if (!order) {
-        return {
-          EC: 1,
-          EM: "Đơn hàng không tồn tại",
-        };
-      } else {
-        order.is_paid = true;
-        await order.save();
-        return {
-          EC: 0,
-          EM: "Xác nhận thanh toán thành công",
-        };
-      }
+      // const order = await Order.findOne({ order_code: data.data.orderCode });
+      // // if (!order) {
+      // //   return {
+      // //     EC: 1,
+      // //     EM: "Đơn hàng không tồn tại",
+      // //   };
+      // // } else {
+      // order.is_paid = true;
+      // await order.save();
+      return {
+        EC: 0,
+        EM: "Xác nhận thanh toán thành công",
+      };
+      // }
     }
     return {
       EC: 3,
