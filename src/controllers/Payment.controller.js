@@ -8,6 +8,7 @@ const paymentController = {
     const { signature } = req.body;
     try {
       const response = await handleWebhookService(data, signature);
+      console.log("Response from PayOS:", response);
       response.EC === 0
         ? res.success(data, response.EM)
         : res.error(response.EC, response.EM, response?.status);
