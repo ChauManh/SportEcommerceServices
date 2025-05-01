@@ -47,11 +47,7 @@ const updateStore = async (req, res) => {
 
       let bannersToKeep = [];
       if (existing_banners) {
-        try {
-          bannersToKeep = JSON.parse(existing_banners);
-        } catch (e) {
-          console.error("Error parsing existing_banners:", e);
-        }
+        bannersToKeep = JSON.parse(existing_banners);
       }
 
       const { images } = processFiles(req.files);
@@ -76,7 +72,6 @@ const updateStore = async (req, res) => {
 const getDetailStore = async (req, res) => {
   try {
     const storeId = req.params.id;
-
     const result = await storeService.getDetailStore(storeId);
     result.EC === 0
       ? res.success(result.EM, result.data)

@@ -7,36 +7,6 @@ const {
   updateProductImages,
 } = require("../utils/UploadUtil");
 
-// const uploadImgProduct = (req, res, next) => {
-//     console.log("Received body before Multer:", req.body);
-
-//     const multerMiddleware = upload.any();
-
-//     multerMiddleware(req, res, (err) => {
-//         if (err) {
-//             return res.status(400).json({ message: "Upload error", error: err.message });
-//         }
-
-//         console.log("Received body after Multer:", req.body);
-//         console.log("Received files:", req.files);
-
-//         try {
-//             // if (!req.body.variants) {
-//             //     return res.status(400).json({ message: "Variants data is required" });
-//             // }
-
-//             // let variants = JSON.parse(req.body.variants);
-//             // if (!Array.isArray(variants)) {
-//             //     return res.status(400).json({ message: "Invalid variants format. Expected an array." });
-//             // }
-
-//             next();
-//         } catch (error) {
-//             return res.status(400).json({ message: "Invalid variants JSON format", error: error.message });
-//         }
-//     });
-// };
-
 const createProduct = async (req, res) => {
   try {
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
@@ -60,17 +30,14 @@ const createProduct = async (req, res) => {
     try {
       productData = mapProductImages(productData, filesMap);
     } catch (error) {
-      // return res.status(400).json({ message: error.message });
       return res.error(1, error.message);
     }
 
     const result = await productService.createProduct(productData);
-    //return res.status(200).json(response);
     result.EC === 0
       ? res.success(null, result.EM)
       : res.error(result.EC, result.EM);
   } catch (error) {
-    console.error("Error creating product:", error);
     return res.InternalError();
   }
 };
@@ -78,7 +45,6 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-
     const uploadResult = await uploadImgProduct(req, res); // Gọi hàm upload
     if (!uploadResult.success) {
       return res.error(1, uploadResult.error);

@@ -38,13 +38,16 @@ const updateProductToFavourService = async ({ user_id, product_id }) => {
 };
 
 const getFavouriteService = async (user_id) => {
-
   // Tìm danh sách yêu thích của user
   const favourite = await Favourite.findOne({ user_id });
 
   // Nếu không tìm thấy danh sách yêu thích
   if (!favourite) {
-    return { EC: 0, EM: "Danh sách sản phẩm yêu thích không tồn tại", favourites: [] };
+    return {
+      EC: 0,
+      EM: "Danh sách sản phẩm yêu thích không tồn tại",
+      favourites: [],
+    };
   }
 
   // Nếu danh sách sản phẩm rỗng, trả về mảng rỗng thay vì truy cập thuộc tính không tồn tại
@@ -59,10 +62,8 @@ const getFavouriteService = async (user_id) => {
   };
 };
 
-
 const clearFavouritesService = async (user_id) => {
-  
-  let favourite = await Favourite.findOne( {user_id} );
+  let favourite = await Favourite.findOne({ user_id });
   if (!favourite) {
     return { EC: 2, EM: "Không tìm thấy danh sách yêu th" };
   }
@@ -75,7 +76,6 @@ const clearFavouritesService = async (user_id) => {
 
   return { EC: 0, EM: "Xóa danh sách yêu thích thành công" };
 };
-
 
 module.exports = {
   updateProductToFavourService,

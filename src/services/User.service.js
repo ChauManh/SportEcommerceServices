@@ -38,85 +38,69 @@ const changePasswordService = async (email, oldPassword, newPassword) => {
 };
 
 const updateUserService = async (userId, dataUpdate) => {
-  try {
-    const user = await User.findById(userId);
+  const user = await User.findById(userId);
 
-    // Cập nhật thông tin
-    Object.assign(user, dataUpdate);
-    await user.save();
+  // Cập nhật thông tin
+  Object.assign(user, dataUpdate);
+  await user.save();
 
-    return { EC: 0, EM: "Thay đổi thông tin thành công!", user };
-  } catch (error) {
-    return { EC: 2, EM: error.message };
-  }
+  return { EC: 0, EM: "Thay đổi thông tin thành công!", user };
 };
 
 const addAddressService = async (userId, addressData) => {
-  try {
-    const user = await User.findById(userId);
+  const user = await User.findById(userId);
 
-    // Nếu địa chỉ mới là mặc định, reset tất cả địa chỉ trước đó
-    if (addressData.is_default) {
-      user.addresses.forEach((addr) => (addr.is_default = false));
-    }
-
-    user.addresses.push(addressData);
-    await user.save();
-
-    return {
-      EC: 0,
-      EM: "Thêm địa chỉ thành công",
-      addresses: user.addresses,
-    };
-  } catch (error) {
-    return { EC: 2, EM: error.message };
+  // Nếu địa chỉ mới là mặc định, reset tất cả địa chỉ trước đó
+  if (addressData.is_default) {
+    user.addresses.forEach((addr) => (addr.is_default = false));
   }
+
+  user.addresses.push(addressData);
+  await user.save();
+
+  return {
+    EC: 0,
+    EM: "Thêm địa chỉ thành công",
+    addresses: user.addresses,
+  };
 };
 
 const updateAddressService = async (userId, index, updateData) => {
-  try {
-    const user = await User.findById(userId);
+  const user = await User.findById(userId);
 
-    if (index < 0 || index >= user.addresses.length) {
-      return { EC: 2, EM: "Không tìm thấy địa chỉ" };
-    }
-
-    // Cập nhật thông tin địa chỉ
-    Object.assign(user.addresses[index], updateData);
-
-    // Nếu đặt mặc định, bỏ mặc định của các địa chỉ khác
-    if (updateData.is_default) {
-      user.addresses.forEach((addr, i) => (addr.is_default = i === index));
-    }
-
-    await user.save();
-    return {
-      EC: 0,
-      EM: "Cập nhật địa chỉ thành công",
-      addresses: user.addresses,
-    };
-  } catch (error) {
-    return { EC: 3, EM: error.message };
+  if (index < 0 || index >= user.addresses.length) {
+    return { EC: 2, EM: "Không tìm thấy địa chỉ" };
   }
+
+  // Cập nhật thông tin địa chỉ
+  Object.assign(user.addresses[index], updateData);
+
+  // Nếu đặt mặc định, bỏ mặc định của các địa chỉ khác
+  if (updateData.is_default) {
+    user.addresses.forEach((addr, i) => (addr.is_default = i === index));
+  }
+
+  await user.save();
+  return {
+    EC: 0,
+    EM: "Cập nhật địa chỉ thành công",
+    addresses: user.addresses,
+  };
 };
 
 const saveDiscount = async (userId, discountId) => {
-  try {
-    const user = await User.findById(userId);
-    if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
+  const user = await User.findById(userId);
+  if (!user) return { EC: 1, EM: "Không tìm thấy người dùng" };
 
-    const discount = await Discount.findById(discountId);
-    if (!discount) return { EC: 2, EM: "Mã giảm giá không tồn tại" };
+  const discount = await Discount.findById(discountId);
+  if (!discount) return { EC: 2, EM: "Mã giảm giá không tồn tại" };
 
-    const alreadySaved = user.discounts.some((d) => d.equals(discount._id));
-    if (alreadySaved) return { EC: 0, EM: "Mã giảm giá đã được lưu" };
+  const alreadySaved = user.discounts.some((d) => d.equals(discount._id));
+  if (alreadySaved) return { EC: 0, EM: "Mã giảm giá đã được lưu" };
 
-    user.discounts.push(discount._id);
-    await user.save();
-    return { EC: 0, EM: "Lưu mã giảm giá thành công", data: user.discounts };
-  } catch (error) {
-    return { EC: 3, EM: error.message };
-  }
+  user.discounts.push(discount._id);
+  await user.save();
+  return { EC: 0, EM: "Lưu mã giảm giá thành công", data: user.discounts };
 };
 
 const getDiscountUser = async (userId) => {

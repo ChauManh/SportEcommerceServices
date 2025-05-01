@@ -79,7 +79,6 @@ const userController = {
         ? res.success(updateResult.user, updateResult.EM)
         : res.error(updateResult.EC, updateResult.EM);
     } catch (error) {
-      console.error("Error updating user:", error);
       return res.InternalError();
     }
   },
@@ -88,12 +87,6 @@ const userController = {
     try {
       const { userId } = req.user;
       const newAddress = req.body;
-      console.log("newAddress", newAddress);
-      console.log("userId", userId);
-      // if (!addressData || !addressData.name || !addressData.phone) {
-      //   return res.status(400).json({ EC: 1, EM: "Thiếu thông tin địa chỉ!" });
-      // }
-
       const result = await addAddressService(userId, newAddress);
       return result.EC === 0
         ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
@@ -108,7 +101,6 @@ const userController = {
       const { userId } = req.user;
       const index = parseInt(req.params.index);
       const updateData = req.body;
-
       const result = await updateAddressService(userId, index, updateData);
       return result.EC === 0
         ? res.success({ EC: 0, EM: result.EM, addresses: result.addresses })
@@ -122,7 +114,6 @@ const userController = {
     try {
       const { userId } = req.user;
       const index = parseInt(req.params.index);
-
       const result = await deleteAddressService(userId, index);
       return result.EC === 0
         ? res.success({ EC: 0, EM: result.EM })
@@ -136,9 +127,7 @@ const userController = {
     try {
       const { userId } = req.user;
       const { discount } = req.body;
-
       const result = await saveDiscount(userId, discount);
-
       return result.EC === 0
         ? res.success(result.data, result.EM)
         : res.error(result.EC, result.EM);
@@ -150,9 +139,7 @@ const userController = {
   async getDiscountUser(req, res) {
     try {
       const { userId } = req.user;
-
       const result = await getDiscountUser(userId);
-
       return result.EC === 0
         ? res.success(result.data, result.EM)
         : res.error(result.EC, result.EM);
@@ -165,7 +152,6 @@ const userController = {
     try {
       const userId = req.user.userId;
       const index = req.params.index;
-
       const response = await deleteSearchHistoryService(userId, index);
       return response.EC === 0
         ? res.success({ EC: 0, EM: response.EM })
@@ -179,7 +165,6 @@ const userController = {
   async getChatHistory(req, res) {
     try {
       const userId = req.user.userId;
-
       const response = await ChatHistory.findOne({ userId });
       if (!response) {
         return res.error(1, "Không có đoạn chat của user này");
@@ -194,7 +179,6 @@ const userController = {
   async deleteChatHistory(req, res) {
     try {
       const userId = req.user.userId;
-
       const response = await ChatHistory.findOneAndDelete({ userId });
       if (!response) {
         return res.error(1, "Không có đoạn chat của user này");

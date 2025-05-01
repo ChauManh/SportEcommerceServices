@@ -1,4 +1,8 @@
-const { handleWebhookService, getInfoOfPaymentService, deletePaymentService } = require("../services/Payment.service");
+const {
+  handleWebhookService,
+  getInfoOfPaymentService,
+  deletePaymentService,
+} = require("../services/Payment.service");
 
 require("dotenv").config();
 
@@ -8,12 +12,10 @@ const paymentController = {
     const { signature } = req.body;
     try {
       const response = await handleWebhookService(data, signature);
-      console.log("Response from PayOS:", response);
       response.EC === 0
         ? res.success(data, response.EM)
         : res.error(response.EC, response.EM, response?.status);
     } catch (error) {
-      console.log("Internal error", error);
       return res.InternalError();
     }
   },
@@ -26,7 +28,6 @@ const paymentController = {
         ? res.success(response.data, response.EM)
         : res.error(response.EC, response.EM);
     } catch (error) {
-      console.log("Internal error", error);
       return res.InternalError();
     }
   },
@@ -39,10 +40,9 @@ const paymentController = {
         ? res.success(response.data, response.EM)
         : res.error(response.EC, response.EM);
     } catch (error) {
-      console.log("Internal error", error);
       return res.InternalError();
     }
-  }
+  },
 };
 
 module.exports = paymentController;

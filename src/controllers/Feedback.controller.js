@@ -6,29 +6,30 @@ const createFeedback = async (req, res) => {
   try {
     upload.any()(req, res, async (err) => {
       if (err) {
-        // return res.status(400).json({ success: false, message: err.message });
         return res.error(-1, err.message);
       }
-      console.log("req", req);
       const { userId } = req.user;
 
-      const { product_id, variant_id, order_id, content, rating, color, variant } = req.body;
+      const {
+        product_id,
+        variant_id,
+        order_id,
+        content,
+        rating,
+        color,
+        variant,
+      } = req.body;
 
-      if (!product_id || !order_id || !content || !rating || !color || !variant) {
+      if (
+        !product_id ||
+        !order_id ||
+        !content ||
+        !rating ||
+        !color ||
+        !variant
+      ) {
         return res.error(3, "Các thông tin là bắt buộc");
       }
-
-      // const files = req.files || [];
-      // const images = [];
-      // const videos = [];
-
-      // files.forEach((file) => {
-      //     if (file.mimetype.startsWith("image/")) {
-      //         images.push(file.path);
-      //     } else if (file.mimetype.startsWith("video/")) {
-      //         videos.push(file.path);
-      //     }
-      // });
 
       const { images, videos } = processFiles(req.files);
 
@@ -63,18 +64,6 @@ const updateFeedback = async (req, res) => {
       const feedbackId = req.params.id;
       const { content, rating, replied_by_admin } = req.body;
 
-      // const files = req.files || [];
-      // const images = [];
-      // const videos = [];
-
-      // files.forEach((file) => {
-      //     if (file.mimetype.startsWith("image/")) {
-      //         images.push(file.path);
-      //     } else if (file.mimetype.startsWith("video/")) {
-      //         videos.push(file.path);
-      //     }
-      // });
-
       const { images, videos } = processFiles(req.files);
 
       const updateData = {};
@@ -101,7 +90,6 @@ const updateFeedback = async (req, res) => {
 const deleteFeedback = async (req, res) => {
   try {
     const feedbackId = req.params.id;
-
     const result = await feedbackService.deleteFeedback(feedbackId);
     return result.EC === 0
       ? res.success(null, result.EM)
@@ -114,7 +102,6 @@ const deleteFeedback = async (req, res) => {
 const getAllFeedback = async (req, res) => {
   try {
     const productId = req.params.productId;
-
     const result = await feedbackService.getAllFeedback(productId);
     return result.EC === 0
       ? res.success(result.data, result.EM)

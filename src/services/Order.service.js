@@ -208,78 +208,70 @@ const createOrder = async (newOrder, user_id) => {
 };
 
 const getAllOrder = async (orderStatus) => {
-  try {
-    let filter = {};
+  let filter = {};
 
-    if (orderStatus.toLowerCase() !== "all") {
-      const validStatuses = [
-        "Chờ xác nhận",
-        "Đang chuẩn bị hàng",
-        "Đang giao",
-        "Hoàn thành",
-        "Hoàn hàng",
-        "Hủy hàng",
-      ];
+  if (orderStatus.toLowerCase() !== "all") {
+    const validStatuses = [
+      "Chờ xác nhận",
+      "Đang chuẩn bị hàng",
+      "Đang giao",
+      "Hoàn thành",
+      "Hoàn hàng",
+      "Hủy hàng",
+    ];
 
-      if (!validStatuses.includes(orderStatus)) {
-        return { EC: 1, EM: "Trạng thái đơn hàng không hợp lệ" };
-      }
-
-      filter.order_status = orderStatus;
+    if (!validStatuses.includes(orderStatus)) {
+      return { EC: 1, EM: "Trạng thái đơn hàng không hợp lệ" };
     }
 
-    const orders = await Order.find(filter);
-
-    return {
-      EC: 0,
-      EM: "Lấy danh sách đơn hàng thành công",
-      data: orders,
-    };
-  } catch (error) {
-    return { EC: 2, EM: error.message };
+    filter.order_status = orderStatus;
   }
+
+  const orders = await Order.find(filter);
+
+  return {
+    EC: 0,
+    EM: "Lấy danh sách đơn hàng thành công",
+    data: orders,
+  };
 };
 
 const getOrderByUser = async (userId, orderStatus) => {
-  try {
-    if (!userId) {
-      return { EC: 1, EM: "Mã khách hàng là bắt buộc" };
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return { EC: 2, EM: "Người dùng không tồn tại" };
-    }
-
-    let filter = { user_id: userId };
-
-    if (orderStatus && orderStatus.toLowerCase() !== "all") {
-      const validStatuses = [
-        "Chờ xác nhận",
-        "Đang chuẩn bị hàng",
-        "Đang giao",
-        "Hoàn thành",
-        "Hoàn hàng",
-        "Hủy hàng",
-      ];
-
-      if (!validStatuses.includes(orderStatus)) {
-        return { EC: 3, EM: "Trạng thái đơn hàng không hợp lệ" };
-      }
-
-      filter.order_status = orderStatus;
-    }
-
-    const orders = await Order.find(filter).populate("products.product_id");
-
-    return {
-      EC: 0,
-      EM: "Lấy danh sách đơn hàng thành công",
-      data: orders,
-    };
-  } catch (error) {
-    return { EC: 4, EM: error.message };
+  if (!userId) {
+    return { EC: 1, EM: "Mã khách hàng là bắt buộc" };
   }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return { EC: 2, EM: "Người dùng không tồn tại" };
+  }
+
+  let filter = { user_id: userId };
+
+  if (orderStatus && orderStatus.toLowerCase() !== "all") {
+    const validStatuses = [
+      "Chờ xác nhận",
+      "Đang chuẩn bị hàng",
+      "Đang giao",
+      "Hoàn thành",
+      "Hoàn hàng",
+      "Hủy hàng",
+    ];
+
+    if (!validStatuses.includes(orderStatus)) {
+      return { EC: 3, EM: "Trạng thái đơn hàng không hợp lệ" };
+    }
+
+    filter.order_status = orderStatus;
+  }
+
+  const orders = await Order.find(filter).populate("products.product_id");
+
+  return {
+    EC: 0,
+    EM: "Lấy danh sách đơn hàng thành công",
+    data: orders,
+  };
 };
 
 const previewOrder = async (newOrder, userId) => {
@@ -629,27 +621,23 @@ const updateStatus = async (
 };
 
 const getDetailOrder = async (orderId, user) => {
-  try {
-    const order = await Order.findById(orderId).populate("products.product_id");
-    if (!order) {
-      return { EC: 1, EM: "Đơn hàng không tồn tại", data: null };
-    }
-    if (order.user_id) {
-      if (!order.user_id === user.userId || !user.role === "admin") {
-        return {
-          EC: 2,
-          EM: "Bạn không có quyền truy cập đơn hàng này",
-        };
-      }
-    }
-    return {
-      EC: 0,
-      EM: "Xem chi tiết đơn hàng thành công",
-      data: order,
-    };
-  } catch (error) {
-    return { EC: 99, EM: error.message, data: null };
+  const order = await Order.findById(orderId).populate("products.product_id");
+  if (!order) {
+    return { EC: 1, EM: "Đơn hàng không tồn tại", data: null };
   }
+  if (order.user_id) {
+    if (!order.user_id === user.userId || !user.role === "admin") {
+      return {
+        EC: 2,
+        EM: "Bạn không có quyền truy cập đơn hàng này",
+      };
+    }
+  }
+  return {
+    EC: 0,
+    EM: "Xem chi tiết đơn hàng thành công",
+    data: order,
+  };
 };
 
 const handleCancelPaymentService = async (
@@ -683,27 +671,6 @@ const handleCancelPaymentService = async (
   }
 };
 
-// const deleteOrderService = async (orderCode) => {
-//   // try {
-//   //   const order = await Order.findOne({ order_code: orderCode });
-//   //   if (!order) {
-//   //     return { EC: 1, EM: "Order doesn't exist" };
-//   //   }
-//   //   if (order.order_payment_method === "Cod") {
-//   //       if(order.order_status === "Chờ xác nhận") {
-//   //         // Xóa đơn hàng nếu trạng thái là "Chờ xác nhận"
-//   //         await order.remove();
-//   //       } else {
-//   //         // Nếu trạng thái không phải là "Chờ xác nhận", chỉ cập nhật trạng thái
-//   //         order.order_status = "Hủy hàng";
-//   //         await order.save();
-//   //       }
-//   //   }
-//   // } catch (error) {
-//   //   return { EC: 99, EM: error.message };
-//   // }
-// };
-
 const getRevenue = async (year) => {
   const startDate = new Date(`${year}-01-01`);
   const endDate = new Date(`${parseInt(year) + 1}-01-01`);
@@ -727,22 +694,11 @@ const getRevenue = async (year) => {
             },
           },
         ],
-        // byCategory: [
-        //   { $unwind: "$" },
-        //   {
-        //     $group: {
-        //       _id: "$items.category",
-        //       revenue: { $sum: "$items.total_price" },
-        //     },
-        //   },
-        //   { $sort: { revenue: -1 } }
-        // ],
       },
     },
   ]);
 
   const { byMonth, byCategory } = result[0];
-
   // Doanh thu theo tháng
   const fullMonthly = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
@@ -770,10 +726,6 @@ const getRevenue = async (year) => {
     EM: "Lấy thống kê thành công",
     data: {
       revenueByMonth: fullMonthly,
-      // revenueByCategory: byCategory.map(c => ({
-      //   category: c._id,
-      //   revenue: c.revenue,
-      // })),
     },
   };
 };
@@ -787,5 +739,4 @@ module.exports = {
   getDetailOrder,
   handleCancelPaymentService,
   getRevenue,
-  // deleteOrderService,
 };
