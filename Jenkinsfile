@@ -4,7 +4,7 @@ pipeline {
   environment {
     IMAGE_NAME = 'rain494/my_backend_image'
     DOCKERHUB_USERNAME = 'rain494' 
-    BACKEND_EC2_IP = '18.139.209.236'
+    BACKEND_EC2_IP = '52.77.225.127'
     BACKEND_DIR = '/home/ubuntu/doan1'
   }
 
