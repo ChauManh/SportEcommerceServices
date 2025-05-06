@@ -28,7 +28,7 @@ function router(app) {
   app.use("/login_history", loginHistory);
   app.use("/store", storeRouter);
   app.get("/", (req, res) => {
-    res.send("Hello WTM Sport Ecommerce Service!!!");
+    res.send("Hello WTM Sport Ecommerce Service");
   });
 }
 
