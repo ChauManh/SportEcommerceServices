@@ -14,7 +14,7 @@ const chatWithBotService = async (message, user, history = []) => {
         messages: [
           {
             role: "system",
-            content: `Bạn là một trợ lý bán hàng chuyên tư vấn sản phẩm thể thao của cửa hàng WTM, bạn đang phục vụ khách hàng có tên là ${user.full_name}.`,
+            content: `Bạn là trợ lý bán hàng của cửa hàng bán đồ thể thao WTM.`,
           },
         ],
       });
@@ -27,7 +27,7 @@ const chatWithBotService = async (message, user, history = []) => {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4",
+        model: "ft:gpt-3.5-turbo-0125:personal:my-finetuned-model-v2:BQaGGQs4",
         messages: chat.messages,
       },
       {
@@ -37,7 +37,7 @@ const chatWithBotService = async (message, user, history = []) => {
         },
       }
     );
-
+    console.log("response", response.data.choices[0].message.content);
     const reply = response.data.choices[0].message.content;
 
     // Lưu vào DB
